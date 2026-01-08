@@ -1,0 +1,167 @@
+---
+import MainLayout from "../../layouts/MainLayout.astro";
+import { supabase } from "../../lib/supabase";
+
+// Consultamos las noticias ordenadas por fecha (más nuevas primero)
+const { data: noticias } = await supabase
+    .from("noticias")
+    .select("*")
+    .order("fecha", { ascending: false })
+    .limit(3);
+
+// Función auxiliar simple para traducir 'top' a CSS real
+const getObjectPosition = (pos: any) => {
+    if (pos === "top") return "top center"; // Enfocar Arriba
+    if (pos === "bottom") return "bottom center"; // Enfocar Abajo
+    return "center center"; // Enfocar Centro (Default)
+};
+
+// Si hay error, asignamos un array vacío para no romper la página
+const listadoNoticias = noticias || [];
+---
+
+<MainLayout title="Noticias">
+    <section class="bg-ufro text-white py-5 position-relative overflow-hidden">
+        <div class="container position-relative z-2">
+            <div class="row">
+                <div class="col-lg-8">
+                    <span class="text-info fw-bold text-uppercase ls-2"
+                        >Actualidad</span
+                    >
+                    <h1 class="display-4 fw-bold mt-2">Noticias y Eventos</h1>
+                    <p class="lead opacity-75">
+                        Novedades, investigaciones y actividades del CI²A².
+                    </p>
+                </div>
+            </div>
+        </div>
+        <i
+            class="bi bi-newspaper position-absolute opacity-10"
+            style="font-size: 15rem; right: -50px; bottom: -50px;"></i>
+    </section>
+
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row g-4">
+                {
+                    listadoNoticias.length > 0 ? (
+                        listadoNoticias.map((item) => (
+                            <div class="col-md-6 col-lg-4">
+                                {/* Mini lista de colaboradores (CORREGIDO) */}
+                                {item.colaboradores &&
+                                    Array.isArray(item.colaboradores) &&
+                                    item.colaboradores.length > 0 && (
+                                        <div class="mb-3">
+                                            <small
+                                                class="text-muted"
+                                                style="font-size: 0.75rem;"
+                                            >
+                                                Por:{" "}
+                                                {item.colaboradores
+                                                    .slice(0, 2)
+                                                    .join(", ")}
+                                                {item.colaboradores.length > 2
+                                                    ? " y más..."
+                                                    : ""}
+                                            </small>
+                                        </div>
+                                    )}
+                                <div class="card h-100 border-0 shadow-sm hover-up">
+                                    <div
+                                        class="position-relative overflow-hidden"
+                                        style="height: 200px;"
+                                    >
+                                        <div
+                                            class="position-relative overflow-hidden"
+                                            style="height: 200px;"
+                                        >
+                                            <img
+                                                src={
+                                                    item.image_url ||
+                                                    "/img/placeholder-news.jpg"
+                                                }
+                                                class="w-100 h-100"
+                                                style={`object-fit: cover; object-position: center ${item.image_position || 50}%;`}
+                                                alt={item.titulo}
+                                                onerror="this.src='https://via.placeholder.com/400x200?text=Sin+Imagen'"
+                                            />
+
+                                            <div class="position-absolute top-0 start-0 m-3">
+                                                <span class="badge bg-ufro shadow-sm">
+                                                    {item.categoria ||
+                                                        "General"}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="position-absolute top-0 start-0 m-3">
+                                            <span class="badge bg-ufro shadow-sm">
+                                                {item.categoria || "General"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-4 d-flex flex-column">
+                                        <small class="text-muted mb-2">
+                                            <i class="bi bi-calendar3 me-1" />
+                                            {item.fecha
+                                                ? new Date(
+                                                      item.fecha,
+                                                  ).toLocaleDateString("es-CL")
+                                                : "Sin fecha"}
+                                        </small>
+                                        <h5 class="fw-bold mb-3 text-dark">
+                                            {item.titulo}
+                                        </h5>
+                                        <p class="text-secondary small line-clamp-3 mb-4 flex-grow-1">
+                                            {item.bajada}
+                                        </p>
+                                        <a
+                                            href={`/noticias/${item.id}`}
+                                            class="btn btn-outline-primary rounded-pill btn-sm fw-bold align-self-start stretched-link"
+                                        >
+                                            Leer completa
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div class="col-12 text-center py-5">
+                            <div class="alert alert-light border shadow-sm d-inline-block px-5">
+                                <i class="bi bi-info-circle me-2" /> No hay
+                                noticias publicadas aún.
+                            </div>
+                        </div>
+                    )
+                }
+            </div>
+        </div>
+    </section>
+</MainLayout>
+
+<style>
+    .bg-ufro {
+        background-color: #003767;
+    }
+    .text-info {
+        color: #009fe3 !important;
+    }
+    .ls-2 {
+        letter-spacing: 2px;
+    }
+
+    /* Cortar texto a 3 líneas */
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Efecto de elevación al pasar el mouse */
+    .hover-up {
+        transition: transform 0.3s;
+    }
+    .hover-up:hover {
+        transform: translateY(-5px);
+    }
+</style>

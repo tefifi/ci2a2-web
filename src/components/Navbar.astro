@@ -1,0 +1,74 @@
+---
+const links = [
+  { name: 'Inicio', href: '/' },
+  { name: 'Nosotros', href: '/nosotros' },
+  { name: 'Proyectos', href: '/proyectos' },
+  { name: 'Noticias', href: '/noticias' },
+  { name: 'Contacto', href: 'mailto:contacto.ci2a2@ufro.cl' },
+];
+---
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-ufro fixed-top shadow" id="mainNav">
+  <div class="container">
+    
+    <a class="navbar-brand d-flex align-items-center py-0" href="/">
+      
+      <img src="/img/logo-ci2a2.png" alt="Logo CI2A2" height="70" class="d-inline-block">
+      
+      <div class="border-start border-light opacity-50 mx-4" style="height: 50px;"></div>
+      
+      <img src="/img/02-logo-UFRO-blanco-horizontal.png" alt="Logo UFRO" height="48" class="d-inline-block">
+    
+    </a>
+
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-lg-4"> {links.map((link) => (
+          <li class="nav-item">
+            <a class="nav-link fw-medium text-white hover-cyan" href={link.href} style="font-size: 1.05rem;">
+              {link.name}
+            </a>
+          </li>
+        ))}
+        
+        <li class="nav-item ms-lg-3">
+            <a href="/admin" class="btn btn-light text-ufro rounded-pill px-4 py-2 fw-bold shadow-sm">
+                Acceso Intranet
+            </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<style>
+  /* Colores */
+  .bg-ufro { background-color: #003767; }
+  .text-ufro { color: #003767; }
+
+  /* Navbar: Más espacio vertical */
+  #mainNav {
+    transition: all 0.3s ease-in-out;
+    padding-top: 1.2rem;    /* Antes era 0.8rem */
+    padding-bottom: 1.2rem; /* Antes era 0.8rem */
+  }
+  
+  /* Hover Efecto */
+  .hover-cyan {
+    transition: color 0.2s, opacity 0.2s;
+    opacity: 0.9;
+  }
+  .hover-cyan:hover {
+    color: #009fe3 !important;
+    opacity: 1;
+    font-weight: 600;
+  }
+
+  /* IMPORTANTE: Aumentamos el padding del body porque el navbar ahora es más alto */
+  :global(body) {
+    padding-top: 110px; /* Antes era 80px */
+  }
+</style>

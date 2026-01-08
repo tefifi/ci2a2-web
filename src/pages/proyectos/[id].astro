@@ -1,0 +1,365 @@
+---
+import MainLayout from "../../layouts/MainLayout.astro";
+import { supabase } from "../../lib/supabase";
+
+// Esto le dice a Astro qué IDs existen para crear las páginas estáticas
+export async function getStaticPaths() {
+    const { data: proyectos } = await supabase.from("proyectos").select("id");
+
+    // Si no hay proyectos o hay error, devolvemos array vacío
+    if (!proyectos) return [];
+
+    return proyectos.map((p) => ({
+        params: { id: p.id.toString() }, // El ID debe ser string
+    }));
+}
+
+// 1. OBTENER EL ID DE LA URL
+const { id } = Astro.params;
+
+// 2. CONSULTAR SUPABASE
+// Buscamos un solo proyecto (.single()) que coincida con el ID
+console.log("1. ID INTENTADO:", id);
+
+// Consultar Supabase
+const { data: proyecto, error } = await supabase
+    .from("proyectos")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+console.log("2. DATOS RECIBIDOS:", proyecto);
+console.log("3. ERROR SUPABASE:", error);
+
+// 3. SI NO EXISTE EL PROYECTO (O hay error), REDIRIGIR A 404 O LISTA
+// if (error || !proyecto) {
+//   return Astro.redirect('/404'); // Asegúrate de tener una pagina 404 o redirige a '/proyectos'
+// }
+
+// Formatear fecha
+const fecha = new Date(proyecto.created_at).toLocaleDateString("es-CL", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+});
+---
+
+<MainLayout title={proyecto.title}>
+    <section class="bg-ufro text-white py-5 position-relative overflow-hidden">
+        <div class="container position-relative z-2">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="d-inline-block mb-3">
+                        <span
+                            class="badge bg-white text-ufro fw-bold px-3 py-2 shadow-sm rounded-pill"
+                        >
+                            {proyecto.area}
+                        </span>
+                        <span
+                            class={`badge ms-2 px-3 py-2 rounded-pill ${proyecto.status === "En Curso" ? "bg-success" : "bg-secondary"}`}
+                        >
+                            {proyecto.status}
+                        </span>
+                    </div>
+                    <h1 class="display-4 fw-bold">{proyecto.title}</h1>
+                    <p class="lead opacity-90 mt-3">{proyecto.resumen}</p>
+                </div>
+            </div>
+        </div>
+        <i
+            class="bi bi-cpu position-absolute text-white opacity-10"
+            style="font-size: 20rem; right: -50px; top: -50px; transform: rotate(15deg);"
+        ></i>
+    </section>
+
+    <section class="py-5 bg-light-subtle">
+        <div class="container">
+            <div class="row g-5">
+                <div class="col-lg-4">
+                    <div
+                        class="card border-0 shadow-sm mb-4 sticky-top"
+                        style="top: 100px; z-index: 1;"
+                    >
+                        <img
+                            src={proyecto.image_url ||
+                                "/img/placeholder-project.jpg"}
+                            class="card-img-top object-fit-cover"
+                            style={`height: 300px; object-position: 50% ${proyecto.image_position !== null ? proyecto.image_position : 50}%;`}
+                            alt={proyecto.title}
+                        />
+
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-3 text-ufro">
+                                Ficha Técnica
+                            </h5>
+
+                            <ul class="list-unstyled mb-4">
+                                <li class="mb-3 d-flex align-items-start gap-3">
+                                    <i
+                                        class="bi bi-calendar-check text-primary fs-5"
+                                    ></i>
+                                    <div>
+                                        <span
+                                            class="d-block fw-bold small text-uppercase text-muted"
+                                            >Período</span
+                                        >
+                                        {
+                                            /* Si existe fecha_inicio, la mostramos */
+                                        }
+                                        <span>
+                                            {
+                                                proyecto.fecha_inicio
+                                                    ? new Date(
+                                                          proyecto.fecha_inicio,
+                                                      ).toLocaleDateString(
+                                                          "es-CL",
+                                                      )
+                                                    : "Fecha por definir"
+                                            }
+
+                                            {
+                                                /* Si existe fecha_termino, mostramos el guión y la fecha final */
+                                            }
+                                            {
+                                                proyecto.fecha_termino && (
+                                                    <>
+                                                        {" "}
+                                                        -{" "}
+                                                        {new Date(
+                                                            proyecto.fecha_termino,
+                                                        ).toLocaleDateString(
+                                                            "es-CL",
+                                                        )}
+                                                    </>
+                                                )
+                                            }
+                                        </span>
+                                    </div>
+                                </li>
+                                <li class="mb-3 d-flex align-items-start gap-3">
+                                    <i class="bi bi-layers text-primary fs-5"
+                                    ></i>
+                                    <div>
+                                        <span
+                                            class="d-block fw-bold small text-uppercase text-muted"
+                                            >Área</span
+                                        >
+                                        <span>{proyecto.area}</span>
+                                    </div>
+                                </li>
+                                {
+                                    proyecto.link_externo && (
+                                        <li class="mb-3 d-flex align-items-start gap-3">
+                                            <i class="bi bi-link-45deg text-primary fs-5" />
+                                            <div>
+                                                <span class="d-block fw-bold small text-uppercase text-muted">
+                                                    Recurso Externo
+                                                </span>
+                                                <a
+                                                    href={proyecto.link_externo}
+                                                    target="_blank"
+                                                    class="text-decoration-none text-break"
+                                                >
+                                                    Ver enlace
+                                                </a>
+                                            </div>
+                                        </li>
+                                    )
+                                }
+                            </ul>
+
+                            <hr class="opacity-25" />
+
+                            <div class="d-grid">
+                                <a
+                                    href="mailto:contacto.ci2a2@ufro.cl"
+                                    class="btn btn-outline-primary rounded-pill fw-bold"
+                                >
+                                    Consultar por este proyecto
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="bg-white p-5 rounded-4 shadow-sm content-box">
+                        <h3 class="fw-bold text-dark mb-4 border-bottom pb-3">
+                            Descripción del Proyecto
+                        </h3>
+
+                        {/* Descripción HTML enriquecida */}
+                        <div
+                            class="rich-text"
+                            set:html={proyecto.description}
+                        />
+
+                        {
+                            /* --- SECCIÓN DE ALIANZAS (Logos Grandes y Legibles) --- */
+                        }
+                        {
+                            ((proyecto.socios && proyecto.socios.length > 0) ||
+                                (proyecto.financiamiento &&
+                                    proyecto.financiamiento.length > 0)) && (
+                                <div class="mt-5 pt-4 border-top">
+                                    <div class="row g-5">
+                                        {/* 1. COLUMNA SOCIOS */}
+                                        {proyecto.socios &&
+                                            proyecto.socios.length > 0 && (
+                                                <div class="col-md-6">
+                                                    <h6 class="fw-bold text-uppercase text-secondary small mb-4 opacity-75">
+                                                        <i class="bi bi-people-fill me-2" />{" "}
+                                                        Socios & Colaboradores
+                                                    </h6>
+                                                    <div class="d-flex flex-wrap align-items-center gap-4">
+                                                        {proyecto.socios.map(
+                                                            (socio: any) => (
+                                                                <div class="text-center">
+                                                                    {/* Contenedor más amplio para logos horizontales */}
+                                                                    <div
+                                                                        class="mb-2 d-flex align-items-center justify-content-center"
+                                                                        style="height: 100px; width: 160px;"
+                                                                    >
+                                                                        {socio.imagen ? (
+                                                                            <img
+                                                                                src={
+                                                                                    socio.imagen
+                                                                                }
+                                                                                alt={
+                                                                                    socio.nombre
+                                                                                }
+                                                                                title={
+                                                                                    socio.nombre
+                                                                                }
+                                                                                style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                                                                            />
+                                                                        ) : (
+                                                                            <i class="bi bi-building fs-1 text-muted opacity-25" />
+                                                                        )}
+                                                                    </div>
+                                                                    {/* Nombre (si quieres que se vea el texto del logo, quizás quieras ocultar este texto o dejarlo muy sutil) */}
+                                                                    <span
+                                                                        class="d-block text-muted small text-truncate"
+                                                                        style="max-width: 160px;"
+                                                                    >
+                                                                        {
+                                                                            socio.nombre
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                            ),
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                        {/* 2. COLUMNA FINANCIAMIENTO */}
+                                        {proyecto.financiamiento &&
+                                            proyecto.financiamiento.length >
+                                                0 && (
+                                                <div class="col-md-6">
+                                                    <h6 class="fw-bold text-uppercase text-secondary small mb-4 opacity-75">
+                                                        <i class="bi bi-cash-coin me-2" />{" "}
+                                                        Financiado Por
+                                                    </h6>
+                                                    <div class="d-flex flex-wrap align-items-center gap-4">
+                                                        {proyecto.financiamiento.map(
+                                                            (finan: any) => (
+                                                                <div class="text-center">
+                                                                    {/* Contenedor más amplio */}
+                                                                    <div
+                                                                        class="mb-2 d-flex align-items-center justify-content-center"
+                                                                        style="height: 100px; width: 160px;"
+                                                                    >
+                                                                        {finan.imagen ? (
+                                                                            <img
+                                                                                src={
+                                                                                    finan.imagen
+                                                                                }
+                                                                                alt={
+                                                                                    finan.nombre
+                                                                                }
+                                                                                title={
+                                                                                    finan.nombre
+                                                                                }
+                                                                                style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                                                                            />
+                                                                        ) : (
+                                                                            <i class="bi bi-bank fs-1 text-muted opacity-25" />
+                                                                        )}
+                                                                    </div>
+                                                                    <span
+                                                                        class="d-block text-muted small text-truncate"
+                                                                        style="max-width: 160px;"
+                                                                    >
+                                                                        {
+                                                                            finan.nombre
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                            ),
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                    </div>
+                                </div>
+                            )
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a
+                    href="/proyectos"
+                    class="btn btn-link text-muted text-decoration-none px-0"
+                >
+                    <i class="bi bi-arrow-left me-1"></i> Volver al portafolio
+                </a>
+            </div>
+        </div>
+    </section>
+</MainLayout>
+
+<style>
+    .bg-ufro {
+        background-color: #003767;
+    }
+    .text-ufro {
+        color: #003767;
+    }
+
+    /* Estilos para el contenido HTML enriquecido (Rich Text) */
+    .rich-text {
+        color: #444;
+        line-height: 1.8;
+    }
+    .rich-text h2,
+    .rich-text h3 {
+        color: #003767;
+        font-weight: 700;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+    .rich-text p {
+        margin-bottom: 1.5rem;
+    }
+    .rich-text ul,
+    .rich-text ol {
+        margin-bottom: 1.5rem;
+        padding-left: 1.5rem;
+    }
+    .rich-text img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+    .rich-text blockquote {
+        border-left: 4px solid #009fe3;
+        padding-left: 1rem;
+        font-style: italic;
+        color: #666;
+    }
+</style>

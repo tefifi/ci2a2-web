@@ -1,0 +1,16 @@
+/* AdminProyectos.module.css */
+.contenedor {
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+}
+
+.titulo {
+    color: #0d6efd; /* Azul primario de Bootstrap */
+    font-weight: bold;
+}
+
+/* Opcional: Ajustes para el editor si los necesitas */
+.editorContainer {
+    min-height: 200px;
+}

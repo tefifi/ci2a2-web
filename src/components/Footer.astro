@@ -1,0 +1,87 @@
+---
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="bg-ufro text-white pt-5 pb-3 mt-auto">
+  <div class="container">
+    <div class="row g-4 justify-content-between">
+      
+      <div class="col-lg-4 col-md-6">
+        <img src="/img/logo-ci2a2.png" alt="Logo CI2A2 Blanco" class="mb-3 img-fluid" style="max-height: 70px;">
+        
+        <p class="small opacity-75 pe-lg-5">
+          Articulando ciencia, tecnología y sociedad desde La Araucanía para el mundo. Liderando la innovación en IA aplicada.
+        </p>
+        <div class="d-flex gap-3 mt-4">
+          <a href="#" class="text-white opacity-75 hover-opacity"><i class="bi bi-linkedin fs-5"></i></a>
+          <a href="#" class="text-white opacity-75 hover-opacity"><i class="bi bi-twitter-x fs-5"></i></a>
+          <a href="#" class="text-white opacity-75 hover-opacity"><i class="bi bi-instagram fs-5"></i></a>
+        </div>
+      </div>
+
+      <div class="col-lg-2 col-md-6">
+        <h6 class="fw-bold text-uppercase mb-3 small ls-1 text-info">Explora</h6>
+        <ul class="list-unstyled d-flex flex-column gap-2 small">
+          <li><a href="/" class="text-white text-decoration-none opacity-75 hover-opacity">Inicio</a></li>
+          <li><a href="/#mision" class="text-white text-decoration-none opacity-75 hover-opacity">Nosotros</a></li>
+          <li><a href="/proyectos" class="text-white text-decoration-none opacity-75 hover-opacity">Proyectos</a></li>
+          <li><a href="/noticias" class="text-white text-decoration-none opacity-75 hover-opacity">Noticias</a></li>
+          <li><a href="/admin" class="text-white text-decoration-none opacity-75 hover-opacity">Intranet</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <h6 class="fw-bold text-uppercase mb-3 small ls-1 text-info">Contacto</h6>
+        <ul class="list-unstyled d-flex flex-column gap-3 small opacity-75">
+          <li class="d-flex gap-2">
+            <i class="bi bi-geo-alt-fill text-info"></i>
+            <span>Av. Francisco Salazar 01145,<br>Temuco, Chile.</span>
+          </li>
+          <li class="d-flex gap-2">
+            <i class="bi bi-envelope-fill text-info"></i>
+            <a href="mailto:contacto.ci2a2@ufro.cl" class="text-white text-decoration-none">contacto.ci2a2@ufro.cl</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="col-lg-3 col-md-6 text-lg-end d-flex flex-column align-items-start align-items-lg-end">
+          <h6 class="fw-bold text-uppercase mb-3 small ls-1 text-info w-100 text-lg-end">Institución</h6>
+          
+          <img src="/img/02-logo-UFRO-blanco-horizontal.png" 
+               alt="Universidad de La Frontera" 
+               class="img-fluid opacity-75 mb-2" 
+               style="max-width: 200px;">
+          
+          <p class="small opacity-50 fst-italic text-lg-end">
+              Facultad de Ingeniería y Ciencias
+          </p>
+      </div>
+
+    </div>
+
+    <hr class="border-light opacity-25 my-4">
+
+    <div class="row align-items-center">
+      <div class="col-md-6 text-center text-md-start">
+        <p class="small mb-0 opacity-50">
+          &copy; {currentYear} CI²A² - Universidad de La Frontera.
+        </p>
+      </div>
+      <div class="col-md-6 text-center text-md-end">
+        <p class="small mb-0 opacity-50">
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .bg-ufro { background-color: #003767; }
+  .text-info { color: #009fe3 !important; }
+  .ls-1 { letter-spacing: 1px; }
+  .hover-opacity:hover {
+    opacity: 1 !important;
+    text-decoration: underline !important;
+    transition: opacity 0.2s;
+  }
+</style>

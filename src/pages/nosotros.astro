@@ -1,0 +1,106 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { supabase } from '../lib/supabase';
+
+// Traemos a TODOS los colaboradores ordenados
+const { data: equipo } = await supabase
+  .from('colaboradores')
+  .select('*')
+  .order('orden', { ascending: true }) // O por 'id' si prefieres
+  .order('id', { ascending: true });
+
+---
+
+<MainLayout title="Nosotros">
+    
+    <section class="bg-ufro text-white py-5">
+        <div class="container text-center">
+            <h1 class="fw-bold display-5">Nuestro Centro</h1>
+            <p class="lead opacity-75">Ciencia de Datos e Inteligencia Artificial desde La Araucanía</p>
+        </div>
+    </section>
+
+    <section class="py-5 bg-white">
+        <div class="container">
+            <div class="row g-5 align-items-center">
+                <div class="col-lg-6">
+                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1000" alt="Equipo UFRO" class="img-fluid rounded-4 shadow-sm">
+                </div>
+                <div class="col-lg-6">
+                    <div class="mb-4">
+                        <h5 class="text-ufro fw-bold text-uppercase ls-1">Nuestra Misión</h5>
+                        <p class="text-muted">
+                            Liderar la investigación aplicada en Inteligencia Artificial con un enfoque inter y transdisciplinario, articulando las capacidades de la Universidad de La Frontera para resolver desafíos territoriales y nacionales.
+                        </p>
+                    </div>
+                    <div class="mb-4">
+                        <h5 class="text-ufro fw-bold text-uppercase ls-1">Nuestra Visión</h5>
+                        <p class="text-muted">
+                            Ser un referente nacional e internacional en IA aplicada, contribuyendo al desarrollo sostenible de La Araucanía a través de la transferencia tecnológica, la formación de capital humano avanzado y la vinculación con el entorno.
+                        </p>
+                    </div>
+                    <div>
+                        <h5 class="text-ufro fw-bold text-uppercase ls-1">Propósito</h5>
+                        <p class="text-muted mb-0">
+                            Alinear el desarrollo tecnológico con la Estrategia Regional de Desarrollo 2040, promoviendo la equidad territorial y la preservación del patrimonio mediante el uso ético de los datos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 bg-light-subtle">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold text-dark">Nuestro Equipo</h2>
+                <p class="text-muted">Investigadores y profesionales detrás del CI²A²</p>
+            </div>
+
+            <div class="row g-4">
+                {equipo && equipo.length > 0 ? equipo.map((c) => (
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card h-100 border-0 shadow-sm text-center p-4 hover-up">
+                            <div class="mx-auto mb-3 position-relative">
+                                <img src={c.foto_url || `https://ui-avatars.com/api/?name=${c.nombre}&background=random`} 
+                                     class="rounded-circle object-fit-cover border border-3 border-white shadow-sm" 
+                                     style="width: 140px; height: 140px;" 
+                                     alt={c.nombre}>
+                            </div>
+                            <h5 class="fw-bold mb-1 text-dark">{c.nombre}</h5>
+                            <span class="badge bg-primary-subtle text-primary mb-3 rounded-pill px-3">{c.rol}</span>
+                            
+                            {c.bio && <p class="small text-muted mb-3 line-clamp-3">{c.bio}</p>}
+                            
+                            <div class="d-flex justify-content-center gap-2 mt-auto">
+                                {c.email && (
+                                    <a href={`mailto:${c.email}`} class="btn btn-sm btn-outline-secondary rounded-circle" title="Email">
+                                        <i class="bi bi-envelope-fill"></i>
+                                    </a>
+                                )}
+                                {c.linkedin && (
+                                    <a href={c.linkedin} target="_blank" class="btn btn-sm btn-outline-primary rounded-circle" title="LinkedIn">
+                                        <i class="bi bi-linkedin"></i>
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )) : (
+                    <div class="col-12 text-center py-5">
+                        <p class="text-muted">Cargando equipo...</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .bg-ufro { background-color: #003767; }
+        .text-ufro { color: #003767; }
+        .ls-1 { letter-spacing: 1px; font-size: 0.85rem; }
+        .hover-up { transition: transform 0.3s; }
+        .hover-up:hover { transform: translateY(-5px); }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    </style>
+</MainLayout>
