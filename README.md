@@ -1,43 +1,58 @@
-# Astro Starter Kit: Minimal
+# Plataforma Web CI2A2 - Universidad de La Frontera
 
-```sh
-npm create astro@latest -- --template minimal
-```
+![Build Status](https://img.shields.io/badge/build-passing-success) ![Version](https://img.shields.io/badge/version-1.0.0-blue) ![License](https://img.shields.io/badge/license-Proprietary-lightgrey)
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Repositorio oficial del sitio web del **Centro de Investigación en Inteligencia Artificial Aplicada (CI2A2)** de la Universidad de La Frontera.
 
-## 🚀 Project Structure
+Esta plataforma tiene como objetivo la divulgación científica, la visualización del portafolio de proyectos de I+D+i y la vinculación con el medio a través de noticias y eventos. El desarrollo se centra en el rendimiento, la optimización para motores de búsqueda (SEO) y la escalabilidad de contenidos.
 
-Inside of your Astro project, you'll see the following folders and files:
+---
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+## Tabla de Contenidos
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+1. [Descripción General](#descripción-general)
+2. [Arquitectura Técnica](#arquitectura-técnica)
+3. [Requisitos del Sistema](#requisitos-del-sistema)
+4. [Instalación y Configuración](#instalación-y-configuración)
+5. [Estructura del Proyecto](#estructura-del-proyecto)
+6. [Modelo de Datos](#modelo-de-datos)
+7. [Despliegue](#despliegue)
+8. [Licencia y Créditos](#licencia-y-créditos)
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+---
 
-Any static assets, like images, can be placed in the `public/` directory.
+## Descripción General
 
-## 🧞 Commands
+El sistema es una aplicación web basada en arquitectura Jamstack híbrida, permitiendo tanto la generación de sitios estáticos (SSG) como el renderizado del lado del servidor (SSR) para secciones dinámicas.
 
-All commands are run from the root of the project, from a terminal:
+**Funcionalidades principales:**
+* **Catálogo de Proyectos:** Sistema de filtrado y paginación para iniciativas de investigación.
+* **Gestión de Noticias:** Módulo de novedades con rutas dinámicas.
+* **Interfaz Institucional:** Diseño adaptativo (responsive) alineado con la identidad visual corporativa.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+---
 
-## 👀 Want to learn more?
+## Arquitectura Técnica
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+El proyecto utiliza las siguientes tecnologías y librerías:
+
+| Componente | Tecnología | Descripción |
+| :--- | :--- | :--- |
+| **Framework Core** | Astro | Generación de sitio y enrutamiento. |
+| **Backend / Base de Datos** | Supabase | PostgreSQL como servicio, autenticación y almacenamiento. |
+| **Framework UI** | Bootstrap 5 | Sistema de diseño y componentes visuales. |
+| **Lenguaje** | TypeScript / JavaScript | Lógica de negocio y control de tipos. |
+| **Iconografía** | Bootstrap Icons | Biblioteca de iconos vectoriales SVG. |
+
+---
+
+## Requisitos del Sistema
+
+Para ejecutar este proyecto en un entorno de desarrollo local, se requiere:
+
+* **Node.js:** Versión 18.14.1 o superior.
+* **NPM:** Versión 9.0.0 o superior.
+* **Git:** Sistema de control de versiones.
+* **Acceso a Supabase:** Credenciales del proyecto (URL y API Key).
+
+
