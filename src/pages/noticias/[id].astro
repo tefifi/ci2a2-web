@@ -3,22 +3,18 @@ import MainLayout from "../../layouts/MainLayout.astro";
 import { supabase } from "../../lib/supabase";
 
 // Generamos las rutas estáticas para noticias
-export async function getStaticPaths() {
-    const { data } = await supabase.from("noticias").select("id");
-    return data ? data.map((n) => ({ params: { id: n.id.toString() } })) : [];
-}
 
-// Obtenemos el ID de la URL y buscamos los datos
 const { id } = Astro.params;
 
-const { data: noticia } = await supabase
-    .from("noticias")
-    .select("*")
-    .eq("id", id)
-    .single();
 
-    if (!noticia) {
-    return Astro.redirect("/noticias");
+const { data: noticia, error } = await supabase
+  .from('noticias') 
+  .select('*')
+  .eq('id', id)
+  .single();
+
+if (error || !noticia) {
+  return Astro.redirect('/noticias');
 }
 ---
 
