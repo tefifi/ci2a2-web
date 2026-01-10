@@ -1,5 +1,7 @@
 # Plataforma Web CI2A2 - Universidad de La Frontera
 
+**Demo en vivo:** [https://ci2a2-web.vercel.app](https://ci2a2-web.vercel.app)
+
 Repositorio oficial del sitio web del **Centro de Investigación en Inteligencia Artificial Aplicada (CI2A2)** de la Universidad de La Frontera.
 
 Esta plataforma tiene como objetivo la divulgación científica, la visualización del portafolio de proyectos de I+D+i y la vinculación con el medio a través de noticias y eventos. El desarrollo se centra en el rendimiento, la optimización para motores de búsqueda (SEO) y la escalabilidad de contenidos.
