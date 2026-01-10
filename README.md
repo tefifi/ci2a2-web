@@ -55,15 +55,6 @@ Para ejecutar este proyecto en un entorno local, se requiere:
 
 ---
 
-## Instalación y Configuración
-
-Sigue estos pasos para levantar el entorno de desarrollo:
-
-### 1. Clonar el repositorio
-```bash
-git clone [https://github.com/tefifi/ci2a2-web.git](https://github.com/tefifi/ci2a2-web.git)
-cd ci2a2-web
-npm install
 
 Este proyecto requiere variables de entorno para conectar con Supabase y Zotero. Crea un archivo .env en la raíz del proyecto y agrega las siguientes claves:
 
@@ -71,4 +62,13 @@ PUBLIC_SUPABASE_URL=tu_url_supabase
 PUBLIC_SUPABASE_ANON_KEY=tu_anon_key_supabase
 VITE_ZOTERO_API_KEY=tu_api_key_zotero
 
+## Instalación y Configuración
+Sigue estos pasos para levantar el entorno de desarrollo:
+### 1. Clonar el repositorio
+```bash
+git clone [https://github.com/tefifi/ci2a2-web.git](https://github.com/tefifi/ci2a2-web.git)
+cd ci2a2-web
+npm install
 npm run dev
+
+
