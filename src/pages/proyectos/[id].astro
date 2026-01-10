@@ -6,8 +6,6 @@ export const prerender = false;
 
 const { id } = Astro.params;
 
-console.log("1. ID INTENTADO:", id);
-
 // Consultar Supabase
 const { data: proyecto, error } = await supabase
     .from("proyectos")
@@ -15,9 +13,7 @@ const { data: proyecto, error } = await supabase
     .eq("id", id)
     .single();
 
-console.log("2. DATOS RECIBIDOS:", proyecto);
-console.log("3. ERROR SUPABASE:", error);
-
+// Seguridad
 if (error || !proyecto) {
     return Astro.redirect('/404');
 }
@@ -30,9 +26,8 @@ const fecha = (proyecto && proyecto.created_at)
         day: "numeric",
       })
     : "Fecha no disponible";
-
-
 ---
+
 
 <MainLayout title={proyecto.title}>
     <section class="bg-ufro text-white py-5 position-relative overflow-hidden">
