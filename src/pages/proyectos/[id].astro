@@ -18,6 +18,9 @@ const { data: proyecto, error } = await supabase
 console.log("2. DATOS RECIBIDOS:", proyecto);
 console.log("3. ERROR SUPABASE:", error);
 
+if (error || !proyecto) {
+    return Astro.redirect('/404');
+}
 
 // Formatear fecha
 const fecha = new Date(proyecto.created_at).toLocaleDateString("es-CL", {
@@ -25,6 +28,8 @@ const fecha = new Date(proyecto.created_at).toLocaleDateString("es-CL", {
     month: "long",
     day: "numeric",
 });
+
+
 ---
 
 <MainLayout title={proyecto.title}>
