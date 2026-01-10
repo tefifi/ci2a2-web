@@ -16,6 +16,8 @@ const { data: noticia, error } = await supabase
 if (error || !noticia) {
   return Astro.redirect('/noticias');
 }
+
+export const prerender = false;
 ---
 
 <MainLayout title={noticia.titulo}>

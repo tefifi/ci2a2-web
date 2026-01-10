@@ -28,7 +28,7 @@ const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
 
 // Función para colores de estado 
 const getStatusStyle = (status:any) => {
-    if (!status) return "bg-light text-secondary border-secondary"; // Default
+    if (!status) return "bg-light text-secondary border-secondary"; 
     const s = status.toLowerCase();
     
     if (s.includes("curso") || s.includes("activo")) return "bg-success bg-opacity-10 text-success border-success"; 

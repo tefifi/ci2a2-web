@@ -2,15 +2,7 @@
 import MainLayout from "../../layouts/MainLayout.astro";
 import { supabase } from "../../lib/supabase";
 
-export async function getStaticPaths() {
-    const { data: proyectos } = await supabase.from("proyectos").select("id");
-
-    if (!proyectos) return [];
-
-    return proyectos.map((p) => ({
-        params: { id: p.id.toString() }, 
-    }));
-}
+export const prerender = false;
 
 const { id } = Astro.params;
 
