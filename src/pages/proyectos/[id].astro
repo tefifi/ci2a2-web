@@ -38,10 +38,10 @@ const fecha = (proyecto && proyecto.created_at)
                         <span
                             class="badge bg-white text-ufro fw-bold px-3 py-2 shadow-sm rounded-pill"
                         >
-                            {proyecto.area}
+                            {proyecto?.area}
                         </span>
                         <span
-                            class={`badge ms-2 px-3 py-2 rounded-pill ${proyecto.status === "En Curso" ? "bg-success" : "bg-secondary"}`}
+                            class={`badge ms-2 px-3 py-2 rounded-pill ${proyecto?.status === "En Curso" ? "bg-success" : "bg-secondary"}`}
                         >
                             {proyecto?.status}
                         </span>
@@ -69,7 +69,7 @@ const fecha = (proyecto && proyecto.created_at)
                             src={proyecto?.image_url ||
                                 "/img/placeholder-project.jpg"}
                             class="card-img-top object-fit-cover"
-                            style={`height: 300px; object-position: 50% ${proyecto.image_position !== null ? proyecto.image_position : 50}%;`}
+                            style={`height: 300px; object-position: 50% ${proyecto?.image_position !== null ? proyecto?.image_position : 50}%;`}
                             alt={proyecto?.title}
                         />
 
@@ -92,9 +92,9 @@ const fecha = (proyecto && proyecto.created_at)
                                         }
                                         <span>
                                             {
-                                                proyecto.fecha_inicio
+                                                proyecto?.fecha_inicio
                                                     ? new Date(
-                                                          proyecto.fecha_inicio,
+                                                          proyecto?.fecha_inicio,
                                                       ).toLocaleDateString(
                                                           "es-CL",
                                                       )
@@ -104,12 +104,12 @@ const fecha = (proyecto && proyecto.created_at)
                                             {
                                             }
                                             {
-                                                proyecto.fecha_termino && (
+                                                proyecto?.fecha_termino && (
                                                     <>
                                                         {" "}
                                                         -{" "}
                                                         {new Date(
-                                                            proyecto.fecha_termino,
+                                                            proyecto?.fecha_termino,
                                                         ).toLocaleDateString(
                                                             "es-CL",
                                                         )}
@@ -127,11 +127,11 @@ const fecha = (proyecto && proyecto.created_at)
                                             class="d-block fw-bold small text-uppercase text-muted"
                                             >Área</span
                                         >
-                                        <span>{proyecto.area}</span>
+                                        <span>{proyecto?.area}</span>
                                     </div>
                                 </li>
                                 {
-                                    proyecto.link_externo && (
+                                    proyecto?.link_externo && (
                                         <li class="mb-3 d-flex align-items-start gap-3">
                                             <i class="bi bi-link-45deg text-primary fs-5" />
                                             <div>
@@ -139,7 +139,7 @@ const fecha = (proyecto && proyecto.created_at)
                                                     Recurso Externo
                                                 </span>
                                                 <a
-                                                    href={proyecto.link_externo}
+                                                    href={proyecto?.link_externo}
                                                     target="_blank"
                                                     class="text-decoration-none text-break"
                                                 >
@@ -174,28 +174,28 @@ const fecha = (proyecto && proyecto.created_at)
                         {/* Descripción HTML enriquecida */}
                         <div
                             class="rich-text"
-                            set:html={proyecto.description}
+                            set:html={proyecto?.description}
                         />
 
                         {
                             /* --- SECCIÓN DE ALIANZAS --- */
                         }
                         {
-                            ((proyecto.socios && proyecto.socios.length > 0) ||
-                                (proyecto.financiamiento &&
-                                    proyecto.financiamiento.length > 0)) && (
+                            ((proyecto?.socios && proyecto?.socios.length > 0) ||
+                                (proyecto?.financiamiento &&
+                                    proyecto?.financiamiento.length > 0)) && (
                                 <div class="mt-5 pt-4 border-top">
                                     <div class="row g-5">
                                         {/* 1. COLUMNA SOCIOS */}
-                                        {proyecto.socios &&
-                                            proyecto.socios.length > 0 && (
+                                        {proyecto?.socios &&
+                                            proyecto?.socios.length > 0 && (
                                                 <div class="col-md-6">
                                                     <h6 class="fw-bold text-uppercase text-secondary small mb-4 opacity-75">
                                                         <i class="bi bi-people-fill me-2" />{" "}
                                                         Socios & Colaboradores
                                                     </h6>
                                                     <div class="d-flex flex-wrap align-items-center gap-4">
-                                                        {proyecto.socios.map(
+                                                        {proyecto?.socios.map(
                                                             (socio: any) => (
                                                                 <div class="text-center">
                                                                     <div
@@ -235,8 +235,8 @@ const fecha = (proyecto && proyecto.created_at)
                                             )}
 
                                         {/* 2. COLUMNA FINANCIAMIENTO */}
-                                        {proyecto.financiamiento &&
-                                            proyecto.financiamiento.length >
+                                        {proyecto?.financiamiento &&
+                                            proyecto?.financiamiento.length >
                                                 0 && (
                                                 <div class="col-md-6">
                                                     <h6 class="fw-bold text-uppercase text-secondary small mb-4 opacity-75">
@@ -244,7 +244,7 @@ const fecha = (proyecto && proyecto.created_at)
                                                         Financiado Por
                                                     </h6>
                                                     <div class="d-flex flex-wrap align-items-center gap-4">
-                                                        {proyecto.financiamiento.map(
+                                                        {proyecto?.financiamiento.map(
                                                             (finan: any) => (
                                                                 <div class="text-center">
                                                                     <div
