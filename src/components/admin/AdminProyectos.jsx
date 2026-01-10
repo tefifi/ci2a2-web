@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef, Suspense, lazy } from 'react';
-import { supabase, uploadImage } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import styles from './AdminProyectos.module.css';
+
 
 const Editor = lazy(() => import('react-simple-wysiwyg').then(module => ({ default: module.default || module })));
 
-// --- ZONA DE CARGA TIPO TARJETA (16:9) ---
+// --- ZONA DE CARGA TIPO TARJETA---
 const UploadZone = ({ image, onUpload, onRemove, subiendo, position, onPositionChange, required }) => {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
     
-    // Aseguramos que sea número. Si no viene definido, es 50 (centro)
     const sliderValue = (position !== undefined && position !== null) ? parseInt(position) : 50;
 
     return (
@@ -18,14 +18,12 @@ const UploadZone = ({ image, onUpload, onRemove, subiendo, position, onPositionC
                 Portada (Vista Previa Tarjeta) {required && <span className="text-danger">*</span>}
             </label>
             
-            {/* CONTENEDOR 16:9 
-                Simula la tarjeta de Bootstrap.
-            */}
+            {/* CONTENEDOR */}
             <div 
                 className={`flex-grow-1 position-relative rounded-3 d-flex flex-column align-items-center justify-content-center text-center overflow-hidden border ${isDragging ? 'border-primary bg-primary-subtle' : 'bg-light'}`} 
                 style={{ 
                     width: '100%',
-                    aspectRatio: '16/9', // <--- PROPORCIÓN DE TARJETA ESTÁNDAR
+                    aspectRatio: '16/9',
                     borderStyle: image ? 'solid' : 'dashed', 
                     cursor: image ? 'default' : 'pointer', 
                     borderColor: isDragging ? '#003767' : '#dee2e6'
@@ -41,16 +39,13 @@ const UploadZone = ({ image, onUpload, onRemove, subiendo, position, onPositionC
                     <div className="text-primary"><div className="spinner-border spinner-border-sm mb-2"></div><p className="small mb-0 fw-bold">Subiendo...</p></div> 
                 ) : image ? ( 
                     <div className="w-100 h-100 position-relative">
-                        {/* IMAGEN: transition: 'none' es la CLAVE.
-                           Permite que la imagen se mueva instantáneamente con el slider.
-                        */}
                         <img 
                             src={image} 
                             className="w-100 h-100 d-block" 
                             style={{ 
                                 objectFit: 'cover', 
                                 objectPosition: `center ${sliderValue}%`,
-                                transition: 'none' // <--- ESTO ARREGLA EL LAG VISUAL
+                                transition: 'none'
                             }} 
                             alt="Preview" 
                         />
@@ -88,7 +83,7 @@ const UploadZone = ({ image, onUpload, onRemove, subiendo, position, onPositionC
     );
 };
 
-// Componente pequeño para logos de socios/financiamiento (sin cambios funcionales)
+// Componente pequeño para logos de socios/financiamiento
 const MiniUpload = ({ image, onUpload, onDelete }) => {
     const fileInputRef = useRef(null);
     return (
@@ -106,6 +101,32 @@ const MiniUpload = ({ image, onUpload, onDelete }) => {
             )}
         </div>
     );
+};
+
+// --- FUNCIÓN HELPER PARA SUBIR IMÁGENES ---
+const uploadImage = async (file) => {
+    if (!file) return null;
+  
+    // 1. Generar nombre único (timestamp + extensión)
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `${fileName}`;
+  
+    // 2. Subir al bucket 'proyectos' (Asegúrate de que tu bucket se llame así en Supabase)
+    const { error: uploadError } = await supabase.storage
+      .from('proyectos') 
+      .upload(filePath, file);
+  
+    if (uploadError) {
+      throw uploadError;
+    }
+  
+    // 3. Obtener URL pública para guardarla en la BD
+    const { data } = supabase.storage
+      .from('proyectos')
+      .getPublicUrl(filePath);
+  
+    return data.publicUrl;
 };
 
 export default function AdminProyectos() {
@@ -173,7 +194,6 @@ export default function AdminProyectos() {
     };
 
     const cargarDatosParaEditar = (p) => { 
-        // Conversión segura de posición
         let pos = (p.image_position !== undefined && p.image_position !== null) ? parseInt(p.image_position) : 50;
         if(isNaN(pos)) pos = 50;
 
@@ -211,7 +231,7 @@ export default function AdminProyectos() {
                             
                             <form onSubmit={handleSubmit}>
                                 <div className="row mb-4">
-                                    {/* ZONA DE CARGA DE IMAGEN (Ahora 16:9 y reactiva) */}
+                                    {/* ZONA DE CARGA DE IMAGEN */}
                                     <div className="col-md-5 mb-4 mb-md-0">
                                         <UploadZone 
                                             image={formData.image_url} 

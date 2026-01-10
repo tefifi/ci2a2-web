@@ -2,7 +2,7 @@
 import MainLayout from "../layouts/MainLayout.astro";
 import { supabase } from "../lib/supabase";
 
-// 1. CARGA DE DATOS DINÁMICOS (Proyectos y Noticias)
+//  CARGA DE DATOS 
 const { data: proyectos } = await supabase
     .from("proyectos")
     .select("*")
@@ -18,7 +18,7 @@ const { data: noticias, error: errorNoticias } = await supabase
 
 const noticiasSeguras = errorNoticias || !noticias ? [] : noticias;
 
-// 2. DATOS ESTÁTICOS DEL PDF (Líneas de Investigación)
+//  DATOS ESTÁTICOS DEL PDF 
 const lineasInvestigacion = [
     {
         titulo: "Smart Agro",
@@ -130,7 +130,7 @@ const lineasInvestigacion = [
                             >
                         </div>
                         <div>
-                            <h3 class="fw-bold text-ufro mb-0">2024</h3>
+                            <h3 class="fw-bold text-ufro mb-0">2025</h3>
                             <small
                                 class="text-uppercase text-muted"
                                 style="font-size: 0.75rem;"
@@ -413,7 +413,6 @@ const lineasInvestigacion = [
                             <div class="col-md-4">
                                 <div class="card h-100 border-0 bg-white shadow-sm hover-up position-relative">
                                     {" "}
-                                    {/* position-relative necesario para stretched-link */}
                                     <div class="card-body p-4">
                                         <small
                                             class="text-primary fw-bold mb-2 d-block text-uppercase"
@@ -422,7 +421,6 @@ const lineasInvestigacion = [
                                             {n.categoria || "Novedades"}
                                         </small>
                                         <h5 class="fw-bold mb-3">
-                                            {/* AQUÍ ESTÁ EL CAMBIO: Ruta dinámica + stretched-link */}
                                             <a
                                                 href={`/noticias/${n.id}`}
                                                 class="text-dark text-decoration-none stretched-link"
@@ -487,7 +485,6 @@ const lineasInvestigacion = [
 </MainLayout>
 
 <style>
-    /* VARIABLES Y COLORES */
     :root {
         --ufro-blue: #003767;
         --ufro-cyan: #009fe3;
@@ -511,10 +508,8 @@ const lineasInvestigacion = [
         letter-spacing: 2px;
     }
 
-    /* HERO NAIR STYLE */
     .hero-section {
         min-height: 90vh;
-        /* Fondo oscuro técnico + degradado UFRO */
         background: url("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop")
             no-repeat center center/cover;
     }
@@ -524,7 +519,6 @@ const lineasInvestigacion = [
         left: 0;
         width: 100%;
         height: 100%;
-        /* Degradado de Azul UFRO a Negro transparente */
         background: linear-gradient(
             135deg,
             rgba(0, 55, 103, 0.95) 0%,
@@ -532,7 +526,6 @@ const lineasInvestigacion = [
         );
     }
 
-    /* EFECTOS */
     .backdrop-blur {
         backdrop-filter: blur(5px);
     }
@@ -560,7 +553,6 @@ const lineasInvestigacion = [
         overflow: hidden;
     }
 
-    /* LOGOS GRAYSCALE */
     .grayscale-logos i {
         filter: grayscale(100%);
         transition: all 0.3s;
@@ -572,7 +564,6 @@ const lineasInvestigacion = [
         transform: scale(1.2);
     }
 
-    /* CARD LINEA DE INVESTIGACION */
     .card-linea:hover .icon-box {
         background-color: var(--ufro-blue) !important;
         color: white !important;

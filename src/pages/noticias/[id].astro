@@ -2,14 +2,13 @@
 import MainLayout from "../../layouts/MainLayout.astro";
 import { supabase } from "../../lib/supabase";
 
-// 1. Generamos las rutas estáticas para todas las noticias existentes
-// (Esto es necesario si tu proyecto es estático - 'output: static' por defecto)
+// Generamos las rutas estáticas para noticias
 export async function getStaticPaths() {
     const { data } = await supabase.from("noticias").select("id");
     return data ? data.map((n) => ({ params: { id: n.id.toString() } })) : [];
 }
 
-// 2. Obtenemos el ID de la URL y buscamos los datos
+// Obtenemos el ID de la URL y buscamos los datos
 const { id } = Astro.params;
 
 const { data: noticia } = await supabase
@@ -18,8 +17,7 @@ const { data: noticia } = await supabase
     .eq("id", id)
     .single();
 
-// Si por alguna razón no existe la noticia, redirigimos al listado
-if (!noticia) {
+    if (!noticia) {
     return Astro.redirect("/noticias");
 }
 ---
@@ -33,10 +31,6 @@ if (!noticia) {
                     width: "100%",
                     height: "400px",
                     objectFit: "cover",
-
-                    // --- CAMBIO AQUÍ ---
-                    // Usamos directamente el número guardado (ej: 20, 50, 80)
-                    // Si no existe, usamos 50 (centro) por defecto.
                     objectPosition: `center ${noticia.image_position || 50}%`,
                 }}
                 alt={noticia.titulo}
@@ -98,7 +92,7 @@ if (!noticia) {
                     />
 
                     <hr class="my-5 opacity-25" />
-                    {/* --- SECCIÓN COLABORADORES (CORREGIDO) --- */}
+                    {/* --- SECCIÓN COLABORADORES --- */}
                     {
                         noticia.colaboradores &&
                             Array.isArray(noticia.colaboradores) &&
@@ -136,12 +130,10 @@ if (!noticia) {
 </MainLayout>
 
 <style>
-    /* Filtro para oscurecer la imagen y que se lea el texto blanco */
     .brightness-50 {
         filter: brightness(0.4);
     }
 
-    /* Degradado sutil para el texto sobre la imagen */
     .gradient-overlay {
         background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
     }
@@ -151,7 +143,6 @@ if (!noticia) {
         text-decoration: underline;
     }
 
-    /* Estilos para el HTML que viene del editor de texto */
     .content-body :global(p) {
         margin-bottom: 1.5rem;
         line-height: 1.8;

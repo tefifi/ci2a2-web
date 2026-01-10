@@ -4,7 +4,7 @@ const links = [
   { name: 'Nosotros', href: '/nosotros' },
   { name: 'Proyectos', href: '/proyectos' },
   { name: 'Noticias', href: '/noticias' },
-  { name: 'Contacto', href: 'mailto:contacto.ci2a2@ufro.cl' },
+  { name: 'Publicaciones', href: '/publicaciones' },
 ];
 ---
 
@@ -45,18 +45,15 @@ const links = [
 </nav>
 
 <style>
-  /* Colores */
   .bg-ufro { background-color: #003767; }
   .text-ufro { color: #003767; }
 
-  /* Navbar: Más espacio vertical */
   #mainNav {
     transition: all 0.3s ease-in-out;
-    padding-top: 1.2rem;    /* Antes era 0.8rem */
-    padding-bottom: 1.2rem; /* Antes era 0.8rem */
+    padding-top: 1.2rem;   
+    padding-bottom: 1.2rem; 
   }
   
-  /* Hover Efecto */
   .hover-cyan {
     transition: color 0.2s, opacity 0.2s;
     opacity: 0.9;
@@ -67,8 +64,7 @@ const links = [
     font-weight: 600;
   }
 
-  /* IMPORTANTE: Aumentamos el padding del body porque el navbar ahora es más alto */
   :global(body) {
-    padding-top: 110px; /* Antes era 80px */
+    padding-top: 110px;
   }
 </style>

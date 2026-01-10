@@ -1,10 +1,10 @@
 ---
-import AdminLayout from '../layouts/AdminLayout.astro';
-import AdminProyectos from '../components/AdminProyectos.jsx';
-import AdminNoticias from '../components/AdminNoticias.jsx'; 
-import AdminColaboradores from '../components/AdminColaboradores.jsx'; // <--- YA DESCOMENTADO
+import AdminLayout from "../layouts/AdminLayout.astro";
 
-// Protección básica de ruta (puedes mejorar esto después con Auth)
+import AdminNoticias from "../components/admin/AdminNoticias.jsx";
+import AdminProyectos from "../components/admin/AdminProyectos.jsx";
+import AdminColaboradores from "../components/admin/AdminColaboradores.jsx";
+import AdminPublicaciones from "../components/admin/AdminPublicaciones.jsx"; // 
 ---
 
 <AdminLayout title="Panel de Administración">
@@ -15,28 +15,69 @@ import AdminColaboradores from '../components/AdminColaboradores.jsx'; // <--- Y
                 <i class="bi bi-box-arrow-right"></i> Ir al Inicio
             </a>
         </div>
+  
+        <h2 class="mb-4">Administración CI2A2</h2>
 
         <ul class="nav nav-pills mb-4 gap-2" id="adminTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active fw-bold rounded-pill px-4" id="proyectos-tab" data-bs-toggle="pill" data-bs-target="#proyectos" type="button" role="tab">
+                <button
+                    class="nav-link active fw-bold rounded-pill px-4"
+                    id="proyectos-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#proyectos"
+                    type="button"
+                    role="tab"
+                >
                     <i class="bi bi-briefcase me-2"></i>Proyectos
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold rounded-pill px-4" id="noticias-tab" data-bs-toggle="pill" data-bs-target="#noticias" type="button" role="tab">
+                <button
+                    class="nav-link fw-bold rounded-pill px-4"
+                    id="noticias-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#noticias"
+                    type="button"
+                    role="tab"
+                >
                     <i class="bi bi-newspaper me-2"></i>Noticias
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold rounded-pill px-4" id="colaboradores-tab" data-bs-toggle="pill" data-bs-target="#colaboradores" type="button" role="tab">
+                <button
+                    class="nav-link fw-bold rounded-pill px-4"
+                    id="colaboradores-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#colaboradores"
+                    type="button"
+                    role="tab"
+                >
                     <i class="bi bi-people me-2"></i>Colaboradores
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button
+                    class="nav-link fw-bold rounded-pill px-4"
+                    id="publicaciones-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#publicaciones"
+                    type="button"
+                    role="tab"
+                >
+                    <i class="bi bi-book me-2"></i>Publicaciones
                 </button>
             </li>
         </ul>
 
-        <div class="tab-content bg-white p-4 rounded shadow-sm border" id="adminTabContent">
-            
-            <div class="tab-pane fade show active" id="proyectos" role="tabpanel">
+        <div
+            class="tab-content bg-white p-4 rounded shadow-sm border"
+            id="adminTabContent"
+        >
+            <div
+                class="tab-pane fade show active"
+                id="proyectos"
+                role="tabpanel"
+            >
                 <AdminProyectos client:only="react" />
             </div>
 
@@ -48,13 +89,18 @@ import AdminColaboradores from '../components/AdminColaboradores.jsx'; // <--- Y
                 <AdminColaboradores client:only="react" />
             </div>
 
+            <div class="tab-pane fade" id="publicaciones" role="tabpanel">
+                <AdminPublicaciones client:only="react" />
+            </div>
         </div>
     </div>
 </AdminLayout>
 
 <style>
-    .text-ufro { color: #003767; }
-    
+    .text-ufro {
+        color: #003767;
+    }
+
     .nav-pills .nav-link.active {
         background-color: #003767;
         color: white;

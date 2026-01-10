@@ -2,21 +2,19 @@
 import MainLayout from "../../layouts/MainLayout.astro";
 import { supabase } from "../../lib/supabase";
 
-// Consultamos las noticias ordenadas por fecha (más nuevas primero)
+// Consultamos las noticias ordenadas por fecha 
 const { data: noticias } = await supabase
     .from("noticias")
     .select("*")
     .order("fecha", { ascending: false })
     .limit(3);
 
-// Función auxiliar simple para traducir 'top' a CSS real
 const getObjectPosition = (pos: any) => {
-    if (pos === "top") return "top center"; // Enfocar Arriba
-    if (pos === "bottom") return "bottom center"; // Enfocar Abajo
-    return "center center"; // Enfocar Centro (Default)
+    if (pos === "top") return "top center";
+    if (pos === "bottom") return "bottom center"; 
+    return "center center";
 };
 
-// Si hay error, asignamos un array vacío para no romper la página
 const listadoNoticias = noticias || [];
 ---
 
@@ -47,7 +45,7 @@ const listadoNoticias = noticias || [];
                     listadoNoticias.length > 0 ? (
                         listadoNoticias.map((item) => (
                             <div class="col-md-6 col-lg-4">
-                                {/* Mini lista de colaboradores (CORREGIDO) */}
+                                {/* Mini lista de colaboradores */}
                                 {item.colaboradores &&
                                     Array.isArray(item.colaboradores) &&
                                     item.colaboradores.length > 0 && (
@@ -149,7 +147,6 @@ const listadoNoticias = noticias || [];
         letter-spacing: 2px;
     }
 
-    /* Cortar texto a 3 líneas */
     .line-clamp-3 {
         display: -webkit-box;
         -webkit-line-clamp: 3;
@@ -157,7 +154,6 @@ const listadoNoticias = noticias || [];
         overflow: hidden;
     }
 
-    /* Efecto de elevación al pasar el mouse */
     .hover-up {
         transition: transform 0.3s;
     }

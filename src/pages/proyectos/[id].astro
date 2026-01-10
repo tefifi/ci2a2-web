@@ -2,23 +2,18 @@
 import MainLayout from "../../layouts/MainLayout.astro";
 import { supabase } from "../../lib/supabase";
 
-// Esto le dice a Astro qué IDs existen para crear las páginas estáticas
 export async function getStaticPaths() {
     const { data: proyectos } = await supabase.from("proyectos").select("id");
 
-    // Si no hay proyectos o hay error, devolvemos array vacío
     if (!proyectos) return [];
 
     return proyectos.map((p) => ({
-        params: { id: p.id.toString() }, // El ID debe ser string
+        params: { id: p.id.toString() }, 
     }));
 }
 
-// 1. OBTENER EL ID DE LA URL
 const { id } = Astro.params;
 
-// 2. CONSULTAR SUPABASE
-// Buscamos un solo proyecto (.single()) que coincida con el ID
 console.log("1. ID INTENTADO:", id);
 
 // Consultar Supabase
@@ -31,10 +26,6 @@ const { data: proyecto, error } = await supabase
 console.log("2. DATOS RECIBIDOS:", proyecto);
 console.log("3. ERROR SUPABASE:", error);
 
-// 3. SI NO EXISTE EL PROYECTO (O hay error), REDIRIGIR A 404 O LISTA
-// if (error || !proyecto) {
-//   return Astro.redirect('/404'); // Asegúrate de tener una pagina 404 o redirige a '/proyectos'
-// }
 
 // Formatear fecha
 const fecha = new Date(proyecto.created_at).toLocaleDateString("es-CL", {
@@ -104,7 +95,6 @@ const fecha = new Date(proyecto.created_at).toLocaleDateString("es-CL", {
                                             >Período</span
                                         >
                                         {
-                                            /* Si existe fecha_inicio, la mostramos */
                                         }
                                         <span>
                                             {
@@ -118,7 +108,6 @@ const fecha = new Date(proyecto.created_at).toLocaleDateString("es-CL", {
                                             }
 
                                             {
-                                                /* Si existe fecha_termino, mostramos el guión y la fecha final */
                                             }
                                             {
                                                 proyecto.fecha_termino && (
@@ -195,7 +184,7 @@ const fecha = new Date(proyecto.created_at).toLocaleDateString("es-CL", {
                         />
 
                         {
-                            /* --- SECCIÓN DE ALIANZAS (Logos Grandes y Legibles) --- */
+                            /* --- SECCIÓN DE ALIANZAS --- */
                         }
                         {
                             ((proyecto.socios && proyecto.socios.length > 0) ||
@@ -215,7 +204,6 @@ const fecha = new Date(proyecto.created_at).toLocaleDateString("es-CL", {
                                                         {proyecto.socios.map(
                                                             (socio: any) => (
                                                                 <div class="text-center">
-                                                                    {/* Contenedor más amplio para logos horizontales */}
                                                                     <div
                                                                         class="mb-2 d-flex align-items-center justify-content-center"
                                                                         style="height: 100px; width: 160px;"
@@ -237,7 +225,6 @@ const fecha = new Date(proyecto.created_at).toLocaleDateString("es-CL", {
                                                                             <i class="bi bi-building fs-1 text-muted opacity-25" />
                                                                         )}
                                                                     </div>
-                                                                    {/* Nombre (si quieres que se vea el texto del logo, quizás quieras ocultar este texto o dejarlo muy sutil) */}
                                                                     <span
                                                                         class="d-block text-muted small text-truncate"
                                                                         style="max-width: 160px;"
@@ -266,7 +253,6 @@ const fecha = new Date(proyecto.created_at).toLocaleDateString("es-CL", {
                                                         {proyecto.financiamiento.map(
                                                             (finan: any) => (
                                                                 <div class="text-center">
-                                                                    {/* Contenedor más amplio */}
                                                                     <div
                                                                         class="mb-2 d-flex align-items-center justify-content-center"
                                                                         style="height: 100px; width: 160px;"
@@ -330,7 +316,6 @@ const fecha = new Date(proyecto.created_at).toLocaleDateString("es-CL", {
         color: #003767;
     }
 
-    /* Estilos para el contenido HTML enriquecido (Rich Text) */
     .rich-text {
         color: #444;
         line-height: 1.8;

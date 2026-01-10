@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { supabase, uploadImage } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 // --- COMPONENTE AVATAR LIMPIO ---
 const AvatarUpload = ({ image, onUpload, onRemove, subiendo }) => {
     const fileInputRef = useRef(null);
 
+    
+
     return (
         <div className="d-flex flex-column align-items-center justify-content-center h-100">
-            {/* Círculo de la imagen */}
             <div 
                 className="position-relative rounded-circle shadow-sm d-flex align-items-center justify-content-center bg-white border border-2 transition-all overflow-hidden"
                 style={{ 
@@ -29,11 +30,10 @@ const AvatarUpload = ({ image, onUpload, onRemove, subiendo }) => {
                     </div>
                 )}
                 
-                {/* Input oculto */}
                 <input type="file" hidden ref={fileInputRef} onChange={(e) => e.target.files[0] && onUpload(e.target.files[0])} accept="image/*" />
             </div>
 
-            {/* Controles debajo de la imagen (Minimalista) */}
+            {/* Controles debajo de la imagen*/}
             <div className="mt-3 text-center">
                 {image ? (
                     <button type="button" className="btn btn-link text-danger text-decoration-none btn-sm fw-bold p-0" onClick={onRemove}>
@@ -98,6 +98,26 @@ export default function AdminColaboradores() {
 
     const handleDelete = async (id) => { if (confirm('¿Eliminar colaborador?')) { await supabase.from('colaboradores').delete().eq('id', id); fetchColaboradores(); } };
 
+    const uploadImage = async (file) => {
+        if (!file) return null;
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+
+        const { error: uploadError } = await supabase.storage
+            .from('fotos') 
+            .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage
+            .from('fotos')
+            .getPublicUrl(filePath);
+
+        return data.publicUrl;
+    };
+
     return (
         <div className="container py-4">
             <h2 className="mb-4 fw-bold" style={{ color: '#003767' }}>Gestión de Equipo</h2>
@@ -120,7 +140,7 @@ export default function AdminColaboradores() {
                             
                             <form onSubmit={handleSubmit}>
                                 <div className="row">
-                                    {/* 1. SECCIÓN FOTO (COLUMNA IZQUIERDA DENTRO DEL FORM) */}
+                                    {/* 1. SECCIÓN FOTO */}
                                     <div className="col-md-4 mb-4 mb-md-0 border-end-md">
                                         <AvatarUpload 
                                             image={formData.foto_url} 
@@ -130,7 +150,7 @@ export default function AdminColaboradores() {
                                         />
                                     </div>
 
-                                    {/* 2. SECCIÓN DATOS (COLUMNA DERECHA DENTRO DEL FORM) */}
+                                    {/* 2. SECCIÓN DATOS */}
                                     <div className="col-md-8 ps-md-4">
                                         <div className="mb-3">
                                             <label className="form-label fw-bold small text-secondary">Nombre Completo <span className="text-danger">*</span></label>
@@ -155,7 +175,7 @@ export default function AdminColaboradores() {
                                     </div>
                                 </div>
 
-                                {/* 3. SECCIÓN BIOGRAFÍA (ANCHO COMPLETO ABAJO) */}
+                                {/* 3. SECCIÓN BIOGRAFÍA */}
                                 <div className="mt-3">
                                     <label className="form-label fw-bold small text-secondary">Biografía Breve</label>
                                     <textarea className="form-control" name="bio" rows="3" value={formData.bio} onChange={handleChange} placeholder="Pequeña reseña profesional..."></textarea>
