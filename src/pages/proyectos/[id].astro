@@ -23,11 +23,13 @@ if (error || !proyecto) {
 }
 
 // Formatear fecha
-const fecha = new Date(proyecto.created_at).toLocaleDateString("es-CL", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-});
+const fecha = (proyecto && proyecto.created_at) 
+    ? new Date(proyecto.created_at).toLocaleDateString("es-CL", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "Fecha no disponible";
 
 
 ---
