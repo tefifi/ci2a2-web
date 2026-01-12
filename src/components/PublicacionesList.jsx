@@ -81,9 +81,6 @@ export default function PublicacionesList() {
                     <div className="card border-0 shadow-sm rounded-4 p-4 sticky-top" style={{ top: '100px', zIndex: 5 }}>
                         <div className="d-flex justify-content-between align-items-center mb-4">
                             <h5 className="fw-bold text-primary mb-0"><i className="bi bi-funnel-fill me-2"></i> Filtros</h5>
-                            {(filters.year !== 'Todos' || filters.area !== 'Todos' || filters.type !== 'Todos' || filters.search !== '') && (
-                                <span className="badge bg-danger rounded-pill" style={{ cursor: 'pointer' }} onClick={clearFilters}>Borrar</span>
-                            )}
                         </div>
                         <div className="d-flex flex-column gap-3">
                             <div>
