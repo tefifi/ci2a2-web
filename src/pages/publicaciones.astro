@@ -1,21 +1,16 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
 import PublicacionesList from '../components/PublicacionesList.jsx'; 
+import PageHeader from '../components/common/PageHeader.astro';
 ---
 
 <MainLayout title="Publicaciones Científicas">
     
-    <section class="py-5 position-relative text-white" style="background-color: #003767;">
-        <div class="container text-center py-3">
-            <h1 class="fw-bold display-5 mb-3">Producción Científnica</h1>
-            <div class="d-flex justify-content-center mb-3">
-                <div class="rounded-pill bg-white opacity-50" style="width: 80px; height: 4px;"></div>
-            </div>
-            <p class="lead opacity-75">
-              Accede a nuestros artículos, conferencias y tesis publicadas.
-            </p>
-        </div>
-    </section>
+    <PageHeader 
+        title="Producción Científica" 
+        description="Accede a nuestros artículos, conferencias y tesis publicadas" 
+    />
+    
 
     <section class="py-5 bg-light min-vh-100">
         <div class="container py-4">

@@ -1,6 +1,7 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
 import { supabase } from '../lib/supabase';
+import PageHeader from '../components/common/PageHeader.astro';
 
 // Traemos a los colaboradores 
 const { data: equipo } = await supabase
@@ -13,12 +14,11 @@ const { data: equipo } = await supabase
 
 <MainLayout title="Nosotros">
     
-    <section class="bg-ufro text-white py-5">
-        <div class="container text-center">
-            <h1 class="fw-bold display-5">Nuestro Centro</h1>
-            <p class="lead opacity-75">Ciencia de Datos e Inteligencia Artificial desde La Araucanía</p>
-        </div>
-    </section>
+    <PageHeader 
+        title="Nuestro Centro" 
+        description="Ciencia de Datos e Inteligencia Artificial desde La Araucanía" 
+    />
+
 
     <section class="py-5 bg-white">
         <div class="container">

@@ -1,6 +1,8 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
 import { supabase } from "../../lib/supabase";
+import PageHeader from '../../components/common/PageHeader.astro';
+
 
 // Consultamos las noticias ordenadas por fecha 
 const { data: noticias } = await supabase
@@ -19,24 +21,11 @@ const listadoNoticias = noticias || [];
 ---
 
 <MainLayout title="Noticias">
-    <section class="bg-ufro text-white py-5 position-relative overflow-hidden">
-        <div class="container position-relative z-2">
-            <div class="row">
-                <div class="col-lg-8">
-                    <span class="text-info fw-bold text-uppercase ls-2"
-                        >Actualidad</span
-                    >
-                    <h1 class="display-4 fw-bold mt-2">Noticias y Eventos</h1>
-                    <p class="lead opacity-75">
-                        Novedades, investigaciones y actividades del CI²A².
-                    </p>
-                </div>
-            </div>
-        </div>
-        <i
-            class="bi bi-newspaper position-absolute opacity-10"
-            style="font-size: 15rem; right: -50px; bottom: -50px;"></i>
-    </section>
+    
+    <PageHeader 
+        title="Noticias y Eventos" 
+        description="Novedades, investigaciones y actividades del CI²A²" 
+    />
 
     <section class="py-5 bg-light">
         <div class="container">
