@@ -3,36 +3,25 @@ import { supabase } from './supabase';
 const GROUP_ID = import.meta.env.PUBLIC_ZOTERO_GROUP_ID;
 const API_KEY = import.meta.env.PUBLIC_ZOTERO_API_KEY;
 
-// --- FUNCIÓN DE LIMPIEZA MAESTRA ---
+// --- FUNCIÓN DE LIMPIEZA DE TEXTO ---
 function cleanText(text) {
     if (!text) return '';
     let cleaned = text;
-
     const specificFixes = {
-        // Errores clásicos de Zotero/LaTeX
         'Ã\\copyright': 'é', 'Ã\\pm': 'ñ', 'Ã!': 'á', 'Ã`': 'á',
         '\\&': '&', 'â€“': '-', '{': '', '}': '',
         '\\"': '', "\\'": '', '\\`': '',
-        'Á\\-': 'í',    
-        'Áp': 'ñ',     
-        'Ã.': 'Á.',     
-        'Ã,': 'Á,'      
+        'Á\\-': 'í', 'Áp': 'ñ', 'Ã.': 'Á.', 'Ã,': 'Á,'
     };
-
-    // Aplicar correcciones manuales
     Object.keys(specificFixes).forEach(bad => {
         cleaned = cleaned.replaceAll(bad, specificFixes[bad]);
     });
-
-    // Intentar arreglar UTF-8 roto automáticamente (Ã± -> ñ)
     try {
         if (cleaned.includes('Ã') || cleaned.includes('Â')) {
              cleaned = decodeURIComponent(escape(cleaned));
         }
     } catch (e) {}
-
-    cleaned = cleaned.replaceAll('`', ''); 
-    return cleaned;
+    return cleaned.replaceAll('`', '');
 }
 
 // --- FORMATEO DE AUTORES ---
@@ -40,7 +29,6 @@ function formatAuthors(creators) {
     if (!creators || !Array.isArray(creators)) return '';
     return creators.map(c => {
         if (c.firstName && c.lastName) {
-            // Formato: Apellido, Inicial.
             return `${c.lastName}, ${c.firstName.charAt(0)}.`;
         }
         return c.name || '';
@@ -59,36 +47,51 @@ export async function syncZoteroToSupabase() {
     
     const zoteroItems = await response.json();
 
+    // 1. Preparamos los datos nuevos
     const itemsToUpsert = zoteroItems.map(item => {
         const rawTitle = item.data.title || 'Sin título';
-        // Buscamos el resumen en varios lugares posibles para asegurar que guardamos algo
         const rawAbstract = item.data.abstractNote || item.data.abstract || item.data.description || '';
 
         return {
             zotero_id: item.key,
-            title: cleanText(rawTitle), // ¡Título limpio al guardar!
+            title: cleanText(rawTitle),
             year: item.data.date ? item.data.date.substring(0, 4) : 'S/F',
             type: item.data.itemType,
             url: item.data.url || '',
-            resumen: cleanText(rawAbstract), // ¡Resumen limpio al guardar!
-            autores: cleanText(formatAuthors(item.data.creators)), // ¡Autores limpios y formateados!
-            zotero_data: item.data, // Guardamos la data cruda por seguridad
-            is_visible: true, // Asumimos visible por defecto
+            resumen: cleanText(rawAbstract),
+            autores: cleanText(formatAuthors(item.data.creators)),
+            zotero_data: item.data,
+            is_visible: true,
             created_at: new Date().toISOString()
         };
     });
 
-    const { error } = await supabase
+    // 2. Insertamos o Actualizamos (Upsert)
+    const { error: upsertError } = await supabase
       .from('publicaciones')
       .upsert(itemsToUpsert, { onConflict: 'zotero_id' });
 
-    if (error) throw error;
+    if (upsertError) throw upsertError;
 
-    console.log(`✅ Sincronización completada. ${itemsToUpsert.length} items procesados.`);
+    // 3. LIMPIEZA (NUEVO): Borrar de Supabase lo que ya no existe en Zotero
+    // Obtenemos la lista de IDs que acabamos de guardar (los que SÍ existen)
+    const validZoteroIds = itemsToUpsert.map(i => i.zotero_id);
+
+    if (validZoteroIds.length > 0) {
+        // Borramos todo lo que NO esté en la lista de IDs válidos
+        const { error: deleteError } = await supabase
+            .from('publicaciones')
+            .delete()
+            .not('zotero_id', 'in', `(${validZoteroIds.map(id => `"${id}"`).join(',')})`); // Sintaxis especial para arrays de strings
+        
+        if (deleteError) console.error("Error limpiando publicaciones antiguas:", deleteError);
+    }
+
+    console.log(`Sincronización completada. ${itemsToUpsert.length} items procesados.`);
     return { success: true, count: itemsToUpsert.length };
 
   } catch (error) {
-    console.error("❌ Error en sincronización:", error);
+    console.error("Error en sincronización:", error);
     return { success: false, error };
   }
 }

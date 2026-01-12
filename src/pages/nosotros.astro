@@ -68,7 +68,9 @@ const { data: equipo } = await supabase
                                      alt={c.nombre}>
                             </div>
                             <h5 class="fw-bold mb-1 text-dark">{c.nombre}</h5>
-                            <span class="badge bg-primary-subtle text-primary mb-3 rounded-pill px-3">{c.rol}</span>
+                            <span class="badge bg-primary-subtle text-primary mb-3 rounded-pill px-3">{c.cargo}</span>
+                            <span class="small text ">{c.facultad}</span>
+
                             
                             {c.bio && <p class="small text-muted mb-3 line-clamp-3">{c.bio}</p>}
                             
