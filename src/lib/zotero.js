@@ -36,7 +36,7 @@ function formatAuthors(creators) {
 }
 
 export async function syncZoteroToSupabase() {
-  console.log("🔄 Iniciando sincronización con Zotero...");
+  console.log("Iniciando sincronización con Zotero...");
   
   // Pedimos los items ordenados por fecha
   const url = `https://api.zotero.org/groups/${GROUP_ID}/items/top?format=json&limit=100&sort=date`;

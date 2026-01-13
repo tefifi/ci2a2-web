@@ -7,17 +7,16 @@ const links = [
   { name: 'Publicaciones', href: '/publicaciones' },
 ];
 ---
-
 <nav class="navbar navbar-expand-lg navbar-dark bg-ufro fixed-top shadow" id="mainNav">
   <div class="container">
     
     <a class="navbar-brand d-flex align-items-center py-0" href="/">
       
-      <img src="/img/logo-ci2a2.png" alt="Logo CI2A2" height="70" class="d-inline-block">
+      <img src="/img/logo-ufro.png" alt="Logo UFRO" height="70" class="d-inline-block">
       
       <div class="border-start border-light opacity-50 mx-4" style="height: 50px;"></div>
       
-      <img src="/img/02-logo-UFRO-blanco-horizontal.png" alt="Logo UFRO" height="48" class="d-inline-block">
+      <img src="/img/logo-ci2a2.png" alt="Logo CI2A2" height="70" class="d-inline-block">
     
     </a>
 
@@ -26,9 +25,10 @@ const links = [
     </button>
 
     <div class="collapse navbar-collapse" id="navbarContent">
-      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-lg-4"> {links.map((link) => (
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-lg-4"> 
+        {links.map((link) => (
           <li class="nav-item">
-            <a class="nav-link fw-medium text-white hover-cyan" href={link.href} style="font-size: 1.05rem;">
+            <a class="nav-link fw-medium text-white hover-pink" href={link.href} style="font-size: 1.05rem;">
               {link.name}
             </a>
           </li>
@@ -43,10 +43,14 @@ const links = [
     </div>
   </div>
 </nav>
-
 <style>
-  .bg-ufro { background-color: #003767; }
-  .text-ufro { color: #003767; }
+  :root {
+    --ufro-blue: #003767;
+    --ufro-pink: #d63384;
+  }
+
+  .bg-ufro { background-color: var(--ufro-blue); }
+  .text-ufro { color: var(--ufro-blue); }
 
   #mainNav {
     transition: all 0.3s ease-in-out;
@@ -54,17 +58,27 @@ const links = [
     padding-bottom: 1.2rem; 
   }
   
-  .hover-cyan {
+  /* Efecto para que las letras cambien a rosado al pasar el mouse */
+  .hover-pink {
     transition: color 0.2s, opacity 0.2s;
     opacity: 0.9;
+    text-decoration: none;
   }
-  .hover-cyan:hover {
-    color: #009fe3 !important;
+
+  .hover-pink:hover {
+    color: var(--ufro-pink) !important;
     opacity: 1;
-    font-weight: 600;
+    font-weight: 600; /* Se pone un poco más gruesa para resaltar */
   }
 
   :global(body) {
     padding-top: 110px;
+  }
+
+  /* Ajuste para móviles: que los logos no se vean gigantes */
+  @media (max-width: 991.98px) {
+    .navbar-brand img[alt="Logo UFRO"] { height: 35px; }
+    .navbar-brand img[alt="Logo CI2A2"] { height: 50px; }
+    .navbar-brand .border-start { mx-2 !important; height: 35px !important; }
   }
 </style>
