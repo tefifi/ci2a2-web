@@ -4,7 +4,8 @@ import AdminLayout from "../layouts/AdminLayout.astro";
 import AdminNoticias from "../components/admin/AdminNoticias.jsx";
 import AdminProyectos from "../components/admin/AdminProyectos.jsx";
 import AdminColaboradores from "../components/admin/AdminColaboradores.jsx";
-import AdminPublicaciones from "../components/admin/AdminPublicaciones.jsx"; // 
+import AdminPublicaciones from "../components/admin/AdminPublicaciones.jsx"; 
+import AdminBanners from "../components/admin/AdminBanners.jsx";
 ---
 
 <AdminLayout title="Panel de Administración">
@@ -19,6 +20,18 @@ import AdminPublicaciones from "../components/admin/AdminPublicaciones.jsx"; //
             <li class="nav-item" role="presentation">
                 <button
                     class="nav-link active fw-bold rounded-pill px-4"
+                    id="banners-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#banners"
+                    type="button"
+                    role="tab"
+                >
+                    <i class="bi bi-images me-2"></i>Banners
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button
+                    class="nav-link fw-bold rounded-pill px-4"
                     id="proyectos-tab"
                     data-bs-toggle="pill"
                     data-bs-target="#proyectos"
@@ -72,9 +85,13 @@ import AdminPublicaciones from "../components/admin/AdminPublicaciones.jsx"; //
         >
             <div
                 class="tab-pane fade show active"
-                id="proyectos"
+                id="banners"
                 role="tabpanel"
             >
+                <AdminBanners client:only="react" />
+            </div>
+
+            <div class="tab-pane fade" id="proyectos" role="tabpanel">
                 <AdminProyectos client:only="react" />
             </div>
 

@@ -35,8 +35,11 @@ const { data: bannersRes, error: errorBanners } = await supabase
     .order("order", { ascending: true });
 
 // Si hay error o no hay datos, enviamos un array vacío para que el HTML sepa qué hacer
-const bannersSeguros = errorBanners || !bannersRes ? [] : bannersRes;
-// --- DATOS ESTÁTICOS (Líneas de Investigación) ---
+const { data: bannersSeguros } = await supabase
+    .from("banners")
+    .select("*")
+    .eq("active", true) // Solo los visibles al público
+    .order("order", { ascending: true }); // Respetar el orden del arrastre
 const lineasInvestigacion = [
     {
         titulo: "Smart Agro",
@@ -71,51 +74,66 @@ function formatAuthorsHome(autoresStr: any) {
 }
 ---
 
-<MainLayout title="Inicio">
-    <section class="bg-light py-4">
-        <div class="carousel-inner">
-            {
-                bannersSeguros.length > 0 ? (
-                    bannersSeguros.map((banner, index) => (
-                        <div
-                            class={`carousel-item ${index === 0 ? "active" : ""}`}
-                            data-bs-interval="5000"
-                        >
-                            {banner.link ? (
-                                <a href={banner.link}>
-                                    <img
-                                        src={banner.image_url}
-                                        class="d-block w-100 h-auto"
-                                        alt={banner.title}
-                                        onerror="this.onerror=null;this.src='/img/banner-fallback.png';"
-                                    />
-                                </a>
-                            ) : (
-                                <img
-                                    src={banner.image_url}
-                                    class="d-block w-100 h-auto"
-                                    alt={banner.title}
-                                    onerror="this.onerror=null;this.src='/img/banner-fallback.png';"
-                                />
-                            )}
+<MainLayout title="Inicio"
+    ><section class="bg-light py-4">
+    <div class="container">
+        <div id="mainBannerCarousel" class="carousel slide" data-bs-ride="carousel">
+            
+            <div class="carousel-inner shadow-sm rounded-4 overflow-hidden bg-white">
+                {
+                    bannersSeguros && bannersSeguros.length > 0 ? (
+                        bannersSeguros.map((banner, index) => (
+                            <div class={`carousel-item ${index === 0 ? "active" : ""}`} data-bs-interval="5000">
+                                <div style={{ width: "100%", aspectRatio: "25/9", overflow: "hidden" }}>
+                                    {banner.link ? (
+                                        <a href={banner.link} target="_blank" rel="noopener noreferrer">
+                                            <img 
+                                                src={banner.image_url} 
+                                                class="d-block w-100 h-100" 
+                                                style={{ objectFit: "cover", objectPosition: `center ${banner.image_position || 50}%` }} 
+                                            />
+                                        </a>
+                                    ) : (
+                                        <img 
+                                            src={banner.image_url} 
+                                            class="d-block w-100 h-100" 
+                                            style={{ objectFit: "cover", objectPosition: `center ${banner.image_position || 50}%` }} 
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div class="carousel-item active">
+                            <div style={{ width: "100%", aspectRatio: "25/9" }}>
+                                <img src="/img/banner-fallback.png" class="d-block w-100 h-100" style={{ objectFit: "cover" }} />
+                            </div>
                         </div>
-                    ))
-                ) : (
-                    /* ESTO SE MUESTRA SI FALLA LA BASE DE DATOS O NO HAY BANNERS ACTIVOS */
-                    <div class="carousel-item active">
-                        <div class="position-relative">
-                            <img
-                                src="/img/banner-fallback.png"
-                                class="d-block w-100 h-auto"
-                                alt="Banner por defecto"
-                            />
+                    )
+                }
+            </div>
+
+            {
+                bannersSeguros && bannersSeguros.length > 1 && (
+                    <div class="custom-indicators-container">
+                        <div class="carousel-indicators">
+                            {bannersSeguros.map((_, index) => (
+                                <button
+                                    type="button"
+                                    data-bs-target="#mainBannerCarousel"
+                                    data-bs-slide-to={index}
+                                    class={index === 0 ? "active" : ""}
+                                    aria-current={index === 0 ? "true" : "false"}
+                                    aria-label={`Slide ${index + 1}`}
+                                />
+                            ))}
                         </div>
                     </div>
                 )
             }
         </div>
-    </section>
-
+    </div>
+</section>
     <section class="py-6 bg-white">
         <div class="container">
             <div class="row align-items-center g-5">
@@ -576,7 +594,7 @@ function formatAuthorsHome(autoresStr: any) {
         backdrop-filter: blur(5px);
     }
     .hover-primary:hover {
-        color: #d63384 !important; /* Cambia el cian por rosado al pasar el mouse */
+        color: #d63384 !important;
     }
     .hover-scale {
         transition: transform 0.3s;
@@ -612,29 +630,69 @@ function formatAuthorsHome(autoresStr: any) {
         color: var(--ufro-blue);
         transform: scale(1.2);
     }
-
-    /* Estilos para el Carrusel de Banners */
-    #bannerCarousel {
-        background-color: #f8f9fa;
+/* Contenedor de los círculos */
+    .custom-indicators-container {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        padding: 20px 0 10px 0; /* Un poco más de aire */
     }
 
-    .carousel-item img {
-        object-fit: contain; /* Evita que la imagen se corte */
-        max-height: 400px; /* Ajusta según la altura promedio de tus banners */
+    /* Estabilizador de los indicadores */
+    .custom-indicators-container .carousel-indicators {
+        position: relative !important;
+        margin: 0 !important;
+        bottom: 0 !important;
+        inset: 0 !important;
+        display: flex;
+        align-items: center;
+        gap: 8px; /* Espacio uniforme entre botones */
     }
 
-    /* Personalización de los indicadores para que sean rosados */
+    /* Estilo Base Interactivo */
     .carousel-indicators [data-bs-target] {
-        background-color: var(--ufro-pink);
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
+        width: 12px !important;
+        height: 12px !important;
+        border-radius: 50% !important;
+        background-color: #d1d5db !important; /* Gris suave */
+        border: 2px solid transparent !important; /* Preparado para el hover */
+        margin: 0 !important;
+        opacity: 0.7 !important;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; /* Efecto rebote suave */
+        cursor: pointer;
     }
 
-    .carousel-control-prev-icon,
-    .carousel-control-next-icon {
-        filter: drop-shadow(
-            0px 0px 2px rgba(0, 0, 0, 0.5)
-        ); /* Para que se vean sobre fondos blancos */
+    /* Hover: Cuando pasas el mouse por encima */
+    .carousel-indicators [data-bs-target]:hover {
+        opacity: 1 !important;
+        transform: scale(1.4);
+        background-color: #9ca3af !important;
     }
-</style>
+
+    /* Estado Activo: El que está seleccionado actualmente */
+    .carousel-indicators .active {
+        width: 14px !important; /* Se hace un poquito más grande */
+        height: 14px !important;
+        background-color: var(--ufro-pink) !important;
+        opacity: 1 !important;
+        transform: scale(1.1);
+        box-shadow: 0 0 8px rgba(var(--ufro-pink-rgb), 0.4); /* Brillo sutil si tienes la variable RGB */
+    }
+
+    /* Animación extra para el activo */
+    .carousel-indicators .active::after {
+        content: "";
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        right: -4px;
+        bottom: -4px;
+        border-radius: 50%;
+        border: 1px solid var(--ufro-pink);
+    }
+
+    @keyframes pulse-ring {
+        0% { transform: scale(0.7); opacity: 0.5; }
+        100% { transform: scale(1.5); opacity: 0; }
+    }
+    </style>
