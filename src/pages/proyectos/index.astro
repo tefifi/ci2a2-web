@@ -1,7 +1,7 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
 import { supabase } from "../../lib/supabase";
-import PageHeader from '../../components/common/PageHeader.astro';
+
 // --- CONFIGURACIÓN ---
 const PROYECTOS_POR_PAGINA = 9;
 
@@ -25,6 +25,7 @@ const totalPaginas = Math.ceil(totalProyectos / PROYECTOS_POR_PAGINA);
 const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
 
 // Función para colores de estado
+// Función para colores de estado
 const getStatusStyle = (status: any) => {
   if (!status) return "bg-light text-secondary border-secondary";
   const s = status.toLowerCase();
@@ -36,16 +37,32 @@ const getStatusStyle = (status: any) => {
   if (s.includes("plan") || s.includes("diseño"))
     return "bg-warning bg-opacity-10 text-dark border-warning";
 
-  return "bg-primary bg-opacity-10 text-primary border-primary";
+  // --- CORRECCIÓN AQUÍ ---
+  // Usamos una clase personalizada para asegurar que la transparencia funcione
+  return "badge-ufro-soft";
 };
 ---
 
 <MainLayout title="Nuestros Proyectos">
   {/* --- ENCABEZADO --- */}
-  <PageHeader
-    title="Proyectos Realizados"
-    description="Conoce el estado y avance de nuestras iniciativas"
-  />
+  <section
+    class="py-5 text-white position-relative overflow-hidden shadow-sm"
+    style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);"
+  >
+    <div class="container position-relative z-2">
+      <div class="col-lg-8">
+        <h6
+          class="text-pink-light fw-bold text-uppercase ls-2 mb-2 animate-fade-in"
+        >
+          Iniciativas
+        </h6>
+        <h1 class="display-5 fw-bold mb-2">Proyectos Realizados</h1>
+        <p class="opacity-90 mb-0 lead small">
+          Conoce el estado y avance de nuestras iniciativas
+        </p>
+      </div>
+    </div>
+  </section>
 
   <section class="py-5 bg-light min-vh-100">
     <div class="container py-4">
@@ -60,10 +77,10 @@ const getStatusStyle = (status: any) => {
                   class="text-decoration-none w-100 card-link-wrapper"
                 >
                   <article class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden modern-card bg-white">
-                    {/* IMAGEN */}
+                    {/* IMAGEN (Compacta 16/9) */}
                     <div
                       class="position-relative overflow-hidden card-img-wrapper"
-                      style="aspect-ratio: 4/3;"
+                      style="aspect-ratio: 16/9;"
                     >
                       {proyecto.image_url ? (
                         <img
@@ -78,35 +95,39 @@ const getStatusStyle = (status: any) => {
                         </div>
                       )}
 
-                      <div class="position-absolute top-0 end-0 m-3 z-2">
+                      {/* BADGE ÁREA */}
+                      <div class="position-absolute top-0 end-0 m-2 z-2">
                         <span
                           class="badge bg-white text-dark shadow-sm fw-bold px-2 py-1 rounded-2 small"
-                          style="font-size: 0.65rem; opacity: 0.9;"
+                          style="font-size: 0.65rem; opacity: 0.95;"
                         >
                           {proyecto.area}
                         </span>
                       </div>
                     </div>
 
-                    {/* 2. CONTENIDO  */}
-                    <div class="card-body p-4 d-flex flex-column">
-                      {/* FILA SUPERIOR */}
-                      <div class="d-flex justify-content-between align-items-center mb-3">
-                        {/* Fecha */}
+                    {/* CONTENIDO */}
+                    <div class="card-body p-3 d-flex flex-column">
+                      {/* HEADER: FECHA (Texto normal) Y ESTADO */}
+                      <div class="d-flex justify-content-between align-items-center mb-2">
                         <div
                           class="text-muted small fw-bold text-uppercase d-flex align-items-center gap-2"
                           style="font-size: 0.7rem;"
                         >
-                          <i class="bi bi-calendar-event opacity-50" />
+                          <i class="bi bi-calendar-event text-ufro opacity-75" />
                           {proyecto.fecha_inicio
-                            ? new Date(proyecto.fecha_inicio).getFullYear()
+                            ? new Date(
+                                proyecto.fecha_inicio,
+                              ).toLocaleDateString("es-CL", {
+                                year: "numeric",
+                                month: "short",
+                              })
                             : "---"}
                         </div>
 
-                        {/* Estado */}
                         <span
                           class={`badge border border-opacity-25 rounded-pill fw-bold ${getStatusStyle(proyecto.status)}`}
-                          style="font-size: 0.65rem; letter-spacing: 0.5px;"
+                          style="font-size: 0.6rem; letter-spacing: 0.5px;"
                         >
                           {proyecto.status || "Proyecto"}
                         </span>
@@ -114,30 +135,39 @@ const getStatusStyle = (status: any) => {
 
                       {/* Título */}
                       <h5
-                        class="card-title fw-bold mb-3 text-dark lh-sm line-clamp-2"
-                        style="min-height: 2.4rem; font-size: 1.25rem;"
+                        class="card-title fw-bold mb-2 text-dark lh-sm line-clamp-2 title-hover"
+                        style="min-height: 2rem; font-size: 1.1rem;"
                       >
                         {proyecto.title}
                       </h5>
 
                       {/* Descripción */}
                       <p
-                        class="card-text text-secondary small line-clamp-3 mb-4 flex-grow-1"
-                        style="line-height: 1.6;"
+                        class="card-text text-secondary small line-clamp-2 mb-3 flex-grow-1"
+                        style="line-height: 1.5; font-size: 0.85rem;"
                       >
                         {proyecto.resumen || proyecto.description}
                       </p>
 
                       {/* Footer */}
-                      <div class="mt-auto pt-3 border-top border-light w-100 d-flex justify-content-between align-items-center">
-                        <span class="text-primary fw-bold small group-hover-text">
+                      <div class="mt-auto pt-2 border-top border-light w-100 d-flex justify-content-between align-items-center">
+                        <span
+                          class="text-muted fw-bold small group-hover-text transition-text"
+                          style="font-size: 0.75rem;"
+                        >
                           Ver proyecto
                         </span>
+
+                        {/* --- AQUÍ ESTÁ LA FLECHA CORREGIDA --- */}
+                        {/* Círculo Rosado + Flecha Rosada */}
                         <div
-                          class="btn btn-sm btn-outline-primary rounded-circle d-flex align-items-center justify-content-center p-0"
-                          style="width: 32px; height: 32px; transition: all 0.3s ease;"
+                          class="btn-arrow-pink rounded-circle d-flex align-items-center justify-content-center"
+                          style="width: 32px; height: 32px;"
                         >
-                          <i class="bi bi-arrow-right transition-icon" />
+                          <i
+                            class="bi bi-arrow-right transition-icon"
+                            style="font-size: 1rem;"
+                          />
                         </div>
                       </div>
                     </div>
@@ -152,38 +182,41 @@ const getStatusStyle = (status: any) => {
       {
         totalPaginas > 1 && (
           <nav class="mt-5 d-flex justify-content-center">
-            <ul class="pagination gap-2">
+            <ul class="pagination gap-2 align-items-center">
+              {/* Botón ANTERIOR */}
               <li class={`page-item ${paginaActual === 1 ? "disabled" : ""}`}>
                 <a
-                  class="page-link border rounded-circle text-dark shadow-sm d-flex align-items-center justify-content-center"
+                  class="page-link rounded-circle text-dark shadow-sm d-flex align-items-center justify-content-center pagination-btn prev-btn"
                   href={`?pagina=${paginaActual - 1}`}
-                  style="width: 40px; height: 40px;"
+                  style="width: 45px; height: 45px;"
                 >
-                  <i class="bi bi-chevron-left small" />
+                  <i class="bi bi-chevron-left small transition-icon" />
                 </a>
               </li>
 
+              {/* Números de Página */}
               {paginasArray.map((pag) => (
                 <li class="page-item">
                   <a
-                    class={`page-link border rounded-circle shadow-sm fw-bold d-flex align-items-center justify-content-center ${pag === paginaActual ? "text-white border-0" : "bg-white text-dark"}`}
+                    class={`page-link rounded-circle shadow-sm fw-bold d-flex align-items-center justify-content-center pagination-btn ${pag === paginaActual ? "active-page text-white border-0" : "bg-white text-dark"}`}
                     href={`?pagina=${pag}`}
-                    style={`width: 40px; height: 40px; ${pag === paginaActual ? "background-color: #003767 !important;" : ""}`}
+                    style={`width: 45px; height: 45px; ${pag === paginaActual ? "background-color: #003767 !important;" : ""}`}
                   >
                     {pag}
                   </a>
                 </li>
               ))}
 
+              {/* Botón SIGUIENTE */}
               <li
                 class={`page-item ${paginaActual === totalPaginas ? "disabled" : ""}`}
               >
                 <a
-                  class="page-link border rounded-circle text-dark shadow-sm d-flex align-items-center justify-content-center"
+                  class="page-link rounded-circle text-dark shadow-sm d-flex align-items-center justify-content-center pagination-btn next-btn"
                   href={`?pagina=${paginaActual + 1}`}
-                  style="width: 40px; height: 40px;"
+                  style="width: 45px; height: 45px;"
                 >
-                  <i class="bi bi-chevron-right small" />
+                  <i class="bi bi-chevron-right small transition-icon" />
                 </a>
               </li>
             </ul>
@@ -193,38 +226,20 @@ const getStatusStyle = (status: any) => {
     </div>
   </section>
 </MainLayout>
-
 <style>
-  .modern-card {
-    transition:
-      transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-      box-shadow 0.3s ease;
+  /* =========================================
+     1. VARIABLES Y UTILIDADES
+     ========================================= */
+  :root {
+    --ufro-blue: #003767;
+    --ufro-pink: #d63384;
   }
 
-  .card-link-wrapper:hover .modern-card {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 55, 103, 0.12) !important;
-  }
-
-  .transition-img {
-    transition: transform 0.6s ease;
-  }
-  .card-link-wrapper:hover .transition-img {
-    transform: scale(1.08);
-  }
-
-  .transition-icon {
-    transition: transform 0.3s ease;
-  }
-  .card-link-wrapper:hover .transition-icon {
-    transform: translateX(3px);
-  }
-
-  .card-link-wrapper:hover .btn-outline-primary {
-    background-color: #003767;
-    color: white;
-    border-color: #003767;
-  }
+  .bg-fica { background-color: var(--ufro-pink); color: white; }
+  .text-pink-light { color: #ff85c0; }
+  .bg-ufro { background-color: var(--ufro-blue); color: white; }
+  .text-ufro { color: var(--ufro-blue); }
+  .ls-2 { letter-spacing: 2px; }
 
   .line-clamp-2 {
     display: -webkit-box;
@@ -232,10 +247,109 @@ const getStatusStyle = (status: any) => {
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
+
+  /* Badge para estados desconocidos (Opacidad corregida) */
+  .badge-ufro-soft {
+    background-color: rgba(0, 55, 103, 0.1);
+    color: var(--ufro-blue);
+    border: 1px solid var(--ufro-blue);
+  }
+
+  /* =========================================
+     2. TARJETA (CARD) Y EFECTOS
+     ========================================= */
+  .modern-card {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  }
+  
+  /* Hover de la tarjeta completa */
+  .card-link-wrapper:hover .modern-card {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 30px rgba(214, 51, 132, 0.15) !important;
+  }
+
+  /* Animación de la Imagen */
+  .transition-img { transition: transform 0.6s ease; }
+  .card-link-wrapper:hover .transition-img { transform: scale(1.08); }
+
+  /* Título y textos */
+  .title-hover { transition: color 0.3s ease; }
+  .card-link-wrapper:hover .title-hover {
+    color: var(--ufro-blue) !important;
+    text-decoration: underline;
+  }
+  
+  .transition-text { transition: color 0.3s ease; }
+  .card-link-wrapper:hover .transition-text { color: var(--ufro-pink) !important; }
+
+  /* =========================================
+     3. BOTÓN FLECHA (CÍRCULO)
+     ========================================= */
+  /* ¡ESTO ES LO QUE FALTABA! Define el círculo base */
+  .btn-arrow-pink {
+    width: 32px;
+    height: 32px;
+    display: flex;            
+    align-items: center;
+    justify-content: center;
+    color: var(--ufro-pink);
+    border: 1.5px solid var(--ufro-pink);
+    background: transparent;
+    transition: all 0.3s ease;
+  }
+
+  /* Hover del círculo (se rellena de rosado) */
+  .card-link-wrapper:hover .btn-arrow-pink {
+    background-color: var(--ufro-pink);
+    color: white;
+    box-shadow: 0 4px 10px rgba(214, 51, 132, 0.3);
+  }
+
+  /* Icono de la flecha (Movimiento) */
+  .transition-icon {
+    font-size: 1rem;
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .card-link-wrapper:hover .transition-icon {
+    transform: translateX(5px);
+  }
+
+  /* =========================================
+     4. PAGINACIÓN
+     ========================================= */
+  .pagination-btn {
+    border: 1px solid #dee2e6;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
     overflow: hidden;
+  }
+
+  /* Hover de botones */
+  .pagination-btn:not(.active-page):not(.disabled):hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 8px 15px rgba(214, 51, 132, 0.2) !important;
+    border-color: var(--ufro-pink) !important;
+    color: var(--ufro-pink) !important;
+    z-index: 10;
+  }
+
+  /* Página activa */
+  .active-page {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(0, 55, 103, 0.4) !important;
+  }
+
+  /* Movimiento de flechas paginación */
+  .prev-btn:hover .bi-chevron-left { transform: translateX(-3px); }
+  .next-btn:hover .bi-chevron-right { transform: translateX(3px); }
+
+  /* Deshabilitado */
+  .page-item.disabled .pagination-btn {
+    opacity: 0.5;
+    transform: none !important;
+    cursor: default;
+    background-color: #f8f9fa;
   }
 </style>

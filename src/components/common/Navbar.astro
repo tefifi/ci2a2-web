@@ -42,7 +42,9 @@ const links = [
       </ul>
     </div>
   </div>
-</nav><style>
+</nav>
+
+<style>
   :root {
     --ufro-blue: #003767;
     --ufro-pink: #d63384;
@@ -53,8 +55,9 @@ const links = [
 
   #mainNav {
     transition: all 0.3s ease-in-out;
-    padding-top: 1rem;    /* Reduje un poco de 1.2 a 1 para que no sea tan gigante */
-    padding-bottom: 1rem; 
+    padding-top: 1rem;    /* 1rem = 16px */
+    padding-bottom: 1rem; /* 1rem = 16px */
+    /* Altura total aprox: 70px (logo) + 32px (padding) = 102px */
   }
   
   /* Efecto hover */
@@ -70,27 +73,26 @@ const links = [
     font-weight: 600;
   }
 
-  /* --- SOLUCIÓN DEL DESCUADRE --- */
+  /* --- AQUÍ ESTÁ EL AJUSTE --- */
   :global(body) {
-    /* Aumentado de 105px a 130px para dar aire al contenido */
-    padding-top: 130px; 
+    /* Ajustamos a 102px para que coincida EXACTO con la altura de la barra */
+    padding-top: 102px; 
+    /* Si aún ves una línea blanca milimétrica, prueba bajarlo a 100px */
   }
 
   /* Ajuste para móviles */
   @media (max-width: 991.98px) {
-    /* Ajustamos el padding del body en móvil porque la barra se achica */
     :global(body) {
-        padding-top: 100px;
+        /* En móvil la barra es más chica, bajamos el padding */
+        padding-top: 85px;
     }
 
     .navbar-brand img[alt="Logo UFRO"] { height: 35px; }
     .navbar-brand img[alt="Logo CI2A2"] { height: 50px; }
     
-    /* CORRECCIÓN: No se puede usar 'mx-2' dentro de CSS, se usa margin */
-    .navbar-brand .border-start { 
-        margin-left: 0.5rem !important; 
-        margin-right: 0.5rem !important; 
-        height: 35px !important; 
+    /* Márgenes para separar los logos en móvil */
+    .navbar-brand img.me-4 {
+        margin-right: 1rem !important;
     }
   }
 </style>
