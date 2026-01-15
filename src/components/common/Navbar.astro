@@ -7,8 +7,8 @@ const links = [
   { name: 'Publicaciones', href: '/publicaciones' },
 ];
 ---
-<nav class="navbar navbar-expand-lg navbar-dark bg-ufro fixed-top shadow" id="mainNav">
-  <div class="container">
+<nav class="navbar navbar-expand-lg navbar-dark bg-ufro fixed-top border-0" id="mainNav">
+    <div class="container">
     
     <a class="navbar-brand d-flex align-items-center py-0" href="/">
       
@@ -42,8 +42,7 @@ const links = [
       </ul>
     </div>
   </div>
-</nav>
-<style>
+</nav><style>
   :root {
     --ufro-blue: #003767;
     --ufro-pink: #d63384;
@@ -54,11 +53,11 @@ const links = [
 
   #mainNav {
     transition: all 0.3s ease-in-out;
-    padding-top: 1.2rem;   
-    padding-bottom: 1.2rem; 
+    padding-top: 1rem;    /* Reduje un poco de 1.2 a 1 para que no sea tan gigante */
+    padding-bottom: 1rem; 
   }
   
-  /* Efecto para que las letras cambien a rosado al pasar el mouse */
+  /* Efecto hover */
   .hover-pink {
     transition: color 0.2s, opacity 0.2s;
     opacity: 0.9;
@@ -68,17 +67,30 @@ const links = [
   .hover-pink:hover {
     color: var(--ufro-pink) !important;
     opacity: 1;
-    font-weight: 600; /* Se pone un poco más gruesa para resaltar */
+    font-weight: 600;
   }
 
+  /* --- SOLUCIÓN DEL DESCUADRE --- */
   :global(body) {
-    padding-top: 110px;
+    /* Aumentado de 105px a 130px para dar aire al contenido */
+    padding-top: 130px; 
   }
 
-  /* Ajuste para móviles: que los logos no se vean gigantes */
+  /* Ajuste para móviles */
   @media (max-width: 991.98px) {
+    /* Ajustamos el padding del body en móvil porque la barra se achica */
+    :global(body) {
+        padding-top: 100px;
+    }
+
     .navbar-brand img[alt="Logo UFRO"] { height: 35px; }
     .navbar-brand img[alt="Logo CI2A2"] { height: 50px; }
-    .navbar-brand .border-start { mx-2 !important; height: 35px !important; }
+    
+    /* CORRECCIÓN: No se puede usar 'mx-2' dentro de CSS, se usa margin */
+    .navbar-brand .border-start { 
+        margin-left: 0.5rem !important; 
+        margin-right: 0.5rem !important; 
+        height: 35px !important; 
+    }
   }
 </style>
