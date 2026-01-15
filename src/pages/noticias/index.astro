@@ -2,147 +2,254 @@
 import MainLayout from "../../layouts/MainLayout.astro";
 import { supabase } from "../../lib/supabase";
 
-// Consultamos las noticias ordenadas por fecha
-const { data: noticias } = await supabase
-    .from("noticias")
-    .select("*")
-    .order("fecha", { ascending: false })
-    .limit(3);
+// --- CONFIGURACIÓN DE PAGINACIÓN ---
+const NOTICIAS_POR_PAGINA = 6;
 
-const listadoNoticias = noticias || [];
+const paginaActual = parseInt(Astro.url.searchParams.get("pagina") || "1");
+const desde = (paginaActual - 1) * NOTICIAS_POR_PAGINA;
+const hasta = desde + NOTICIAS_POR_PAGINA - 1;
+
+// Consulta a la Base de Datos
+const {
+  data: noticias,
+  count,
+  error,
+} = await supabase
+  .from("noticias")
+  .select("*", { count: "exact" })
+  .order("fecha", { ascending: false })
+  .range(desde, hasta);
+
+const totalNoticias = count || 0;
+const totalPaginas = Math.ceil(totalNoticias / NOTICIAS_POR_PAGINA);
+const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
 ---
 
 <MainLayout title="Noticias">
-    <section
-        class="py-5 text-white position-relative overflow-hidden shadow-sm"
-        style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);"
-    >
-        <div class="container position-relative z-2">
-            <div class="col-lg-8">
-                <h6
-                    class="text-pink-light fw-bold text-uppercase ls-2 mb-2 animate-fade-in"
-                >
-                    Actualidad
-                </h6>
-                <h1 class="display-5 fw-bold mb-2">Noticias y Eventos</h1>
-                <p class="opacity-90 mb-0 lead small">
-                    Novedades e investigaciones del CI²A²
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-5 bg-light">
-        <div class="container">
-            <div class="row g-4">
-                {
-                    listadoNoticias.length > 0 ? (
-                        listadoNoticias.map((item) => (
-<div class="col-md-6 col-lg-4 card-container">
-    <div class="card h-100 border-0 shadow-sm hover-grow position-relative">
-        <div class="position-relative overflow-hidden" style="height: 200px;">
-            <img
-                src={item.image_url || "/img/placeholder-news.jpg"}
-                class="w-100 h-100 transition-img"
-                style={`object-fit: cover; object-position: center ${item.image_position || 50}%;`}
-                alt={item.titulo}
-            />
-            <div class="position-absolute top-0 start-0 m-3">
-                <span class="badge bg-fica shadow-sm">
-                    {item.categoria || "General"}
-                </span>
-            </div>
-        </div>
-        
-        <div class="card-body p-4 d-flex flex-column">
-            <small class="text-muted mb-2">
-                <i class="bi bi-calendar3 me-1" />
-                {item.fecha ? new Date(item.fecha).toLocaleDateString("es-CL") : "Sin fecha"}
-            </small>
-            
-            <h5 class="fw-bold mb-3 text-dark title-hover">
-                {item.titulo}
-            </h5>
-            
-            <p class="text-secondary small line-clamp-3 mb-4 flex-grow-1">
-                {item.bajada}
-            </p>
-
-            <a
-                href={`/noticias/${item.id}`}
-                class="btn btn-outline-fica rounded-pill btn-sm fw-bold align-self-start stretched-link mt-auto"
-            >
-                Leer completa
-            </a>
-        </div>
+  {/* --- ENCABEZADO --- */}
+  <section
+    class="py-5 text-white position-relative overflow-hidden shadow-sm"
+    style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);"
+  >
+    <div class="container position-relative z-2">
+      <div class="col-lg-8">
+        <h6 class="text-pink-light fw-bold text-uppercase ls-2 mb-2 animate-fade-in">
+          Actualidad
+        </h6>
+        <h1 class="display-5 fw-bold mb-2">Noticias y Eventos</h1>
+        <p class="opacity-90 mb-0 lead small">
+          Novedades e investigaciones del CI²A²
+        </p>
+      </div>
     </div>
-</div>
-                        ))
-                    ) : (
-                        <div class="col-12 text-center py-5">
-                            <div class="alert alert-light border shadow-sm d-inline-block px-5">
-                                <i class="bi bi-info-circle me-2" /> No hay
-                                noticias publicadas aún.
-                            </div>
-                        </div>
-                    )
-                }
+  </section>
+
+  <section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+      {/* --- GRID DE NOTICIAS --- */}
+      <div class="row g-4">
+        {
+          noticias && noticias.length > 0 ? (
+            noticias.map((item) => (
+              <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
+                <a
+                  href={`/noticias/${item.id}`}
+                  class="text-decoration-none w-100 card-link-wrapper"
+                >
+                  <article class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden modern-card bg-white">
+                    {/* IMAGEN (16:9) - SIN ETIQUETA */}
+                    <div
+                      class="position-relative overflow-hidden card-img-wrapper"
+                      style="aspect-ratio: 16/9;"
+                    >
+                      <img
+                        src={item.image_url || "/img/placeholder-news.jpg"}
+                        class="w-100 h-100 transition-img"
+                        style="object-fit: cover;"
+                        alt={item.titulo}
+                      />
+                    </div>
+
+                    {/* CONTENIDO */}
+                    <div class="card-body p-4 d-flex flex-column">
+                      {/* Fecha */}
+                      <div
+                        class="text-muted small fw-bold text-uppercase d-flex align-items-center gap-2 mb-2"
+                        style="font-size: 0.7rem;"
+                      >
+                        <i class="bi bi-calendar3 text-ufro opacity-75" />
+                        {item.fecha
+                          ? new Date(item.fecha).toLocaleDateString("es-CL", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })
+                          : "Sin fecha"}
+                      </div>
+
+                      {/* Título (Hover Azul) */}
+                      <h5
+                        class="fw-bold mb-3 text-dark lh-sm title-hover"
+                        style="font-size: 1.25rem;"
+                      >
+                        {item.titulo}
+                      </h5>
+
+                      {/* Bajada */}
+                      <p class="text-secondary small line-clamp-3 mb-4 flex-grow-1">
+                        {item.bajada}
+                      </p>
+
+                      {/* Botón "Leer completa" (ROSADO) */}
+                      <div class="mt-auto">
+                        <span class="btn btn-sm btn-leermas rounded-pill fw-bold px-4 py-2">
+                          Leer completa
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                </a>
+              </div>
+            ))
+          ) : (
+            <div class="col-12 text-center py-5">
+              <div class="alert alert-light border shadow-sm d-inline-block px-5">
+                <i class="bi bi-info-circle me-2" /> No hay noticias publicadas
+                aún.
+              </div>
             </div>
-        </div>
-    </section>
+          )
+        }
+      </div>
+
+      {/* --- PAGINACIÓN --- */}
+      {
+        totalPaginas > 1 && (
+          <nav class="mt-5 d-flex justify-content-center">
+            <ul class="pagination gap-2 align-items-center">
+              {/* Anterior */}
+              <li class={`page-item ${paginaActual === 1 ? "disabled" : ""}`}>
+                <a
+                  class="page-link rounded-circle text-dark shadow-sm d-flex align-items-center justify-content-center pagination-btn prev-btn"
+                  href={`?pagina=${paginaActual - 1}`}
+                  style="width: 45px; height: 45px;"
+                >
+                  <i class="bi bi-chevron-left small transition-icon" />
+                </a>
+              </li>
+
+              {/* Números */}
+              {paginasArray.map((pag) => (
+                <li class="page-item">
+                  <a
+                    class={`page-link rounded-circle shadow-sm fw-bold d-flex align-items-center justify-content-center pagination-btn ${pag === paginaActual ? "active-page text-white border-0" : "bg-white text-dark"}`}
+                    href={`?pagina=${pag}`}
+                    style={`width: 45px; height: 45px; ${pag === paginaActual ? "background-color: #003767 !important;" : ""}`}
+                  >
+                    {pag}
+                  </a>
+                </li>
+              ))}
+
+              {/* Siguiente */}
+              <li
+                class={`page-item ${paginaActual === totalPaginas ? "disabled" : ""}`}
+              >
+                <a
+                  class="page-link rounded-circle text-dark shadow-sm d-flex align-items-center justify-content-center pagination-btn next-btn"
+                  href={`?pagina=${paginaActual + 1}`}
+                  style="width: 45px; height: 45px;"
+                >
+                  <i class="bi bi-chevron-right small transition-icon" />
+                </a>
+              </li>
+            </ul>
+          </nav>
+        )
+      }
+    </div>
+  </section>
 </MainLayout>
 
 <style>
-    /* Colores */
-    .bg-fica { background-color: #d63384; }
-    .text-pink-light { color: #ff85c0; }
+  /* --- COLORES --- */
+  :root {
+    --ufro-blue: #003767;
+    --ufro-pink: #d63384;
+  }
+  .text-pink-light { color: #ff85c0; }
+  .text-ufro { color: var(--ufro-blue); }
+  .ls-2 { letter-spacing: 2px; }
 
-    /* Botón */
-    .btn-outline-fica {
-        color: #d63384;
-        border: 2px solid #d63384;
-        transition: all 0.3s ease;
-        z-index: 2; /* Asegura que el botón esté sobre el link estirado para estilo */
-    }
+  /* --- TARJETAS --- */
+  .modern-card {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  }
+  .card-link-wrapper:hover .modern-card {
+    transform: translateY(-6px);
+    /* Sombra ROSADA al levantar (Corregido) */
+    box-shadow: 0 15px 30px rgba(214, 51, 132, 0.15) !important; 
+  }
 
-    /* --- SOLUCIÓN DEFINITIVA: CLICK ÚNICO Y SIN VIBRACIÓN --- */
-    
-    /* La tarjeta base no se mueve al hover directo */
-    .hover-grow {
-        cursor: pointer;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        overflow: hidden;
-    }
+  /* Imagen Zoom */
+  .transition-img { transition: transform 0.6s ease; }
+  .card-link-wrapper:hover .transition-img { transform: scale(1.08); }
 
-    /* El efecto se dispara desde el contenedor padre (estático) */
-    .card-container:hover .hover-grow {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 24px rgba(214, 51, 132, 0.2) !important;
-    }
+  /* Título Azul al Hover */
+  .title-hover { transition: color 0.3s ease; }
+  .card-link-wrapper:hover .title-hover {
+    color: var(--ufro-blue) !important;
+    text-decoration: underline;
+  }
 
-    /* Forzamos que el link estirado sea siempre el tope del área de click */
-    .stretched-link {
-        z-index: 3;
-    }
+  /* --- BOTÓN LEER MÁS (ROSADO) --- */
+  .btn-leermas {
+    color: var(--ufro-pink);            /* Texto Rosado */
+    border: 1px solid var(--ufro-pink); /* Borde Rosado */
+    background: transparent;
+    transition: all 0.3s ease;
+  }
+  
+  /* Al pasar el mouse por la tarjeta, el botón se llena de ROSADO */
+  .card-link-wrapper:hover .btn-leermas {
+    background-color: var(--ufro-pink);
+    color: white;
+    box-shadow: 0 4px 10px rgba(214, 51, 132, 0.3); /* Sombra rosada */
+  }
 
-    /* Reactividad de imagen y texto */
-    .transition-img { transition: transform 0.5s ease; }
-    .card-container:hover .transition-img {
-        transform: scale(1.1);
-    }
+  /* --- PAGINACIÓN --- */
+  .pagination-btn {
+    border: 1px solid #dee2e6;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .pagination-btn:not(.active-page):not(.disabled):hover {
+    transform: translateY(-4px) scale(1.05);
+    border-color: var(--ufro-pink) !important;
+    color: var(--ufro-pink) !important;
+    box-shadow: 0 8px 15px rgba(214, 51, 132, 0.2) !important;
+  }
 
-    .title-hover { transition: color 0.3s ease; }
-    .card-container:hover .title-hover {
-        color: #d63384 !important;
-        text-decoration: underline;
-    }
+  .active-page {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(0, 55, 103, 0.4) !important;
+  }
 
-    /* Estilos de texto */
-    .ls-2 { letter-spacing: 2px; }
-    .line-clamp-3 {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
+  .prev-btn:hover .bi-chevron-left { transform: translateX(-3px); }
+  .next-btn:hover .bi-chevron-right { transform: translateX(3px); }
+
+  .page-item.disabled .pagination-btn {
+    opacity: 0.5;
+    cursor: default;
+    background-color: #f8f9fa;
+    transform: none !important;
+  }
+
+  /* Utilidades */
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 </style>

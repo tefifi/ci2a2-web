@@ -9,6 +9,7 @@ const paginaActual = parseInt(Astro.url.searchParams.get("pagina") || "1");
 const desde = (paginaActual - 1) * PROYECTOS_POR_PAGINA;
 const hasta = desde + PROYECTOS_POR_PAGINA - 1;
 
+
 // Consulta a la Base de Datos
 const {
   data: proyectos,
