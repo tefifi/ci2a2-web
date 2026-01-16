@@ -15,51 +15,77 @@ const { data: proyecto, error } = await supabase
 
 // Seguridad
 if (error || !proyecto) {
-    return Astro.redirect('/404');
+    return Astro.redirect("/404");
 }
 
-// Formatear fecha
-const fecha = (proyecto && proyecto.created_at) 
-    ? new Date(proyecto.created_at).toLocaleDateString("es-CL", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "Fecha no disponible";
+const getStatusStyle = (status: string) => {
+  if (!status) return "bg-light text-secondary border-secondary";
+  const s = status.toLowerCase();
+
+  // Usamos bg-opacity-25 para que el color de fondo "brille" sobre el azul marino
+  if (s.includes("curso") || s.includes("activo") || s.includes("desarrollo"))
+    return "bg-success bg-opacity-25 text-success border-success";
+  
+  if (s.includes("finalizado") || s.includes("terminado"))
+    return "bg-secondary bg-opacity-25 text-white border-secondary"; // Texto blanco para gris
+  
+  if (s.includes("plan") || s.includes("diseño"))
+    return "bg-warning bg-opacity-25 text-warning border-warning";
+  
+  return "bg-light text-secondary border-secondary";
+};
 ---
 
-
 <MainLayout title={proyecto?.title}>
-    <section class="bg-ufro text-white py-5 position-relative overflow-hidden">
+    {
+        /* --- CAMBIO: py-5 a py-4 para reducir altura, y d-flex para control vertical --- */
+    }
+    <section
+        class="text-white py-4 position-relative overflow-hidden d-flex align-items-center"
+        style="background: linear-gradient(to right, #003767 0%, #3e2b69 50%, #d63384 100%); min-height: 250px;"
+    >
         <div class="container position-relative z-2">
             <div class="row">
-                <div class="col-lg-8">
-                    <div class="d-inline-block mb-3">
+                <div class="col-lg-10">
+                    {/* Expandido a 10 para dar más aire horizontal al texto */}
+                    <a
+                        href="/proyectos"
+                        class="text-decoration-none small mb-3 d-inline-block back-link-gray"
+                    >
+                        <i class="bi bi-arrow-left me-1 transition-icon"></i> Volver
+                        al portafolio
+                    </a>
+
+                    <div class="d-flex align-items-center gap-2 mb-2">
                         <span
-                            class="badge bg-white text-ufro fw-bold px-3 py-2 shadow-sm rounded-pill"
+                            class="badge bg-pink text-white fw-bold px-3 py-1 shadow-sm rounded-pill small"
                         >
                             {proyecto?.area}
                         </span>
                         <span
-                            class={`badge ms-2 px-3 py-2 rounded-pill ${proyecto?.status === "En Curso" ? "bg-success" : "bg-secondary"}`}
+                            class={`badge ms-2 px-3 py-1 rounded-pill small border ${getStatusStyle(proyecto?.status)}`}
                         >
                             {proyecto?.status}
                         </span>
                     </div>
-                    <h1 class="display-4 fw-bold">{proyecto?.title}</h1>
-                    <p class="lead opacity-90 mt-3">{proyecto?.resumen}</p>
+
+                    {/* --- CAMBIO: h1 con tamaño responsivo dinámico --- */}
+                    <h1 class="responsive-title fw-bold mb-2">
+                        {proyecto?.title}
+                    </h1>
+
+                    <p class="lead opacity-90 small mb-0 max-width-text">
+                        {proyecto?.resumen}
+                    </p>
                 </div>
             </div>
         </div>
-        <i
-            class="bi bi-cpu position-absolute text-white opacity-10"
-            style="font-size: 20rem; right: -50px; top: -50px; transform: rotate(15deg);"
-        ></i>
     </section>
 
     <section class="py-5 bg-light-subtle">
         <div class="container">
             <div class="row g-5">
+                {/* COLUMNA IZQUIERDA: Ficha Técnica */}
                 <div class="col-lg-4">
                     <div
                         class="card border-0 shadow-sm mb-4 sticky-top"
@@ -81,15 +107,13 @@ const fecha = (proyecto && proyecto.created_at)
                             <ul class="list-unstyled mb-4">
                                 <li class="mb-3 d-flex align-items-start gap-3">
                                     <i
-                                        class="bi bi-calendar-check text-primary fs-5"
+                                        class="bi bi-calendar-check text-pink fs-5"
                                     ></i>
                                     <div>
                                         <span
                                             class="d-block fw-bold small text-uppercase text-muted"
                                             >Período</span
                                         >
-                                        {
-                                        }
                                         <span>
                                             {
                                                 proyecto?.fecha_inicio
@@ -99,9 +123,6 @@ const fecha = (proyecto && proyecto.created_at)
                                                           "es-CL",
                                                       )
                                                     : "Fecha por definir"
-                                            }
-
-                                            {
                                             }
                                             {
                                                 proyecto?.fecha_termino && (
@@ -120,8 +141,7 @@ const fecha = (proyecto && proyecto.created_at)
                                     </div>
                                 </li>
                                 <li class="mb-3 d-flex align-items-start gap-3">
-                                    <i class="bi bi-layers text-primary fs-5"
-                                    ></i>
+                                    <i class="bi bi-layers text-pink fs-5"></i>
                                     <div>
                                         <span
                                             class="d-block fw-bold small text-uppercase text-muted"
@@ -133,15 +153,17 @@ const fecha = (proyecto && proyecto.created_at)
                                 {
                                     proyecto?.link_externo && (
                                         <li class="mb-3 d-flex align-items-start gap-3">
-                                            <i class="bi bi-link-45deg text-primary fs-5" />
+                                            <i class="bi bi-link-45deg text-pink fs-5" />
                                             <div>
                                                 <span class="d-block fw-bold small text-uppercase text-muted">
                                                     Recurso Externo
                                                 </span>
                                                 <a
-                                                    href={proyecto?.link_externo}
+                                                    href={
+                                                        proyecto?.link_externo
+                                                    }
                                                     target="_blank"
-                                                    class="text-decoration-none text-break"
+                                                    class="text-decoration-none text-break link-pink"
                                                 >
                                                     Ver enlace
                                                 </a>
@@ -156,7 +178,7 @@ const fecha = (proyecto && proyecto.created_at)
                             <div class="d-grid">
                                 <a
                                     href="mailto:contacto.ci2a2@ufro.cl"
-                                    class="btn btn-outline-primary rounded-pill fw-bold"
+                                    class="btn btn-outline-pink rounded-pill fw-bold"
                                 >
                                     Consultar por este proyecto
                                 </a>
@@ -165,28 +187,27 @@ const fecha = (proyecto && proyecto.created_at)
                     </div>
                 </div>
 
+                {/* COLUMNA DERECHA: Descripción y Socios */}
                 <div class="col-lg-8">
                     <div class="bg-white p-5 rounded-4 shadow-sm content-box">
-                        <h3 class="fw-bold text-dark mb-4 border-bottom pb-3">
+                        <h3
+                            class="fw-bold text-dark mb-4 border-bottom pb-3 border-pink"
+                        >
                             Descripción del Proyecto
                         </h3>
 
-                        {/* Descripción HTML enriquecida */}
                         <div
                             class="rich-text"
                             set:html={proyecto?.description}
                         />
 
                         {
-                            /* --- SECCIÓN DE ALIANZAS --- */
-                        }
-                        {
-                            ((proyecto?.socios && proyecto?.socios.length > 0) ||
+                            ((proyecto?.socios &&
+                                proyecto?.socios.length > 0) ||
                                 (proyecto?.financiamiento &&
                                     proyecto?.financiamiento.length > 0)) && (
                                 <div class="mt-5 pt-4 border-top">
                                     <div class="row g-5">
-                                        {/* 1. COLUMNA SOCIOS */}
                                         {proyecto?.socios &&
                                             proyecto?.socios.length > 0 && (
                                                 <div class="col-md-6">
@@ -234,7 +255,6 @@ const fecha = (proyecto && proyecto.created_at)
                                                 </div>
                                             )}
 
-                                        {/* 2. COLUMNA FINANCIAMIENTO */}
                                         {proyecto?.financiamiento &&
                                             proyecto?.financiamiento.length >
                                                 0 && (
@@ -286,37 +306,161 @@ const fecha = (proyecto && proyecto.created_at)
                                 </div>
                             )
                         }
+
+                        {
+                            /* --- CAMBIO 3: Botón "Ver más proyectos" ahora es ROSADO (btn-outline-pink) --- */
+                        }
+                        <div
+                            class="mt-5 pt-4 border-top text-center d-flex justify-content-center"
+                        >
+                            <a
+                                href="/proyectos"
+                                class="btn btn-outline-pink rounded-pill px-5 py-2 fw-bold d-flex align-items-center gap-2 hover-scale"
+                            >
+                                Ver más proyectos <i class="bi bi-arrow-right"
+                                ></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="mt-4">
-                <a
-                    href="/proyectos"
-                    class="btn btn-link text-muted text-decoration-none px-0"
-                >
-                    <i class="bi bi-arrow-left me-1"></i> Volver al portafolio
-                </a>
             </div>
         </div>
     </section>
 </MainLayout>
 
 <style>
+    /* --- COLORES --- */
+    :root {
+        --ufro-blue: #003767;
+        --ufro-pink: #d63384;
+    }
     .bg-ufro {
-        background-color: #003767;
+        background-color: var(--ufro-blue);
     }
     .text-ufro {
-        color: #003767;
+        color: var(--ufro-blue);
+    }
+    .bg-pink {
+        background-color: var(--ufro-pink) !important;
+    }
+    .text-pink {
+        color: var(--ufro-pink) !important;
+    }
+    .border-pink {
+        border-color: var(--ufro-pink) !important;
+    }
+    .link-pink {
+        color: var(--ufro-pink);
+        transition: 0.2s;
+    }
+    .link-pink:hover {
+        color: #b02a6b;
+        text-decoration: underline;
     }
 
+    /* --- INTERACTIVIDAD BOTÓN VOLVER GRIS -> ROSADO --- */
+    .back-link-gray {
+        color: rgba(
+            255,
+            255,
+            255,
+            0.7
+        ); /* Gris claro inicial (para fondo oscuro) */
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    .back-link-gray:hover {
+        color: var(--ufro-pink); /* Hover Rosado */
+        transform: translateX(-5px); /* Movimiento izquierda */
+    }
+    .back-link-gray i {
+        display: inline-block;
+        transition: transform 0.3s ease;
+    }
+    .back-link-gray:hover i {
+        transform: scale(1.2);
+    }
+
+    /* --- BOTÓN ROSADO (Para Consultar y Ver Más) --- */
+    .btn-outline-pink {
+        color: var(--ufro-pink);
+        border: 2px solid var(--ufro-pink);
+        transition: all 0.3s ease;
+        background: transparent;
+    }
+    .btn-outline-pink:hover {
+        background-color: var(--ufro-pink);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(214, 51, 132, 0.3);
+    }
+
+    /* --- ANIMACIÓN ESCALA --- */
+    .hover-scale {
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+    .hover-scale:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(214, 51, 132, 0.2);
+    }
+
+    /* Control de tamaño dinámico para el título */
+    .responsive-title {
+        font-size: clamp(
+            1.8rem,
+            4vw,
+            2.8rem
+        ); /* Mínimo 1.8rem, máximo 2.8rem según el ancho */
+        line-height: 1.2;
+        max-width: 900px;
+    }
+
+    /* Limita el ancho del resumen para que no se estire demasiado */
+    .max-width-text {
+        max-width: 700px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* Opcional: limita a 2 líneas en el header si es muy largo */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+
+/* Estilo general para las píldoras sobre fondo oscuro */
+    .badge.small {
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.03em;
+        padding: 0.4em 0.9em !important;
+        border-radius: 50px;
+        
+        /* Grosor del borde para que se vea como en tus capturas */
+        border-width: 1.5px !important;
+        border-style: solid !important;
+
+        /* Efecto para que resalte sobre el fondo azul image_221943.png */
+        backdrop-filter: brightness(1.2) blur(4px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Corrección de color de texto para máxima legibilidad sobre fondo azul */
+    .text-success { color: #2ecc71 !important; } /* Un verde más brillante */
+    .text-warning { color: #f1c40f !important; } /* Un amarillo más sólido */
+    
+    /* Si el fondo es el azul marino sólido de la imagen */
+    section.bg-dark-blue {
+        background-color: #002147; /* O el color exacto de tu imagen image_221943.png */
+    }
+
+    /* --- ESTILOS TEXTO --- */
     .rich-text {
         color: #444;
         line-height: 1.8;
     }
     .rich-text h2,
     .rich-text h3 {
-        color: #003767;
+        color: var(--ufro-blue);
         font-weight: 700;
         margin-top: 2rem;
         margin-bottom: 1rem;
@@ -336,7 +480,7 @@ const fecha = (proyecto && proyecto.created_at)
         margin: 1rem 0;
     }
     .rich-text blockquote {
-        border-left: 4px solid #009fe3;
+        border-left: 4px solid var(--ufro-pink);
         padding-left: 1rem;
         font-style: italic;
         color: #666;
