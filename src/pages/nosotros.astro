@@ -1,48 +1,81 @@
 ---
-import MainLayout from '../layouts/MainLayout.astro';
-import { supabase } from '../lib/supabase';
-import PageHeader from '../components/common/PageHeader.astro';
+import MainLayout from "../layouts/MainLayout.astro";
+import { supabase } from "../lib/supabase";
 
-// Traemos a los colaboradores 
 const { data: equipo } = await supabase
-  .from('colaboradores')
-  .select('*')
-  .order('orden', { ascending: true }) 
-  .order('id', { ascending: true });
-
+    .from("colaboradores")
+    .select("*")
+    .order("orden", { ascending: true })
+    .order("id", { ascending: true });
 ---
 
 <MainLayout title="Nosotros">
-    
-    <PageHeader 
-        title="Nuestro Centro" 
-        description="Ciencia de Datos e Inteligencia Artificial desde La Araucanía" 
-    />
+    {/* --- HEADER --- */}
+    <section
+        class="py-5 text-white position-relative overflow-hidden shadow-sm"
+        style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);"
+    >
+        <div class="container position-relative z-2">
+            <div class="col-lg-8">
+        <h6 class="text-pink-light fw-bold text-uppercase ls-3 mb-2 animate-fade-in">
+          Sobre nosotros
+        </h6>
+                <h1 class="display-5 fw-bold mb-2">Nuestro Centro</h1>
+                <p class="opacity-90 mb-0 lead small">
+                    Ciencia de Datos e Inteligencia Artificial desde La
+                    Araucanía
+                </p>
+            </div>
+        </div>
+    </section>
 
-
-    <section class="py-5 bg-white">
-        <div class="container">
+    {/* --- MISIÓN / VISIÓN (Textos actualizados) --- */}
+    <section class="py-5 bg-white position-relative z-1">
+        <div class="container py-4">
             <div class="row g-5 align-items-center">
                 <div class="col-lg-6">
-                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1000" alt="Equipo UFRO" class="img-fluid rounded-4 shadow-sm">
+                    <img
+                        src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1000"
+                        alt="Equipo UFRO"
+                        class="img-fluid rounded-4 shadow-lg"
+                    />
                 </div>
                 <div class="col-lg-6">
                     <div class="mb-4">
-                        <h5 class="text-ufro fw-bold text-uppercase ls-1">Nuestra Misión</h5>
-                        <p class="text-muted">
-                            Liderar la investigación aplicada en Inteligencia Artificial con un enfoque inter y transdisciplinario, articulando las capacidades de la Universidad de La Frontera para resolver desafíos territoriales y nacionales.
+                        <h5 class="text-ufro fw-bold text-uppercase ls-1 mb-3">
+                            Nuestra Misión
+                        </h5>
+                        <p class="text-muted lead fs-6">
+                            Liderar la investigación aplicada en Inteligencia
+                            Artificial con un enfoque inter y
+                            transdisciplinario, articulando las capacidades de
+                            la Universidad de La Frontera para resolver desafíos
+                            territoriales y nacionales.
                         </p>
                     </div>
                     <div class="mb-4">
-                        <h5 class="text-ufro fw-bold text-uppercase ls-1">Nuestra Visión</h5>
-                        <p class="text-muted">
-                            Ser un referente nacional e internacional en IA aplicada, contribuyendo al desarrollo sostenible de La Araucanía a través de la transferencia tecnológica, la formación de capital humano avanzado y la vinculación con el entorno.
+                        <h5 class="text-ufro fw-bold text-uppercase ls-1 mb-3">
+                            Nuestra Visión
+                        </h5>
+                        <p class="text-muted lead fs-6">
+                            Ser un referente nacional e internacional en IA
+                            aplicada, contribuyendo al desarrollo sostenible de
+                            La Araucanía a través de la transferencia
+                            tecnológica, la formación de capital humano avanzado
+                            y la vinculación con el entorno.
                         </p>
                     </div>
                     <div>
-                        <h5 class="text-ufro fw-bold text-uppercase ls-1">Propósito</h5>
-                        <p class="text-muted mb-0">
-                            Alinear el desarrollo tecnológico con la Estrategia Regional de Desarrollo 2040, promoviendo la equidad territorial y la preservación del patrimonio mediante el uso ético de los datos.
+                        <h5
+                            class="text-gradient fw-bold text-uppercase ls-1 mb-3"
+                        >
+                            Propósito
+                        </h5>
+                        <p class="text-muted lead fs-6 mb-0">
+                            Alinear el desarrollo tecnológico con la Estrategia
+                            Regional de Desarrollo 2040, promoviendo la equidad
+                            territorial y la preservación del patrimonio
+                            mediante el uso ético de los datos.
                         </p>
                     </div>
                 </div>
@@ -50,59 +83,187 @@ const { data: equipo } = await supabase
         </div>
     </section>
 
-    <section class="py-5 bg-light-subtle">
-        <div class="container">
+    {/* --- EQUIPO --- */}
+    <section class="py-5 team-section-bg">
+        <div class="container pt-3">
             <div class="text-center mb-5">
                 <h2 class="fw-bold text-dark">Nuestro Equipo</h2>
-                <p class="text-muted">Investigadores y profesionales detrás del CI²A²</p>
+                <div
+                    class="mx-auto mt-2 mb-3 bg-gradient opacity-75"
+                    style="width: 60px; height: 4px; background: linear-gradient(to right, #003767, #d63384);"
+                >
+                </div>
+                <p class="text-muted">
+                    Investigadores y profesionales detrás del CI²A²
+                </p>
             </div>
 
             <div class="row g-4">
-                {equipo && equipo.length > 0 ? equipo.map((c) => (
-                    <div class="col-sm-6 col-lg-3">
-                        <div class="card h-100 border-0 shadow-sm text-center p-4 hover-up">
-                            <div class="mx-auto mb-3 position-relative">
-                                <img src={c.foto_url || `https://ui-avatars.com/api/?name=${c.nombre}&background=random`} 
-                                     class="rounded-circle object-fit-cover border border-3 border-white shadow-sm" 
-                                     style="width: 140px; height: 140px;" 
-                                     alt={c.nombre}>
-                            </div>
-                            <h5 class="fw-bold mb-1 text-dark">{c.nombre}</h5>
-                            <span class="badge bg-primary-subtle text-primary mb-3 rounded-pill px-3">{c.cargo}</span>
-                            <span class="small text ">{c.facultad}</span>
+                {
+                    equipo && equipo.length > 0 ? (
+                        equipo.map((c) => (
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="card h-100 border-0 shadow-sm text-center p-4 hover-up team-card bg-white rounded-4 border-top-gradient">
+                                    <div
+                                        class="mx-auto mb-3 position-relative overflow-hidden rounded-circle shadow-sm"
+                                        style="width: 140px; height: 140px;"
+                                    >
+                                        <img
+                                            src={
+                                                c.foto_url ||
+                                                `https://ui-avatars.com/api/?name=${c.nombre}&background=random`
+                                            }
+                                            class="w-100 h-100 object-fit-cover transition-img"
+                                            alt={c.nombre}
+                                        />
+                                    </div>
+                                    <h5 class="fw-bold mb-1 text-dark transition-text">
+                                        {c.nombre}
+                                    </h5>
+                                    <div>
+                                        <span class="badge badge-role mb-3 rounded-pill px-3 mt-2 fw-normal">
+                                            {c.cargo}
+                                        </span>
+                                    </div>
+                                    <span class="small text-muted d-block mb-2 fst-italic">
+                                        {c.facultad}
+                                    </span>
+                                    {c.bio && (
+                                        <p class="small text-muted mb-3 line-clamp-3 opacity-75">
+                                            {c.bio}
+                                        </p>
+                                    )}
+                                    <div class="d-flex justify-content-center gap-2 mt-auto">
+    
+    {/* BOTÓN CONTACTO (Pasa el nombre por la URL) */}
+    <a 
+        href={`/contacto?para=${encodeURIComponent(c.nombre)}`} 
+        class="btn btn-sm btn-light rounded-circle social-btn" 
+        title={`Contactar a ${c.nombre}`}
+    >
+        <i class="bi bi-chat-text-fill text-muted"></i>
+    </a>
 
-                            
-                            {c.bio && <p class="small text-muted mb-3 line-clamp-3">{c.bio}</p>}
-                            
-                            <div class="d-flex justify-content-center gap-2 mt-auto">
-                                {c.email && (
-                                    <a href={`mailto:${c.email}`} class="btn btn-sm btn-outline-secondary rounded-circle" title="Email">
-                                        <i class="bi bi-envelope-fill"></i>
-                                    </a>
-                                )}
-                                {c.linkedin && (
-                                    <a href={c.linkedin} target="_blank" class="btn btn-sm btn-outline-primary rounded-circle" title="LinkedIn">
-                                        <i class="bi bi-linkedin"></i>
-                                    </a>
-                                )}
+    {/* BOTÓN LINKEDIN */}
+    {c.linkedin && (
+        <a href={c.linkedin} target="_blank" class="btn btn-sm btn-light rounded-circle social-btn" title="LinkedIn">
+            <i class="bi bi-linkedin text-muted"></i>
+        </a>
+    )}
+</div>
+                                </div>
                             </div>
+                        ))
+                    ) : (
+                        <div class="col-12 text-center py-5">
+                            <p class="text-muted">Cargando equipo...</p>
                         </div>
-                    </div>
-                )) : (
-                    <div class="col-12 text-center py-5">
-                        <p class="text-muted">Cargando equipo...</p>
-                    </div>
-                )}
+                    )
+                }
             </div>
         </div>
     </section>
 
     <style>
-        .bg-ufro { background-color: #003767; }
-        .text-ufro { color: #003767; }
-        .ls-1 { letter-spacing: 1px; font-size: 0.85rem; }
-        .hover-up { transition: transform 0.3s; }
-        .hover-up:hover { transform: translateY(-5px); }
-        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        :root {
+            --ufro-blue: #003767;
+            --ufro-pink: #d63384;
+            --ufro-blue-soft: rgba(0, 55, 103, 0.05);
+        }
+        .text-ufro {
+            color: var(--ufro-blue);
+        }
+        .text-pink {
+            color: var(--ufro-pink);
+        }
+        .text-pink-light {
+            color: #ff85c0;
+        }
+        .ls-1 {
+            letter-spacing: 1px;
+            font-size: 0.85rem;
+        }
+        .ls-2 {
+            letter-spacing: 2px;
+            font-size: 0.75rem;
+        }
+
+        .text-gradient {
+            background: linear-gradient(
+                45deg,
+                var(--ufro-blue),
+                var(--ufro-pink)
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .team-section-bg {
+            background: linear-gradient(
+                to bottom,
+                #ffffff 0%,
+                var(--ufro-blue-soft) 100%
+            );
+        }
+
+        .badge-role {
+            background-color: var(--ufro-blue);
+            color: #ffffff !important;
+            box-shadow: 0 4px 6px rgba(0, 55, 103, 0.2);
+            letter-spacing: 0.5px;
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;
+        }
+
+        .border-top-gradient {
+            border-top: 4px solid var(--ufro-blue);
+        }
+
+        /* --- SOMBRA ROSADA --- */
+        .hover-up:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(214, 51, 132, 0.25) !important;
+        }
+
+        .transition-img {
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .team-card:hover .transition-img {
+            transform: scale(1.15);
+        }
+
+        .transition-text {
+            transition: color 0.3s ease;
+        }
+        .team-card:hover .transition-text {
+            color: var(--ufro-blue) !important;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        .social-btn {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #eee;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .social-btn:hover {
+            transform: scale(1.2);
+            background-color: var(--ufro-pink);
+            border-color: var(--ufro-pink);
+        }
+        .social-btn:hover i {
+            color: white !important;
+        }
+
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
     </style>
 </MainLayout>

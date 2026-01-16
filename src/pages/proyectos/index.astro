@@ -10,6 +10,8 @@ const desde = (paginaActual - 1) * PROYECTOS_POR_PAGINA;
 const hasta = desde + PROYECTOS_POR_PAGINA - 1;
 
 
+
+
 // Consulta a la Base de Datos
 const {
   data: proyectos,
@@ -31,7 +33,7 @@ const getStatusStyle = (status: any) => {
   if (!status) return "bg-light text-secondary border-secondary";
   const s = status.toLowerCase();
 
-  if (s.includes("curso") || s.includes("activo"))
+  if (s.includes("curso") || s.includes("activo") || s.includes("desarrollo"))
     return "bg-success bg-opacity-10 text-success border-success";
   if (s.includes("finalizado") || s.includes("terminado"))
     return "bg-secondary bg-opacity-10 text-secondary border-secondary";
