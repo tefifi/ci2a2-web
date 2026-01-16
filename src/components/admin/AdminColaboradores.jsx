@@ -2,12 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import styles from './AdminGlobal.module.css';
 
-// --- COMPONENTE AVATAR MEJORADO (CON DRAG & DROP Y PASTE) ---
+// --- COMPONENTE AVATAR MEJORADO (Drag & Drop + Paste) ---
 const AvatarUpload = ({ image, onUpload, onRemove, subiendo }) => {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
 
-    // 1. Manejo de PEGAR imagen (Ctrl+V)
+    // Manejo de PEGAR imagen (Ctrl+V)
     useEffect(() => {
         const handlePaste = (e) => {
             if (e.clipboardData.items.length > 0) {
@@ -18,48 +18,29 @@ const AvatarUpload = ({ image, onUpload, onRemove, subiendo }) => {
                 }
             }
         };
-        // Escuchamos el evento paste en toda la ventana cuando este componente está montado
         window.addEventListener('paste', handlePaste);
         return () => window.removeEventListener('paste', handlePaste);
     }, [onUpload]);
 
-    // 2. Manejadores de ARRASTRAR (Drag & Drop)
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
-
-    const handleDragLeave = (e) => {
-        e.preventDefault();
-        setIsDragging(false);
-    };
-
-    const handleDrop = (e) => {
-        e.preventDefault();
-        setIsDragging(false);
-        const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) {
-            onUpload(file);
-        }
-    };
-
     return (
         <div className="d-flex flex-column align-items-center justify-content-center h-100">
             <div 
-                // Clases dinámicas: si arrastras, se pone azul (border-primary) y fondo suave
                 className={`position-relative rounded-circle shadow-sm d-flex align-items-center justify-content-center transition-all overflow-hidden border border-2 
                 ${isDragging ? 'border-primary bg-primary-subtle' : 'bg-white'}`}
                 style={{ 
                     width: '160px', 
                     height: '160px', 
                     cursor: image ? 'default' : 'pointer',
-                    borderColor: isDragging ? '#0d6efd' : '#f0f0f0' // Refuerzo visual
+                    borderColor: isDragging ? '#0d6efd' : '#f0f0f0'
                 }}
-                // Eventos de Drag & Drop
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                // Click para abrir selector clásico
+                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+                onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                    const file = e.dataTransfer.files[0];
+                    if (file && file.type.startsWith('image/')) onUpload(file);
+                }}
                 onClick={() => !image && fileInputRef.current.click()}
             >
                 {subiendo ? (
@@ -68,10 +49,9 @@ const AvatarUpload = ({ image, onUpload, onRemove, subiendo }) => {
                     <img src={image} className="w-100 h-100 object-fit-cover" alt="Perfil" />
                 ) : (
                     <div className={`text-center transition-all ${isDragging ? 'text-primary' : 'text-secondary opacity-50'}`}>
-                        {/* El ícono cambia si estás arrastrando algo encima */}
                         <i className={`bi ${isDragging ? 'bi-cloud-upload-fill' : 'bi-camera-fill'} display-4`}></i>
                         <div className="small fw-bold mt-1">
-                            {isDragging ? 'SOLTAR AQUÍ' : 'SUBIR FOTO'}
+                            {isDragging ? 'SOLTAR' : 'SUBIR FOTO'}
                         </div>
                     </div>
                 )}
@@ -86,7 +66,7 @@ const AvatarUpload = ({ image, onUpload, onRemove, subiendo }) => {
                     </button>
                 ) : (
                     <span className="text-muted small fst-italic" style={{fontSize: '0.8rem'}}>
-                        Click en el círculo
+                        Arrastra, pega o haz clic
                     </span>
                 )}
             </div>
@@ -107,6 +87,14 @@ export default function AdminColaboradores() {
 
     useEffect(() => { fetchColaboradores(); }, []);
 
+    // Limpieza automática mensaje
+    useEffect(() => {
+        if (mensaje) {
+            const timer = setTimeout(() => setMensaje(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [mensaje]);
+
     const fetchColaboradores = async () => {
         try { 
             const { data } = await supabase.from('colaboradores').select('*').order('id', { ascending: true }); 
@@ -122,7 +110,7 @@ export default function AdminColaboradores() {
             const url = await uploadImage(file); 
             setFormData(prev => ({ ...prev, foto_url: url })); 
         } catch (error) { 
-            alert(error.message); 
+            setMensaje({ tipo: 'danger', texto: error.message }); 
         } finally { 
             setSubiendo(false); 
         }
@@ -135,17 +123,19 @@ export default function AdminColaboradores() {
             if (idEdicion) {
                 const { error } = await supabase.from('colaboradores').update(datosEnvio).eq('id', idEdicion);
                 if (error) throw error;
-                setMensaje({ tipo: 'success', texto: 'Actualizado correctamente' });
+                setMensaje({ tipo: 'success', texto: '¡Colaborador actualizado correctamente!' });
             } else {
                 const { error } = await supabase.from('colaboradores').insert([datosEnvio]);
                 if (error) throw error;
-                setMensaje({ tipo: 'success', texto: 'Añadido correctamente' });
+                setMensaje({ tipo: 'success', texto: '¡Colaborador añadido con éxito!' });
             }
             setFormData({ nombre: '', cargo: '', facultad: '', email: '', bio: '', foto_url: '', linkedin: '' });
             setIdEdicion(null);
             fetchColaboradores();
             document.getElementById('form-top')?.scrollIntoView({ behavior: 'smooth' });
-        } catch (error) { setMensaje({ tipo: 'danger', texto: error.message }); }
+        } catch (error) { 
+            setMensaje({ tipo: 'danger', texto: error.message }); 
+        }
     };
 
     const cargarDatosParaEditar = (c) => {
@@ -174,26 +164,26 @@ export default function AdminColaboradores() {
 
     return (
         <div className="container py-4">
-            {/* TÍTULO */}
             <h2 className={`mb-4 ${styles.titulo}`}>Gestión de Colaboradores</h2>            
             
             {mensaje && (
-                <div className={`alert alert-${mensaje.tipo} alert-dismissible fade show`}>
+                <div className={`alert alert-${mensaje.tipo} alert-dismissible fade show shadow-sm border-0`}>
+                    <i className={`bi ${mensaje.tipo === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2`}></i>
                     {mensaje.texto}
                     <button className="btn-close" onClick={() => setMensaje(null)}></button>
                 </div>
             )}
 
             <div className="row g-4 align-items-stretch">
-                {/* FORMULARIO */}
+                {/* --- FORMULARIO (IZQUIERDA) --- */}
                 <div className="col-lg-8">
-                    <div className="card shadow-sm border-0 bg-white" id="form-top">
+                    <div className="card shadow-sm border-0 bg-white h-100" id="form-top">
                         <div className="card-body p-4">
                             
-                            {/* ENCABEZADO TIPO ADMIN NOTICIAS */}
+                            {/* ENCABEZADO UNIFICADO */}
                             <h5 className="card-title mb-4 fw-bold text-dark border-bottom pb-2">
-                                <i className={`bi ${idEdicion ? 'bi-pencil-square' : 'bi-plus-circle'} me-2`} style={{ color: '#003767' }}></i>
-                                {idEdicion ? 'Editar' : 'Nuevo'} Integrante
+                                <i className={`bi ${idEdicion ? 'bi-pencil-square' : 'bi-person-plus-fill'} me-2`} style={{ color: '#003767' }}></i>
+                                {idEdicion ? 'Editar Integrante' : 'Nuevo Integrante'}
                             </h5>
                             
                             <form onSubmit={handleSubmit}>
@@ -209,27 +199,27 @@ export default function AdminColaboradores() {
                                     <div className="col-md-8">
                                         <div className="row g-3">
                                             <div className="col-12">
-                                                <label className="form-label small fw-bold">Nombre Completo <span className="text-danger">*</span></label>
+                                                <label className="form-label small fw-bold text-secondary">Nombre Completo <span className="text-danger">*</span></label>
                                                 <input type="text" className="form-control" name="nombre" required value={formData.nombre} onChange={handleChange} placeholder="Ej. Dra. Ana Pérez" />
                                             </div>
                                             <div className="col-12">
-                                                <label className="form-label small fw-bold">Cargo / Rol <span className="text-danger">*</span></label>
+                                                <label className="form-label small fw-bold text-secondary">Cargo / Rol <span className="text-danger">*</span></label>
                                                 <input type="text" className="form-control" name="cargo" required value={formData.cargo} onChange={handleChange} placeholder="Ej. Investigadora Principal" />
                                             </div>
                                             <div className="col-md-12">
-                                                <label className="form-label small fw-bold">Facultad</label>
+                                                <label className="form-label small fw-bold text-secondary">Facultad</label>
                                                 <input type="text" className="form-control" name="facultad" value={formData.facultad} onChange={handleChange} placeholder="Ej. Fac. de Ingeniería y Ciencias" />
                                             </div>
                                             <div className="col-md-6">
-                                                <label className="form-label small fw-bold">Email</label>
+                                                <label className="form-label small fw-bold text-secondary">Email</label>
                                                 <input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} placeholder="correo@institucion.cl" />
                                             </div>
                                             <div className="col-md-6">
-                                                <label className="form-label small fw-bold">LinkedIn (URL)</label>
+                                                <label className="form-label small fw-bold text-secondary">LinkedIn (URL)</label>
                                                 <input type="url" className="form-control" name="linkedin" value={formData.linkedin} onChange={handleChange} placeholder="https://linkedin.com/in/..." />
                                             </div>
                                             <div className="col-12">
-                                                <label className="form-label small fw-bold">Breve Biografía</label>
+                                                <label className="form-label small fw-bold text-secondary">Breve Biografía</label>
                                                 <textarea className="form-control" name="bio" rows="3" value={formData.bio} onChange={handleChange} placeholder="Descripción corta del perfil profesional..."></textarea>
                                             </div>
                                         </div>
@@ -237,7 +227,6 @@ export default function AdminColaboradores() {
                                 </div>
 
                                 <div className="mt-4 d-flex gap-2 justify-content-end border-top pt-3">
-                                    {/* BOTONES UNIFICADOS CON ADMIN PROYECTOS */}
                                     <button 
                                         type="submit" 
                                         className="btn px-4 fw-bold text-white shadow-sm"
@@ -265,17 +254,22 @@ export default function AdminColaboradores() {
                     </div>
                 </div>
 
-                {/* LISTADO ESTILO ADMIN NOTICIAS */}
+                {/* --- HISTORIAL / LISTA (DERECHA) --- */}
                 <div className="col-lg-4 d-flex flex-column">
                     <div className="card shadow-sm border-0 bg-white h-100 d-flex flex-column" style={{minHeight: '0'}}>
+                        
+                        {/* HEADER UNIFICADO */}
                         <div className="card-header bg-white border-bottom py-3">
-                            <h6 className="mb-0 fw-bold text-dark">Equipo Actual ({listaColaboradores.length})</h6>
+                            <h6 className="mb-0 fw-bold text-secondary">Equipo Actual ({listaColaboradores.length})</h6>
                         </div>
-                        <div className="card-body p-0 overflow-auto" style={{ maxHeight: '600px' }}>
-                            <div className="list-group list-group-flush">
+
+                        {/* BODY CON SCROLL IGUAL A BANNERS */}
+                        <div className="card-body p-0" style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                            <div className="list-group list-group-flush shadow-sm">
                                 {listaColaboradores.map(c => (
                                     <div 
                                         key={c.id} 
+                                        // Estilo activo al editar: Borde azul izquierdo y fondo suave
                                         className={`list-group-item d-flex align-items-center gap-3 p-3 transition-all ${idEdicion === c.id ? 'bg-primary bg-opacity-10 border-primary' : ''}`}
                                         style={idEdicion === c.id ? {borderLeft: '4px solid #0d6efd'} : {}}
                                     >
@@ -291,14 +285,13 @@ export default function AdminColaboradores() {
                                             <small className="text-muted" style={{fontSize: '0.8rem'}}>{c.cargo}</small>
                                         </div>
                                         <div>
-                                            {/* ICONOS UNIFICADOS (LÁPIZ Y BASURERO) */}
                                             <button onClick={() => cargarDatosParaEditar(c)} className="btn btn-sm btn-light text-primary me-1" title="Editar"><i className="bi bi-pencil"></i></button>
                                             <button onClick={() => handleDelete(c.id)} className="btn btn-sm btn-light text-danger" title="Eliminar"><i className="bi bi-trash"></i></button>
                                         </div>
                                     </div>
                                 ))}
                                 {listaColaboradores.length === 0 && (
-                                    <div className="text-center p-5 text-muted small">No hay integrantes.</div>
+                                    <div className="text-center p-5 text-muted small">No hay integrantes registrados.</div>
                                 )}
                             </div>
                         </div>

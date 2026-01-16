@@ -72,8 +72,17 @@ export default function AdminNoticias() {
     const [formData, setFormData] = useState({ titulo: '', bajada: '', cuerpo: '', fecha: '', image_url: '' });
     const [isEditing, setIsEditing] = useState(false);
     const [subiendo, setSubiendo] = useState(false);
+    const [mensaje, setMensaje] = useState(null); // Feedback message state
 
     useEffect(() => { fetchNoticias(); }, []);
+
+    // Clear feedback message automatically
+    useEffect(() => {
+        if (mensaje) {
+            const timer = setTimeout(() => setMensaje(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [mensaje]);
 
     const fetchNoticias = async () => {
         const { data } = await supabase.from('noticias').select('*').order('fecha', { ascending: false });
@@ -88,18 +97,26 @@ export default function AdminNoticias() {
             if (error) throw error;
             const { data } = supabase.storage.from('noticias-img').getPublicUrl(fileName);
             setFormData(prev => ({ ...prev, image_url: data.publicUrl }));
-        } catch (e) { alert("Error al subir imagen"); } finally { setSubiendo(false); }
+        } catch (e) { setMensaje({ tipo: 'danger', texto: "Error al subir imagen" }); } finally { setSubiendo(false); }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (isEditing) {
-            await supabase.from('noticias').update(formData).eq('id', isEditing);
-        } else {
-            await supabase.from('noticias').insert([formData]);
+        try {
+            if (isEditing) {
+                await supabase.from('noticias').update(formData).eq('id', isEditing);
+                setMensaje({ tipo: 'success', texto: '¡Noticia actualizada correctamente!' });
+            } else {
+                await supabase.from('noticias').insert([formData]);
+                setMensaje({ tipo: 'success', texto: '¡Noticia creada correctamente!' });
+            }
+            resetForm();
+            fetchNoticias();
+            // Scroll to top to see message
+            document.getElementById('form-top')?.scrollIntoView({ behavior: 'smooth' });
+        } catch (error) {
+            setMensaje({ tipo: 'danger', texto: "Error al guardar la noticia" });
         }
-        resetForm();
-        fetchNoticias();
     };
 
     const resetForm = () => {
@@ -110,6 +127,7 @@ export default function AdminNoticias() {
     const cargarEdicion = (item) => {
         setFormData(item);
         setIsEditing(item.id);
+        document.getElementById('form-top')?.scrollIntoView({ behavior: 'smooth' });
     };
 
     const handleDelete = async (id) => {
@@ -121,9 +139,19 @@ export default function AdminNoticias() {
     return (
         <div className={styles.contenedor}>
             <h2 className={`mb-4 ${styles.titulo}`}>Gestión de Noticias</h2>
+
+            {/* Feedback Message */}
+            {mensaje && (
+                <div className={`alert alert-${mensaje.tipo} alert-dismissible fade show shadow-sm border-0`}>
+                    <i className={`bi ${mensaje.tipo === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2`}></i>
+                    {mensaje.texto}
+                    <button className="btn-close" onClick={() => setMensaje(null)}></button>
+                </div>
+            )}
+
             <div className="row g-4">
                 <div className="col-lg-8">
-                    <form onSubmit={handleSubmit} className="card p-3 shadow-sm border-0 h-100">
+                    <form onSubmit={handleSubmit} className="card p-3 shadow-sm border-0 h-100" id="form-top">
                         {/* Nuevo Encabezado Agregado */}
                         <h5 className="card-title mb-4 fw-bold text-dark border-bottom pb-2">
                             <i className={`bi ${isEditing ? 'bi-pencil-square' : 'bi-plus-circle'} me-2`} style={{ color: '#003767' }}></i>
@@ -171,29 +199,60 @@ export default function AdminNoticias() {
                     </form>
                 </div>
 
-                <div className="col-lg-4">
-                    <h5 className="mb-0 fw-bold text-secondary">Historial ({listaNoticias.length})</h5>
-                    <br />
-                    <div className="list-group shadow-sm">
-                        {listaNoticias.map(n => (
-                            <div 
-                                key={n.id} 
-                                className={`list-group-item d-flex gap-3 align-items-center p-3 transition-all ${isEditing === n.id ? 'bg-primary bg-opacity-10 border-primary' : ''}`}
-                                style={isEditing === n.id ? {borderLeft: '4px solid #0d6efd'} : {}}
-                            >
-                                <div style={{ width: '80px', height: '50px' }} className="rounded overflow-hidden bg-light flex-shrink-0">
-                                    {n.image_url ? <img src={n.image_url} className="w-100 h-100 object-fit-cover" alt="" /> : null}
-                                </div>
-                                <div className="flex-grow-1">
-                                    <h6 className={`mb-0 fw-bold ${isEditing === n.id ? 'text-primary' : ''}`}>{n.titulo}</h6>
-                                    <small className="text-muted">{n.fecha}</small>
-                                </div>
-                                <div>
-                                    <button onClick={() => cargarEdicion(n)} className="btn btn-sm btn-light text-primary me-1"><i className="bi bi-pencil"></i></button>
-                                    <button onClick={() => handleDelete(n.id)} className="btn btn-sm btn-light text-danger"><i className="bi bi-trash"></i></button>
-                                </div>
+                {/* COLUMNA DERECHA: HISTORIAL */}
+                <div className="col-lg-4 d-flex flex-column">
+                    <div className="card shadow-sm border-0 bg-white h-100 d-flex flex-column" style={{ minHeight: '0' }}>
+                        
+                        {/* --- HEADER UNIFICADO --- */}
+                        <div className="card-header bg-white border-bottom py-3">
+                            <h6 className="mb-0 fw-bold text-secondary">Historial ({listaNoticias.length})</h6>
+                        </div>
+
+                        {/* --- CUERPO CON SCROLL --- */}
+                        <div className="card-body p-0 overflow-auto" style={{ maxHeight: '600px' }}>
+                            <div className="list-group list-group-flush shadow-sm">
+                                {listaNoticias.map(n => (
+                                    <div 
+                                        key={n.id} 
+                                        // Lógica de iluminado azul
+                                        className={`list-group-item d-flex gap-3 align-items-center p-3 transition-all ${isEditing === n.id ? 'bg-primary bg-opacity-10 border-primary' : ''}`}
+                                        style={isEditing === n.id ? {borderLeft: '4px solid #0d6efd'} : {}}
+                                    >
+                                        {/* Imagen miniatura */}
+                                        <div style={{ width: '80px', height: '50px' }} className="rounded overflow-hidden bg-light flex-shrink-0">
+                                            {n.image_url ? <img src={n.image_url} className="w-100 h-100 object-fit-cover" alt="" /> : null}
+                                        </div>
+
+                                        {/* Textos */}
+                                        <div className="flex-grow-1">
+                                            <h6 className={`mb-0 fw-bold ${isEditing === n.id ? 'text-primary' : ''}`}>{n.titulo}</h6>
+                                            <small className="text-muted">{n.fecha}</small>
+                                        </div>
+
+                                        {/* Botones Unificados */}
+                                        <div>
+                                            <button 
+                                                onClick={() => cargarEdicion(n)} 
+                                                className="btn btn-sm btn-light text-primary me-1" 
+                                                title="Editar"
+                                            >
+                                                <i className="bi bi-pencil"></i>
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDelete(n.id)} 
+                                                className="btn btn-sm btn-light text-danger" 
+                                                title="Eliminar"
+                                            >
+                                                <i className="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {listaNoticias.length === 0 && (
+                                    <div className="text-center p-5 text-muted small">No hay noticias registradas.</div>
+                                )}
                             </div>
-                        ))}
+                        </div>
                     </div>
                 </div>
             </div>

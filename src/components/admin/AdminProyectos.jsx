@@ -28,40 +28,37 @@ const UploadZone = ({ image, onUpload, onRemove, subiendo, required }) => {
 
             <div
                 className={`flex-grow-1 position-relative rounded-3 d-flex flex-column align-items-center justify-content-center text-center transition-all overflow-hidden border ${isDragging ? 'border-primary bg-primary-subtle' : 'bg-light'}`}
-                style={{
-                    width: '100%',
-                    aspectRatio: '16/9',
-                    borderStyle: image ? 'solid' : 'dashed',
+                style={{ 
+                    minHeight: '200px', 
                     cursor: image ? 'default' : 'pointer',
-                    borderColor: isDragging ? '#0d6efd' : '#dee2e6'
+                    borderStyle: image ? 'solid' : 'dashed',
+                    borderColor: isDragging ? '#0d6efd' : '#dee2e6' 
                 }}
                 onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={(e) => {
-                    e.preventDefault();
-                    setIsDragging(false);
+                    e.preventDefault(); setIsDragging(false);
                     const file = e.dataTransfer.files[0];
                     if (file?.type.startsWith('image/')) onUpload(file);
                 }}
                 onClick={() => !image && fileInputRef.current.click()}
             >
-                <input type="file" hidden ref={fileInputRef} onChange={(e) => e.target.files[0] && onUpload(e.target.files[0])} accept="image/*" />
-
                 {subiendo ? (
-                    <div className="text-primary"><div className="spinner-border spinner-border-sm mb-2"></div><p className="small mb-0 fw-bold">Procesando...</p></div>
+                    <div className="text-primary"><div className="spinner-border spinner-border-sm mb-2"></div><p className="small mb-0 fw-bold">Subiendo...</p></div>
                 ) : image ? (
-                    <div className="w-100 h-100 position-relative">
-                        <img src={image} className="w-100 h-100 object-fit-cover" alt="Previsualización" />
-                        <div className="position-absolute top-0 end-0 m-2">
-                            <button type="button" className="btn btn-danger btn-sm shadow" onClick={(e) => { e.stopPropagation(); onRemove(); }}><i className="bi bi-trash"></i></button>
-                        </div>
-                    </div>
+                    <>
+                        <img src={image} className="w-100 h-100 object-fit-cover position-absolute top-0 start-0" alt="Portada" />
+                        <button type="button" className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 shadow-sm" onClick={(e) => { e.stopPropagation(); onRemove(); }}>
+                            <i className="bi bi-trash"></i>
+                        </button>
+                    </>
                 ) : (
-                    <div className="text-muted pe-none p-3">
-                        <i className="bi bi-card-image display-4 mb-2 opacity-50"></i>
-                        <p className="small fw-bold mb-0 text-dark">Arrastrar, Click o Pegar imagen</p>
+                    <div className="text-muted p-3">
+                        <i className={`bi ${isDragging ? 'bi-cloud-upload-fill text-primary' : 'bi-images opacity-25'} fs-1 mb-2`}></i>
+                        <p className="small fw-bold mb-0">Arrastra o pega imagen</p>
                     </div>
                 )}
+                <input type="file" hidden ref={fileInputRef} onChange={(e) => e.target.files[0] && onUpload(e.target.files[0])} accept="image/*" />
             </div>
         </div>
     );
@@ -101,6 +98,7 @@ export default function AdminProyectos() {
     const [listaProyectos, setListaProyectos] = useState([]);
     const [subiendoGlobal, setSubiendoGlobal] = useState(false);
     const [idEdicion, setIdEdicion] = useState(null);
+    const [mensaje, setMensaje] = useState(null); // Feedback visual
 
     const [formData, setFormData] = useState({
         title: '', resumen: '', description: '', area: '', status: '',
@@ -108,6 +106,14 @@ export default function AdminProyectos() {
     });
 
     useEffect(() => { fetchProyectos(); }, []);
+
+    // Limpiar mensaje automáticamente
+    useEffect(() => {
+        if (mensaje) {
+            const timer = setTimeout(() => setMensaje(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [mensaje]);
 
     const fetchProyectos = async () => {
         const { data } = await supabase.from('proyectos').select('*').order('id', { ascending: false });
@@ -118,14 +124,14 @@ export default function AdminProyectos() {
 
     const handleUploadPortada = async (file) => {
         try { setSubiendoGlobal(true); const url = await uploadImage(file); setFormData(prev => ({ ...prev, image_url: url })); }
-        catch (error) { alert("Error al subir imagen"); } finally { setSubiendoGlobal(false); }
+        catch (error) { setMensaje({ tipo: 'danger', texto: "Error al subir imagen" }); } finally { setSubiendoGlobal(false); }
     };
 
     const handleUploadItem = async (campo, index, file) => {
         try { setSubiendoGlobal(true); const url = await uploadImage(file); const nuevaLista = [...formData[campo]]; nuevaLista[index].imagen = url; setFormData(prev => ({ ...prev, [campo]: nuevaLista })); }
-        catch (error) { alert("Error al subir imagen"); } finally { setSubiendoGlobal(false); }
+        catch (error) { setMensaje({ tipo: 'danger', texto: "Error al subir imagen" }); } finally { setSubiendoGlobal(false); }
     };
-    
+
     const agregarItem = (campo) => { setFormData({ ...formData, [campo]: [...formData[campo], { nombre: '', imagen: '' }] }); };
     const eliminarItem = (campo, index) => { setFormData({ ...formData, [campo]: formData[campo].filter((_, i) => i !== index) }); };
     const updateItem = (campo, index, key, value) => { const nuevaLista = [...formData[campo]]; nuevaLista[index][key] = value; setFormData({ ...formData, [campo]: nuevaLista }); };
@@ -136,13 +142,15 @@ export default function AdminProyectos() {
         try {
             if (idEdicion) {
                 await supabase.from('proyectos').update(datosEnvio).eq('id', idEdicion);
+                setMensaje({ tipo: 'success', texto: '¡Proyecto actualizado correctamente!' });
             } else {
                 await supabase.from('proyectos').insert([datosEnvio]);
+                setMensaje({ tipo: 'success', texto: '¡Proyecto creado correctamente!' });
             }
             resetForm();
             fetchProyectos();
             document.getElementById('form-top')?.scrollIntoView({ behavior: 'smooth' });
-        } catch (error) { alert(error.message); }
+        } catch (error) { setMensaje({ tipo: 'danger', texto: error.message }); }
     };
 
     const resetForm = () => {
@@ -167,11 +175,20 @@ export default function AdminProyectos() {
         <div className={styles.contenedor}>
             <h2 className={`mb-4 ${styles.titulo}`}>Gestión de Proyectos</h2>
 
+            {/* ALERTA DE FEEDBACK */}
+            {mensaje && (
+                <div className={`alert alert-${mensaje.tipo} alert-dismissible fade show shadow-sm border-0`}>
+                    <i className={`bi ${mensaje.tipo === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2`}></i>
+                    {mensaje.texto}
+                    <button className="btn-close" onClick={() => setMensaje(null)}></button>
+                </div>
+            )}
+
             <div className="row g-4">
                 {/* COLUMNA IZQUIERDA: EDITOR */}
                 <div className="col-lg-8">
                     <form onSubmit={handleSubmit} className="card p-4 shadow-sm border-0 h-100" id="form-top">
-                        
+
                         <h5 className="card-title mb-4 fw-bold text-dark border-bottom pb-2">
                             <i className={`bi ${idEdicion ? 'bi-pencil-square' : 'bi-plus-circle'} me-2`} style={{ color: '#003767' }}></i>
                             {idEdicion ? 'Editar' : 'Nuevo'} Proyecto
@@ -283,29 +300,59 @@ export default function AdminProyectos() {
                 </div>
 
                 {/* COLUMNA DERECHA: HISTORIAL */}
-                <div className="col-lg-4">
-                    <h5 className="mb-0 fw-bold text-secondary">Historial ({listaProyectos.length})</h5>
-                    <br />
-                    <div className="list-group shadow-sm">
-                        {listaProyectos.map(p => (
-                            <div 
-                                key={p.id} 
-                                className={`list-group-item d-flex gap-3 align-items-center p-3 transition-all ${idEdicion === p.id ? 'bg-primary bg-opacity-10 border-primary' : ''}`}
-                                style={idEdicion === p.id ? {borderLeft: '4px solid #0d6efd'} : {}}
-                            >
-                                <div style={{ width: '80px', height: '50px' }} className="rounded overflow-hidden bg-light flex-shrink-0">
-                                    {p.image_url ? <img src={p.image_url} className="w-100 h-100 object-fit-cover" alt="" /> : null}
-                                </div>
-                                <div className="flex-grow-1">
-                                    <h6 className={`mb-0 fw-bold ${idEdicion === p.id ? 'text-primary' : ''}`}>{p.title}</h6>
-                                    <small className="text-muted">{p.fecha_inicio}</small>
-                                </div>
-                                <div>
-                                    <button onClick={() => cargarDatosParaEditar(p)} className="btn btn-sm btn-light text-primary me-1"><i className="bi bi-pencil"></i></button>
-                                    <button onClick={() => handleDelete(p.id)} className="btn btn-sm btn-light text-danger"><i className="bi bi-trash"></i></button>
-                                </div>
+                <div className="col-lg-4 d-flex flex-column">
+                    <div className="card shadow-sm border-0 bg-white h-100 d-flex flex-column" style={{ minHeight: '0' }}>
+
+                        {/* --- HEADER UNIFICADO --- */}
+                        <div className="card-header bg-white border-bottom py-3">
+                            <h6 className="mb-0 fw-bold text-secondary">Historial ({listaProyectos.length})</h6>
+                        </div>
+
+                        {/* --- BODY CON SCROLL --- */}
+                        <div className="card-body p-0 overflow-auto" style={{ maxHeight: '600px' }}>
+                            <div className="list-group list-group-flush shadow-sm">
+                                {listaProyectos.map(p => (
+                                    <div
+                                        key={p.id}
+                                        // Lógica de iluminado azul mantenida
+                                        className={`list-group-item d-flex gap-3 align-items-center p-3 transition-all ${idEdicion === p.id ? 'bg-primary bg-opacity-10 border-primary' : ''}`}
+                                        style={idEdicion === p.id ? { borderLeft: '4px solid #0d6efd' } : {}}
+                                    >
+                                        {/* Imagen (Mantiene tamaño original de proyectos 80x50) */}
+                                        <div style={{ width: '80px', height: '50px' }} className="rounded overflow-hidden bg-light flex-shrink-0">
+                                            {p.image_url ? <img src={p.image_url} className="w-100 h-100 object-fit-cover" alt="" /> : null}
+                                        </div>
+
+                                        {/* Textos */}
+                                        <div className="flex-grow-1">
+                                            <h6 className={`mb-0 fw-bold ${idEdicion === p.id ? 'text-primary' : ''}`}>{p.title}</h6>
+                                            <small className="text-muted">{p.fecha_inicio}</small>
+                                        </div>
+
+                                        {/* Botones Unificados */}
+                                        <div className="d-flex gap-1">
+                                            <button
+                                                onClick={() => cargarDatosParaEditar(p)}
+                                                className="btn btn-sm btn-light text-primary me-1"
+                                                title="Editar"
+                                            >
+                                                <i className="bi bi-pencil"></i>
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(p.id)}
+                                                className="btn btn-sm btn-light text-danger"
+                                                title="Eliminar"
+                                            >
+                                                <i className="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {listaProyectos.length === 0 && (
+                                    <div className="text-center p-5 text-muted small">No hay proyectos registrados.</div>
+                                )}
                             </div>
-                        ))}
+                        </div>
                     </div>
                 </div>
             </div>

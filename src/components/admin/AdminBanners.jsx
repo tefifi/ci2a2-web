@@ -165,7 +165,7 @@ export default function AdminBanners() {
             if (uploadError) throw uploadError;
             const { data } = supabase.storage.from('BANNERS').getPublicUrl(fileName);
             setFormData(prev => ({ ...prev, image_url: data.publicUrl }));
-        } catch (error) { 
+        } catch (error) {
             setMensaje({ tipo: 'danger', texto: "Error al subir: " + error.message });
         } finally { setSubiendo(false); }
     };
@@ -187,7 +187,7 @@ export default function AdminBanners() {
             fetchBanners();
             // Scroll arriba para ver el mensaje
             document.getElementById('form-top')?.scrollIntoView({ behavior: 'smooth' });
-        } catch (error) { 
+        } catch (error) {
             setMensaje({ tipo: 'danger', texto: "Error al guardar" });
         }
     };
@@ -209,7 +209,7 @@ export default function AdminBanners() {
                 <div className="col-lg-8">
                     <div className={`card shadow-sm border-0 h-100 ${styles.contenedor}`} id="form-top">
                         <div className="card-body p-4">
-                            
+
                             {/* CAMBIO VISUAL: Encabezado coherente con Noticias/Proyectos */}
                             <h5 className="card-title mb-4 fw-bold text-dark border-bottom pb-2">
                                 <i className={`bi ${idEdicion ? 'bi-pencil-square' : 'bi-plus-circle'} me-2`} style={{ color: '#003767' }}></i>
@@ -248,7 +248,7 @@ export default function AdminBanners() {
                                                 </button>
                                             )}
                                             {/* Botón azul UFRO */}
-                                            <button type="submit" className="btn text-white fw-bold px-5" style={{ backgroundColor: '#003767' }} disabled={subiendo}>
+                                            <button type="submit" className="btn text-white fw-bold px-5" style={{ backgroundColor: '#0d6efd' }} disabled={subiendo}>
                                                 {idEdicion ? 'Actualizar Banner' : 'Guardar en Carrusel'}
                                             </button>
                                         </div>
@@ -258,16 +258,18 @@ export default function AdminBanners() {
                         </div>
                     </div>
                 </div>
-
                 <div className="col-lg-4">
                     <div className={`card shadow-sm border-0 h-100 ${styles.contenedor}`}>
-                        <div className="card-body p-4">
-                            <div className="d-flex align-items-center mb-4 border-bottom pb-2">
-                                <i className="bi bi-clock-history me-2 text-secondary"></i>
-                                <h6 className="mb-0 fw-bold text-secondary">Historial (Arrastra para cambiar de posición)</h6>
-                            </div>
 
-                            <div className="vstack gap-3" style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                        {/* HEADER TIPO NOTICIAS/PROYECTOS */}
+                        <div className="card-header bg-white border-bottom py-3">
+                            <h6 className="mb-0 fw-bold text-secondary">
+                                Banners Actuales ({banners.length})
+                            </h6>
+                        </div>
+
+                        <div className="card-body p-0">
+                            <div className="vstack gap-3 p-3" style={{ maxHeight: '600px', overflowY: 'auto' }}>
                                 {banners.length > 0 ? (
                                     banners.map((b, index) => (
                                         <div
@@ -276,9 +278,12 @@ export default function AdminBanners() {
                                             onDragStart={(e) => handleDragStart(e, index)}
                                             onDragOver={(e) => e.preventDefault()}
                                             onDrop={(e) => handleOnDrop(e, index)}
-                                            // CAMBIO: Lógica de iluminado azul (border-primary) al editar
+                                            // LÓGICA DE ILUMINADO AZUL (UNIFICADA)
                                             className={`p-0 border rounded-3 bg-white transition-all ${idEdicion === b.id ? 'border-primary shadow' : 'shadow-sm'}`}
-                                            style={{ cursor: 'grab', borderLeft: idEdicion === b.id ? '4px solid #0d6efd' : undefined }}
+                                            style={{
+                                                cursor: 'grab',
+                                                borderLeft: idEdicion === b.id ? '4px solid #0d6efd' : undefined
+                                            }}
                                         >
                                             {/* INDICADOR DE ARRASTRE */}
                                             <div className="text-center bg-light border-bottom py-1" style={{ fontSize: '0.7rem', color: '#bbb' }}>
@@ -301,12 +306,15 @@ export default function AdminBanners() {
                                             <div className="p-3">
                                                 <div className="d-flex justify-content-between align-items-center">
                                                     <div className="overflow-hidden me-2" style={{ cursor: 'default' }}>
-                                                        <h6 className={`mb-0 small fw-bold text-truncate ${idEdicion === b.id ? 'text-primary' : 'text-dark'}`}>{b.title || 'Sin título'}</h6>
+                                                        <h6 className={`mb-0 small fw-bold text-truncate ${idEdicion === b.id ? 'text-primary' : 'text-dark'}`}>
+                                                            {b.title || 'Sin título'}
+                                                        </h6>
                                                         <span className="extra-small text-muted">Posición: {index + 1}</span>
                                                     </div>
 
                                                     <div className="d-flex gap-1" onMouseDown={(e) => e.stopPropagation()}>
-                                                        {/* CAMBIO VISUAL: Botones limpios e íconos estándar */}
+
+                                                        {/* Botón Visibilidad */}
                                                         <button
                                                             type="button"
                                                             onClick={(e) => { e.stopPropagation(); toggleVisibility(b.id, b.active); }}
@@ -316,6 +324,7 @@ export default function AdminBanners() {
                                                             <i className={`bi ${b.active ? 'bi-eye-fill' : 'bi-eye-slash-fill'}`}></i>
                                                         </button>
 
+                                                        {/* Botón Editar (Icono unificado: bi-pencil) */}
                                                         <button
                                                             type="button"
                                                             className="btn btn-sm btn-light border text-primary"
@@ -325,6 +334,7 @@ export default function AdminBanners() {
                                                             <i className="bi bi-pencil"></i>
                                                         </button>
 
+                                                        {/* Botón Eliminar (Icono unificado: bi-trash) */}
                                                         <button
                                                             type="button"
                                                             className="btn btn-sm btn-light border text-danger"
