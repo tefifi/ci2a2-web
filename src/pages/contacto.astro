@@ -1,0 +1,142 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+import ContactForm from "../components/ContactForm.jsx";
+---
+
+<MainLayout title="Contacto | CI2A2">
+    {/* --- HEADER (Minimalista y profesional) --- */}
+    <section
+        class="py-5 text-white position-relative"
+        style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);"
+    >
+        <div class="container position-relative z-2 py-4">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h6
+                        class="text-pink-light fw-bold text-uppercase ls-2 mb-2 animate-fade-in"
+                    >
+                        Vinculación y Colaboración
+                    </h6>
+                    <h1 class="display-4 fw-bold mb-0">Contacto</h1>
+                    <p class="opacity-90 mb-0 lead small">
+                        Conoce cómo comunicarte con nuestro equipo.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {/* --- CONTENIDO PRINCIPAL (Layout 2 columnas) --- */}
+    <section class="bg-light min-vh-100 py-5">
+        <div class="container">
+            <div class="row g-5">
+                {/* 1. COLUMNA IZQUIERDA: INFO INSTITUCIONAL (Estilo CMM) */}
+                <div class="col-lg-4">
+                    <div class="d-flex flex-column gap-4">
+                        {/* Tarjeta de Info */}
+                        <div
+                            class="bg-white p-4 rounded-4 shadow-sm border border-light"
+                        >
+                            <h5
+                                class="fw-bold mb-4"
+                                style="color: var(--ufro-blue);"
+                            >
+                                Información de Contacto
+                            </h5>
+
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="icon-box me-3">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                </div>
+                                <div>
+                                    <strong
+                                        class="d-block text-dark small text-uppercase"
+                                        >Dirección</strong
+                                    >
+                                    <span class="text-secondary small"
+                                        >Francisco Salazar 01145, Temuco<br
+                                        />Región de La Araucanía, Chile</span
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="icon-box me-3">
+                                    <i class="bi bi-envelope-fill"></i>
+                                </div>
+                                <div>
+                                    <strong
+                                        class="d-block text-dark small text-uppercase"
+                                        >Correo General</strong
+                                    >
+                                    <a
+                                        href="mailto:contacto.ci2a2@ufrontera.cl"
+                                        class="text-decoration-none text-secondary small"
+                                        >contacto.ci2a2@ufrontera.cl</a
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 2. COLUMNA DERECHA: FORMULARIO DINÁMICO */}
+                <div class="col-lg-8">
+                    {/* Componente React */}
+                    <ContactForm client:only="react" />
+                </div>
+            </div>
+        </div>
+    </section>
+</MainLayout>
+
+<style is:global>
+    /* --- VARIABLES --- */
+    :root {
+        --ufro-blue: #003767;
+        --ufro-pink: #d63384;
+        --ufro-pink-light: #ff85c0;
+    }
+
+    /* Utilidades Header */
+    .text-pink-light {
+        color: var(--ufro-pink-light);
+    }
+    .ls-3 {
+        letter-spacing: 3px;
+        font-size: 0.75rem;
+    }
+
+    /* Icon Box del Sidebar */
+    .icon-box {
+        width: 35px;
+        height: 35px;
+        background-color: rgba(0, 55, 103, 0.05); /* Azul muy suave */
+        color: var(--ufro-blue);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    /* Efecto Hover en enlaces del sidebar */
+    .hover-pink {
+        transition: color 0.2s;
+    }
+    .hover-pink:hover {
+        color: var(--ufro-pink) !important;
+    }
+
+    /* Transiciones generales */
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+
+    /* Ajustes de Formulario (Inputs limpios) */
+    .form-control:focus {
+        background-color: #fff !important;
+        box-shadow: 0 0 0 4px rgba(214, 51, 132, 0.1); /* Sombra rosada */
+        outline: none;
+    }
+</style>
