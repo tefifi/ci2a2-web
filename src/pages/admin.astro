@@ -4,7 +4,8 @@ import AdminLayout from "../layouts/AdminLayout.astro";
 import AdminNoticias from "../components/admin/AdminNoticias.jsx";
 import AdminProyectos from "../components/admin/AdminProyectos.jsx";
 import AdminColaboradores from "../components/admin/AdminColaboradores.jsx";
-import AdminPublicaciones from "../components/admin/AdminPublicaciones.jsx"; 
+import AdminPublicaciones from "../components/admin/AdminPublicaciones.jsx";
+import AdminAgenda from "../components/admin/AdminAgenda.jsx";
 import AdminBanners from "../components/admin/AdminBanners.jsx";
 ---
 
@@ -13,7 +14,7 @@ import AdminBanners from "../components/admin/AdminBanners.jsx";
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1 class="fw-bold text-ufro">Panel de Control</h1>
         </div>
-  
+
         <h2 class="mb-4">Administración CI2A2</h2>
 
         <ul class="nav nav-pills mb-4 gap-2" id="adminTabs" role="tablist">
@@ -56,6 +57,18 @@ import AdminBanners from "../components/admin/AdminBanners.jsx";
             <li class="nav-item" role="presentation">
                 <button
                     class="nav-link fw-bold rounded-pill px-4"
+                    id="agenda-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#agenda"
+                    type="button"
+                    role="tab"
+                >
+                    <i class="bi bi-calendar-event me-2"></i>Agenda
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button
+                    class="nav-link fw-bold rounded-pill px-4"
                     id="colaboradores-tab"
                     data-bs-toggle="pill"
                     data-bs-target="#colaboradores"
@@ -83,11 +96,7 @@ import AdminBanners from "../components/admin/AdminBanners.jsx";
             class="tab-content bg-white p-4 rounded shadow-sm border"
             id="adminTabContent"
         >
-            <div
-                class="tab-pane fade show active"
-                id="banners"
-                role="tabpanel"
-            >
+            <div class="tab-pane fade show active" id="banners" role="tabpanel">
                 <AdminBanners client:only="react" />
             </div>
 
@@ -101,6 +110,10 @@ import AdminBanners from "../components/admin/AdminBanners.jsx";
 
             <div class="tab-pane fade" id="colaboradores" role="tabpanel">
                 <AdminColaboradores client:only="react" />
+            </div>
+
+            <div class="tab-pane fade" id="agenda" role="tabpanel">
+                <AdminAgenda client:only="react" />
             </div>
 
             <div class="tab-pane fade" id="publicaciones" role="tabpanel">
