@@ -13,7 +13,7 @@ export const uploadImage = async (file) => {
     const filePath = `${fileName}`;
 
     const { data, error } = await supabase.storage
-        .from('fotos')
+        .from('evento')
         .upload(filePath, file, {
             upsert: true 
         });
@@ -24,7 +24,7 @@ export const uploadImage = async (file) => {
     }
 
     const { data: publicUrlData } = supabase.storage
-        .from('fotos')
+        .from('evento')
         .getPublicUrl(filePath);
 
     console.log("URL Generada:", publicUrlData.publicUrl);

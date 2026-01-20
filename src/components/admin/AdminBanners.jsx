@@ -194,7 +194,7 @@ export default function AdminBanners() {
 
     return (
         <div className="container py-4">
-            <h2 className={`mb-4 ${styles.titulo}`}>Panel de Banners</h2>
+            <h2 className={`mb-4 ${styles.titulo}`}>Gestión de Banners</h2>
 
             {/* NUEVO: Alerta de Feedback */}
             {mensaje && (
