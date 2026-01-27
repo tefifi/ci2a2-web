@@ -1,0 +1,285 @@
+---
+import { supabase } from "../../lib/supabase";
+
+// --- 1. OBTENCIÓN DE DATOS ---
+const { data: equipo } = await supabase.from("colaboradores").select("*");
+const { data: proyectos } = await supabase.from("proyectos").select("fecha_inicio, area");
+const { count: totalAlianzas } = await supabase.from("alianzas").select("*", { count: "exact", head: true });
+const { count: totalPublicaciones } = await supabase.from("publicaciones").select("*", { count: "exact", head: true });
+
+// --- 2. CONFIGURACIÓN ---
+const { data: configData } = await supabase.from("config_graficos").select("*");
+
+const config = (configData || []).reduce((acc, item) => {
+    acc[item.clave] = item.activo;
+    return acc;
+}, { 
+    stat_colaboradores: true, 
+    stat_proyectos: true, 
+    stat_alianzas: true, 
+    stat_papers: true, 
+    chart_roles: true, 
+    chart_carreras: true, 
+    chart_proyectos_anio: true, 
+    chart_areas: true 
+});
+
+// --- 3. PROCESAMIENTO DE DATOS ---
+const colaboradores = equipo || [];
+const listProyectos = proyectos || [];
+
+const totalEquipo = colaboradores.length;
+const totalProyectos = listProyectos.length;
+
+// A. ROLES
+const rolesMap = colaboradores.reduce((acc: any, curr) => {
+    let rol = (curr.cargo || "Sin definir").trim();
+    rol = rol.charAt(0).toUpperCase() + rol.slice(1).toLowerCase();
+    acc[rol] = (acc[rol] || 0) + 1;
+    return acc;
+}, {});
+
+// B. CARRERAS / PROFESIONES (MODIFICADO: Datos Reales)
+const carreraMap = colaboradores.reduce((acc: any, curr) => {
+    // Tomamos el valor directo de la base de datos
+    let carrera = (curr.profesion || "Sin definir").trim();
+    
+    // Normalizamos (Primera mayúscula, resto minúscula) para evitar duplicados visuales
+    // Ej: "INGENIERÍA" y "ingeniería" se contarán juntos.
+    if (carrera !== "Sin definir") {
+        carrera = carrera.charAt(0).toUpperCase() + carrera.slice(1);
+    }
+
+    acc[carrera] = (acc[carrera] || 0) + 1;
+    return acc;
+}, {});
+
+// C. PROYECTOS POR AÑO
+const proyAnioMap = listProyectos.reduce((acc: any, curr) => {
+    if (curr.fecha_inicio) {
+        const anio = new Date(curr.fecha_inicio).getFullYear().toString();
+        acc[anio] = (acc[anio] || 0) + 1;
+    }
+    return acc;
+}, {});
+
+// D. ÁREAS PROYECTOS
+const proyAreaMap = listProyectos.reduce((acc: any, curr) => {
+    const area = curr.area || 'Sin definir';
+    acc[area] = (acc[area] || 0) + 1;
+    return acc;
+}, {});
+
+// Preparar Arrays para el Cliente
+const rolesLabels = Object.keys(rolesMap);
+const rolesValues = Object.values(rolesMap);
+
+const carrerasLabels = Object.keys(carreraMap);
+const carrerasValues = Object.values(carreraMap);
+
+const anioLabels = Object.keys(proyAnioMap).sort(); 
+const anioValues = anioLabels.map(anio => proyAnioMap[anio]);
+
+const proyAreaLabels = Object.keys(proyAreaMap);
+const proyAreaValues = Object.values(proyAreaMap);
+---
+
+<section class="py-5 bg-light position-relative" id="stats-section">
+    <div class="container">
+        
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-dark">Radiografía del Centro</h2>
+            <div class="mx-auto mt-2 mb-3 bg-gradient opacity-75" style="width: 60px; height: 4px; background: linear-gradient(to right, #003767, #d63384);"></div>
+        </div>
+
+        {/* 1. CONTADORES */}
+        <div class="row g-4 text-center mb-5 justify-content-center">
+            {config.stat_colaboradores && (
+                <div class="col-6 col-md-3">
+                    <div class="p-3 bg-white rounded-4 shadow-sm h-100 border-bottom-blue">
+                        <h2 class="display-5 fw-bold text-ufro mb-0 counter" data-target={totalEquipo}>{totalEquipo}</h2>
+                        <p class="text-muted small fw-bold text-uppercase ls-1 mb-0">Colaboradores</p>
+                    </div>
+                </div>
+            )}
+            {config.stat_proyectos && (
+                <div class="col-6 col-md-3">
+                    <div class="p-3 bg-white rounded-4 shadow-sm h-100 border-bottom-pink">
+                        <h2 class="display-5 fw-bold text-pink mb-0 counter" data-target={totalProyectos}>{totalProyectos}</h2>
+                        <p class="text-muted small fw-bold text-uppercase ls-1 mb-0">Proyectos</p>
+                    </div>
+                </div>
+            )}
+            {config.stat_alianzas && (
+                <div class="col-6 col-md-3">
+                    <div class="p-3 bg-white rounded-4 shadow-sm h-100 border-bottom-blue">
+                        <h2 class="display-5 fw-bold text-ufro mb-0 counter" data-target={totalAlianzas}>{totalAlianzas}</h2>
+                        <p class="text-muted small fw-bold text-uppercase ls-1 mb-0">Alianzas</p>
+                    </div>
+                </div>
+            )}
+            {config.stat_papers && (
+                <div class="col-6 col-md-3">
+                    <div class="p-3 bg-white rounded-4 shadow-sm h-100 border-bottom-pink">
+                        <h2 class="display-5 fw-bold text-pink mb-0 counter" data-target={totalPublicaciones}>{totalPublicaciones}</h2>
+                        <p class="text-muted small fw-bold text-uppercase ls-1 mb-0">Papers</p>
+                    </div>
+                </div>
+            )}
+        </div>
+
+        {/* 2. GRÁFICOS */}
+        <div class="row g-4 justify-content-center">
+            
+            {/* Roles */}
+            {config.chart_roles && (
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                        <h6 class="fw-bold text-secondary text-uppercase small mb-3">Distribución por Roles</h6>
+                        <div class="chart-container"><canvas id="chartRoles"></canvas></div>
+                    </div>
+                </div>
+            )}
+
+            {/* Disciplinas / Carreras */}
+            {config.chart_carreras && (
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                        <h6 class="fw-bold text-secondary text-uppercase small mb-3">Multidiciplinario</h6>
+                        <div class="chart-container d-flex justify-content-center"><canvas id="chartCarreras"></canvas></div>
+                    </div>
+                </div>
+            )}
+
+            {/* Proyectos Año */}
+            {config.chart_proyectos_anio && (
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                        <h6 class="fw-bold text-secondary text-uppercase small mb-3">Proyectos Adjudicados (Año)</h6>
+                        <div class="chart-container"><canvas id="chartProyAnio"></canvas></div>
+                    </div>
+                </div>
+            )}
+
+            {/* Áreas Proyectos */}
+            {config.chart_areas && (
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                        <h6 class="fw-bold text-secondary text-uppercase small mb-3">Áreas de Investigación</h6>
+                        <div class="chart-container d-flex justify-content-center"><canvas id="chartProyAreas"></canvas></div>
+                    </div>
+                </div>
+            )}
+
+        </div>
+    </div>
+</section>
+
+<script is:inline src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script is:inline define:vars={{ rolesLabels, rolesValues, carrerasLabels, carrerasValues, anioLabels, anioValues, proyAreaLabels, proyAreaValues }}>
+    function initStatsAndCharts() {
+        console.log("--> Iniciando Charts <--");
+
+        const ufroBlue = "#003767";
+        const ufroPink = "#d63384";
+        // Paleta extendida para carreras, ya que pueden ser muchas variadas
+        const palette = [
+            ufroBlue, ufroPink, "#27ae60", "#f39c12", "#8e44ad", "#2c3e50", 
+            "#e74c3c", "#16a085", "#34495e", "#d35400", "#7f8c8d", "#c0392b"
+        ];
+
+        const createChart = (id, type, data, options) => {
+            const ctx = document.getElementById(id);
+            if (!ctx) return;
+            const existing = Chart.getChart(ctx);
+            if (existing) existing.destroy();
+            new Chart(ctx, { type, data, options });
+        };
+
+        // 1. CHART ROLES
+        if (rolesLabels.length > 0) {
+            createChart("chartRoles", "bar", {
+                labels: rolesLabels,
+                datasets: [{ 
+                    label: "Personas", 
+                    data: rolesValues, 
+                    backgroundColor: ufroBlue, 
+                    borderRadius: 4 
+                }]
+            }, {
+                indexAxis: "y", responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { display: false }, y: { grid: { display: false } } }
+            });
+        }
+
+        // 2. CHART CARRERAS (Doughnut)
+        if (carrerasLabels.length > 0) {
+            createChart("chartCarreras", "doughnut", {
+                labels: carrerasLabels,
+                datasets: [{ 
+                    data: carrerasValues, 
+                    backgroundColor: palette, 
+                    borderWidth: 0 
+                }]
+            }, {
+                responsive: true, maintainAspectRatio: false, cutout: "60%",
+                plugins: { 
+                    legend: { 
+                        position: "right", 
+                        labels: { boxWidth: 12, usePointStyle: true, font: { size: 10 } } 
+                    } 
+                }
+            });
+        }
+
+        // 3. CHART PROYECTOS AÑO
+        if (anioLabels.length > 0) {
+            createChart("chartProyAnio", "line", {
+                labels: anioLabels,
+                datasets: [{ 
+                    label: "Proyectos", 
+                    data: anioValues, 
+                    borderColor: ufroPink, 
+                    backgroundColor: "rgba(214, 51, 132, 0.1)", 
+                    fill: true, tension: 0.3 
+                }]
+            }, {
+                responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }
+            });
+        }
+
+        // 4. CHART PROYECTOS ÁREAS
+        if (proyAreaLabels.length > 0) {
+            createChart("chartProyAreas", "doughnut", {
+                labels: proyAreaLabels,
+                datasets: [{ 
+                    data: proyAreaValues, 
+                    backgroundColor: palette, 
+                    borderWidth: 0 
+                }]
+            }, {
+                responsive: true, maintainAspectRatio: false, cutout: "60%",
+                plugins: { legend: { position: "right", labels: { boxWidth: 12, usePointStyle: true, font: { size: 10 } } } }
+            });
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initStatsAndCharts);
+    } else {
+        initStatsAndCharts();
+    }
+    document.addEventListener('astro:page-load', initStatsAndCharts);
+</script>
+
+<style>
+    :root { --ufro-blue: #003767; --ufro-pink: #d63384; }
+    .text-ufro { color: var(--ufro-blue); }
+    .text-pink { color: var(--ufro-pink); }
+    .ls-1 { letter-spacing: 1px; font-size: 0.85rem; }
+    .border-bottom-blue { border-bottom: 4px solid var(--ufro-blue); }
+    .border-bottom-pink { border-bottom: 4px solid var(--ufro-pink); }
+    .chart-container { position: relative; height: 250px; width: 100%; min-height: 250px; }
+</style>
