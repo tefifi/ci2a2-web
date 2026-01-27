@@ -1,0 +1,60 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+import { supabase } from "../lib/supabase";
+import TransparenciaList from "../components/TransparenciaList.jsx";
+
+// Consulta de datos
+const { data: proyectos } = await supabase
+  .from("proyectos_adjudicados")
+  .select("*")
+  .order("anio", { ascending: false });
+---
+
+<MainLayout title="Transparencia | CI2A2">
+  
+  {/* --- 1. HEADER (Fondo degradado azul/rosa) --- */}
+  <section
+    class="py-5 text-white position-relative overflow-hidden shadow-sm"
+    style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);"
+  >
+    <div class="container position-relative z-2">
+      <div class="col-lg-8">
+        <h6 class="text-pink-light fw-bold text-uppercase ls-3 mb-2 animate-fade-in">
+          Institucional
+        </h6>
+        <h1 class="display-5 fw-bold mb-2">Transparencia</h1>
+        <p class="opacity-90 mb-0 lead small">
+          Acceso a la información pública.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* --- 2. SECCIÓN PRINCIPAL (Fondo gris claro) --- */}
+  <section class="bg-light py-5 min-vh-100">
+    <div class="container">
+      
+      {/* Título de la lista (Opcional: Si sientes que sobra, puedes borrar este bloque div 'row') */}
+      <div class="row mb-5">
+        <div class="col-lg-8">
+            <h2 class="fw-bold text-dark mb-2">Proyectos Adjudicados</h2>
+            <div style="width: 50px; height: 4px; background: #d63384; border-radius: 2px;"></div>
+            <p class="text-muted mt-3">
+                Listado oficial de iniciativas de investigación, desarrollo e innovación vigentes e históricas.
+            </p>
+        </div>
+      </div>
+      
+      {/* Componente de la Lista Interactiva */}
+      <TransparenciaList client:load iniciales={proyectos || []} />
+      
+    </div>
+  </section>
+
+</MainLayout>
+
+<style>
+    /* Estilos auxiliares para el Header si no están globales */
+    .text-pink-light { color: #ff85c0; }
+    .ls-3 { letter-spacing: 3px; }
+</style>
