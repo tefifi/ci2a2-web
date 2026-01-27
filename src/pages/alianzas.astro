@@ -1,0 +1,241 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+import { supabase } from "../lib/supabase";
+
+// 1. OBTENCIÓN DE DATOS
+let alianzas = [];
+const { data, error } = await supabase
+  .from("alianzas")
+  .select("*")
+  .order("nombre", { ascending: true });
+
+if (!error) alianzas = data || [];
+
+// 2. LÓGICA DE AGRUPACIÓN (LOGOS)
+const ordenSecciones = [
+  "Clientes",
+  "Alianzas",
+  "Universidades Socias",
+  "Ecosistema",
+];
+
+const normalizarCategoria = (valor: any) => {
+  if (!valor) return "Otras";
+  const v = valor.trim();
+  if (v === "Cliente") return "Clientes";
+  if (v === "Alianza") return "Alianzas";
+  if (v === "Universidad Socia") return "Universidades Socias";
+  return v;
+};
+
+const alianzasPorCategoria = alianzas.reduce((acc, item) => {
+  const rawCategoria = item.tipo_entidad || item.categoria || "Otras";
+  const categoria = normalizarCategoria(rawCategoria);
+
+  if (!acc[categoria]) acc[categoria] = [];
+  acc[categoria].push(item);
+  return acc;
+}, {});
+
+const categoriasAmostrar = [
+  ...ordenSecciones.filter((cat) => alianzasPorCategoria[cat]),
+  ...Object.keys(alianzasPorCategoria).filter(
+    (cat) => !ordenSecciones.includes(cat),
+  ),
+];
+
+// 3. LÓGICA PARA LA TABLA DE CONVENIOS (CORREGIDA)
+// Filtramos si tiene 'estado_convenio' (el tipo de convenio)
+const conveniosHistoricos = alianzas.filter(
+  (item) => item.estado_convenio && item.estado_convenio.trim() !== "",
+);
+
+// Ordenar por fecha de firma (descendente: más nuevo arriba)
+conveniosHistoricos.sort((a, b) => {
+  if (!a.fecha_firma) return 1;
+  if (!b.fecha_firma) return -1;
+  if (a.fecha_firma > b.fecha_firma) return -1;
+  if (a.fecha_firma < b.fecha_firma) return 1;
+  return 0;
+});
+---
+
+<MainLayout title="Nuestras Alianzas">
+  {/* HEADER ... (Igual que antes) */}
+  <section
+    class="py-5 text-white position-relative overflow-hidden shadow-sm"
+    style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);"
+  >
+    <div class="container position-relative z-2">
+      <div class="col-lg-8">
+        <h6 class="text-pink-light fw-bold text-uppercase ls-2 mb-2">
+          Red Global
+        </h6>
+        <h1 class="display-5 fw-bold mb-2">Nuestras Alianzas</h1>
+      </div>
+    </div>
+  </section>
+
+  {/* CONTENIDO PRINCIPAL */}
+  <section class="py-5 bg-white min-vh-100">
+    <div class="container py-2">
+      {/* 1. SECCIÓN DE LOGOS (Igual que antes) ... */}
+      {
+        alianzas.length === 0 ? (
+          <div class="text-center py-5">
+            <p>Cargando...</p>
+          </div>
+        ) : (
+          categoriasAmostrar.map((categoria) => (
+            <div class="mb-5 section-group">
+              <div class="mb-4">
+                <h2
+                  class="text-uppercase fw-bold text-ufro mb-1"
+                  style="font-size: 1.5rem;"
+                >
+                  {categoria}
+                </h2>
+                <div class="divider-pink" />
+              </div>
+              <div class="row row-cols-2 row-cols-md-8 row-cols-lg-5 g-4 align-items-center">
+                {alianzasPorCategoria[categoria].map((item: any) => (
+                  <div class="col">
+                    <a
+                      href={item.link_web || "#"}
+                      target={item.link_web ? "_blank" : "_self"}
+                      class="d-block p-1 partner-container h-100 d-flex align-items-center justify-content-center"
+                    >
+                      {item.logo_url ? (
+                        <img
+                          src={item.logo_url}
+                          alt={item.nombre}
+                          class="img-fluid logo-img"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span class="text-muted fw-bold">{item.nombre}</span>
+                      )}
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))
+        )
+      }
+
+      {/* --- 2. SECCIÓN TABLA DINÁMICA (CORREGIDA) --- */}
+      {
+        conveniosHistoricos.length > 0 && (
+          <div class="mt-5 pt-4 border-top">
+            <div class="mb-4">
+              <h2
+                class="text-uppercase fw-bold text-ufro mb-1"
+                style="font-size: 1.5rem; letter-spacing: 1px;"
+              >
+                Acuerdos
+              </h2>
+              <div class="divider-pink" />
+            </div>
+
+            <div class="table-responsive shadow-sm rounded border">
+              <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: #003767; color: white;">
+                  <tr>
+                    <th scope="col" class="py-3 ps-4">
+                      Tipo de Acuerdo
+                    </th>
+                    <th scope="col" class="py-3">
+                      Entidad
+                    </th>
+                    <th scope="col" class="py-3">
+                      País
+                    </th>{" "}
+                    {/* Columna Nueva */}
+                    <th scope="col" class="py-3 text-center">
+                      Año
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white">
+                  {conveniosHistoricos.map((agreement) => (
+                    <tr>
+                      {/* Tipo de Convenio */}
+                      <td class="ps-4 fw-bold text-secondary">
+                        {agreement.estado_convenio}
+                      </td>
+                      {/* Nombre con Link */}
+                      <td>
+                        {agreement.link_web ? (
+                          <a
+                            href={agreement.link_web}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-dark fw-bold text-decoration-underline-hover"
+                          >
+                            {agreement.nombre}
+                          </a>
+                        ) : (
+                          <span class="text-dark fw-bold">
+                            {agreement.nombre}
+                          </span>
+                        )}
+                      </td>
+                      {/* País */}
+                      <td class="text-muted">{agreement.pais || "-"}</td>
+                      {/* Fecha */}
+                      <td class="text-center text-muted small">
+                        {agreement.fecha_firma
+                          ? agreement.fecha_firma.substring(0, 4)
+                          : "-"}
+                      </td>{" "}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <style>
+    /* Estilos existentes... más este hover para links */
+    .text-decoration-underline-hover:hover {
+      text-decoration: underline !important;
+      color: var(--ufro-pink) !important;
+    }
+    /* ... el resto de tu CSS */
+    :root {
+      --ufro-blue: #003767;
+      --ufro-pink: #d63384;
+    }
+    .text-ufro {
+      color: var(--ufro-blue);
+    }
+    .text-pink-light {
+      color: #ff85c0;
+    }
+    .divider-pink {
+      height: 8px;
+      width: 50px;
+      background-color: var(--ufro-pink);
+      border-radius: 10px;
+    }
+    .logo-img {
+      max-height: 80px;
+      max-width: 100%;
+      object-fit: contain;
+      transition: transform 0.3s;
+    }
+    .partner-container:hover .logo-img {
+      transform: scale(1.15);
+    }
+    @media (max-width: 768px) {
+      .logo-img {
+        max-height: 60px;
+      }
+    }
+  </style>
+</MainLayout>
