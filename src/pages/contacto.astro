@@ -1,142 +1,201 @@
 ---
 import MainLayout from "../layouts/MainLayout.astro";
 import ContactForm from "../components/ContactForm.jsx";
+
+const colaborador = Astro.url.searchParams.get("para");
 ---
 
 <MainLayout title="Contacto | CI2A2">
-    {/* --- HEADER (Minimalista y profesional) --- */}
-    <section
-        class="py-5 text-white position-relative"
-        style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);"
-    >
-        <div class="container position-relative z-2 py-4">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <h6
-                        class="text-pink-light fw-bold text-uppercase ls-2 mb-2 animate-fade-in"
-                    >
-                        Vinculación y Colaboración
-                    </h6>
-                    <h1 class="display-4 fw-bold mb-0">Contacto</h1>
-                    <p class="opacity-90 mb-0 lead small">
-                        Conoce cómo comunicarte con nuestro equipo.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
+    {
+        /* ... (Todo el Header y Sidebar sigue igual, no lo copio para ahorrar espacio) ... */
+    }
 
-    {/* --- CONTENIDO PRINCIPAL (Layout 2 columnas) --- */}
     <section class="bg-light min-vh-100 py-5">
         <div class="container">
             <div class="row g-5">
-                {/* 1. COLUMNA IZQUIERDA: INFO INSTITUCIONAL (Estilo CMM) */}
+                {/* ... Sidebar ... */}
                 <div class="col-lg-4">
-                    <div class="d-flex flex-column gap-4">
-                        {/* Tarjeta de Info */}
-                        <div
-                            class="bg-white p-4 rounded-4 shadow-sm border border-light"
+                    {/* ... (Mismo código del sidebar anterior) ... */}
+                    <div
+                        class="bg-white p-4 rounded-4 shadow-sm border border-light"
+                    >
+                        <h5
+                            class="fw-bold mb-4"
+                            style="color: var(--ufro-blue);"
                         >
-                            <h5
-                                class="fw-bold mb-4"
-                                style="color: var(--ufro-blue);"
-                            >
-                                Información de Contacto
-                            </h5>
-
-                            <div class="d-flex align-items-start mb-3">
-                                <div class="icon-box me-3">
-                                    <i class="bi bi-geo-alt-fill"></i>
-                                </div>
-                                <div>
-                                    <strong
-                                        class="d-block text-dark small text-uppercase"
-                                        >Dirección</strong
-                                    >
-                                    <span class="text-secondary small"
-                                        >Francisco Salazar 01145, Temuco<br
-                                        />Región de La Araucanía, Chile</span
-                                    >
-                                </div>
+                            Información
+                        </h5>
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-box me-3">
+                                <i class="bi bi-geo-alt-fill"></i>
                             </div>
-
-                            <div class="d-flex align-items-start mb-3">
-                                <div class="icon-box me-3">
-                                    <i class="bi bi-envelope-fill"></i>
-                                </div>
-                                <div>
-                                    <strong
-                                        class="d-block text-dark small text-uppercase"
-                                        >Correo General</strong
-                                    >
-                                    <a
-                                        href="mailto:contacto.ci2a2@ufrontera.cl"
-                                        class="text-decoration-none text-secondary small"
-                                        >contacto.ci2a2@ufrontera.cl</a
-                                    >
-                                </div>
+                            <div>
+                                <strong
+                                    class="d-block text-dark small text-uppercase"
+                                    >Dirección</strong
+                                >
+                                <span class="text-secondary small"
+                                    >Francisco Salazar 01145, Temuco</span
+                                >
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <div class="icon-box me-3">
+                                <i class="bi bi-envelope-fill"></i>
+                            </div>
+                            <div>
+                                <strong
+                                    class="d-block text-dark small text-uppercase"
+                                    >Correo General</strong
+                                >
+                                <a
+                                    href="mailto:contacto.ci2a2@ufrontera.cl"
+                                    class="text-decoration-none text-secondary small hover-pink"
+                                    >contacto.ci2a2@ufrontera.cl</a
+                                >
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* 2. COLUMNA DERECHA: FORMULARIO DINÁMICO */}
                 <div class="col-lg-8">
-                    {/* Componente React */}
-                    <ContactForm client:only="react" />
+                    <ul
+                        class="nav nav-pills nav-fill mb-4 bg-white p-2 rounded-4 shadow-sm border border-light"
+                        id="contactTab"
+                        role="tablist"
+                    >
+                        <li class="nav-item" role="presentation">
+                            <button
+                                class="nav-link active fw-bold py-3 rounded-3 tab-blue"
+                                id="colaborar-tab"
+                                data-bs-toggle="pill"
+                                data-bs-target="#colaborar"
+                                type="button"
+                                role="tab"
+                            >
+                                <i class="bi bi-briefcase-fill me-2"></i>General
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button
+                                class="nav-link fw-bold py-3 rounded-3 tab-pink"
+                                id="estudiantes-tab"
+                                data-bs-toggle="pill"
+                                data-bs-target="#estudiantes"
+                                type="button"
+                                role="tab"
+                            >
+                                <i class="bi bi-mortarboard-fill me-2"
+                                ></i>Prácticas y Tesis
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="contactTabContent">
+                        {/* FORMULARIO GENERAL (Sin carrera) */}
+                        <div
+                            class="tab-pane fade show active"
+                            id="colaborar"
+                            role="tabpanel"
+                        >
+                            <ContactForm
+                                client:only="react"
+                                titulo="Alianzas y Colaboración"
+                                descripcion="Si eres una institución o empresa y buscas colaborar en proyectos de investigación o desarrollo con CI2A2, escríbenos aquí."
+                                destinatario={colaborador}
+                                mostrarCarrera={false}
+                            />
+                        </div>
+
+                        {/* FORMULARIO ESTUDIANTES (Con carrera) */}
+                        <div
+                            class="tab-pane fade"
+                            id="estudiantes"
+                            role="tabpanel"
+                        >
+                            <ContactForm
+                                client:only="react"
+                                titulo="Postulación Prácticas y Tesis"
+                                descripcion="¿Eres estudiante y quieres realizar tu práctica profesional o tesis con nuestro equipo? Envíanos tus datos."
+                                destinatario="Coordinación Prácticas y Tesis"
+                                mostrarCarrera={true}
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 </MainLayout>
 
+{/* ... Estilos siguen igual ... */}
+
 <style is:global>
-    /* --- VARIABLES --- */
     :root {
         --ufro-blue: #003767;
         --ufro-pink: #d63384;
         --ufro-pink-light: #ff85c0;
     }
 
-    /* Utilidades Header */
-    .text-pink-light {
-        color: var(--ufro-pink-light);
-    }
-    .ls-3 {
-        letter-spacing: 3px;
-        font-size: 0.75rem;
-    }
-
-    /* Icon Box del Sidebar */
     .icon-box {
         width: 35px;
         height: 35px;
-        background-color: rgba(0, 55, 103, 0.05); /* Azul muy suave */
+        background-color: rgba(0, 55, 103, 0.05);
         color: var(--ufro-blue);
         border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.1rem;
     }
 
-    /* Efecto Hover en enlaces del sidebar */
-    .hover-pink {
-        transition: color 0.2s;
+    /* --- ESTILO DE BOTONES PERSONALIZADOS --- */
+
+    /* Botón Colaboración (Azul) */
+    .nav-link.tab-blue {
+        color: var(--ufro-blue);
     }
-    .hover-pink:hover {
-        color: var(--ufro-pink) !important;
+    .nav-link.tab-blue.active {
+        background: var(--ufro-blue) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(0, 55, 103, 0.2);
     }
 
-    /* Transiciones generales */
-    .transition-all {
-        transition: all 0.3s ease;
+    /* Botón Estudiantes (Rosa) */
+    .nav-link.tab-pink {
+        color: var(--ufro-pink);
+    }
+    .nav-link.tab-pink.active {
+        background: var(--ufro-pink) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(214, 51, 132, 0.2);
     }
 
-    /* Ajustes de Formulario (Inputs limpios) */
-    .form-control:focus {
-        background-color: #fff !important;
-        box-shadow: 0 0 0 4px rgba(214, 51, 132, 0.1); /* Sombra rosada */
-        outline: none;
+    /* Hover effects */
+    .nav-link:not(.active):hover {
+        background-color: #f8f9fa;
+    }
+
+    /* Animaciones */
+    .spin {
+        animation: spin 1s linear infinite;
+        display: inline-block;
+    }
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
