@@ -1,0 +1,23 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+import AuthForm from "../components/AuthForm.jsx";
+---
+
+<MainLayout title="Acceso Usuarios | CI2A2">
+    <section class="min-vh-100 d-flex align-items-center justify-content-center py-5" style="background-color: #f8f9fa;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12">
+                    {/* client:only="react" es OBLIGATORIO para formularios interactivos */}
+                    <AuthForm client:only="react" />
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="/" class="text-secondary small text-decoration-none hover-pink">
+                    <i class="bi bi-arrow-left me-1"></i> Volver al Inicio
+                </a>
+            </div>
+        </div>
+    </section>
+</MainLayout>
