@@ -1,6 +1,6 @@
 ---
 interface Props {
-	title: string;
+    title: string;
 }
 
 const { title } = Astro.props;
@@ -8,21 +8,30 @@ const { title } = Astro.props;
 
 <!doctype html>
 <html lang="es">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<title>{title} | Intranet CI²A²</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-        
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <title>{title} | Intranet CI²A²</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+            rel="stylesheet"
+        />
+
         <style>
             :root {
                 --ufro-blue: #003767;
                 --ufro-gray: #6c757d;
             }
             body {
-                font-family: 'Roboto', sans-serif;
+                font-family: "Roboto", sans-serif;
                 background-color: #f4f6f8;
                 min-height: 100vh;
                 display: flex;
@@ -30,16 +39,15 @@ const { title } = Astro.props;
             }
             .navbar-ufro {
                 background-color: var(--ufro-blue);
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                 padding-top: 0.8rem;
                 padding-bottom: 0.8rem;
             }
             .brand-divider {
-                border-left: 1px solid rgba(255,255,255,0.3);
+                border-left: 1px solid rgba(255, 255, 255, 0.3);
                 height: 35px;
                 margin: 0 20px;
             }
-
 
             .admin-footer {
                 margin-top: auto;
@@ -50,65 +58,101 @@ const { title } = Astro.props;
                 color: var(--ufro-gray);
             }
         </style>
-	</head>
-	<body>
-        
-		<header class="navbar navbar-expand navbar-dark navbar-ufro sticky-top px-4">
+    </head>
+    <body>
+        <header
+            class="navbar navbar-expand navbar-dark navbar-ufro sticky-top px-4"
+        >
             <div class="container-fluid">
                 <div class="d-flex align-items-center">
-                    
-                    <img 
-                        src="/img/logo-ufro.png" 
-                        alt="UFRO" 
-                        height="45" 
+                    <img
+                        src="/img/logo-ufro.png"
+                        alt="UFRO"
+                        height="45"
                         class="d-inline-block align-text-top logo-white-filter"
-                    >
-                    
+                    />
+
                     <div class="brand-divider d-none d-sm-block"></div>
-                    
-                    <img 
-                        src="/img/logo-ci2a2.png" 
-                        alt="CI²A²" 
-                        height="45" 
+
+                    <img
+                        src="/img/logo-ci2a2.png"
+                        alt="CI²A²"
+                        height="45"
                         class="d-inline-block align-text-top logo-white-filter"
-                        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" 
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
                     />
                     <div class="text-white lh-1 d-none" style="display:none;">
-                        <span class="d-block fw-bold" style="font-size: 1.1rem;">CI²A²</span>
-                        <small style="font-size: 0.65rem; opacity: 0.8;">INTELIGENCIA ARTIFICIAL</small>
+                        <span class="d-block fw-bold" style="font-size: 1.1rem;"
+                            >CI²A²</span
+                        >
+                        <small style="font-size: 0.65rem; opacity: 0.8;"
+                            >INTELIGENCIA ARTIFICIAL</small
+                        >
                     </div>
-
                 </div>
 
                 <div class="d-flex align-items-center gap-3">
                     <div class="text-end text-white d-none d-sm-block lh-1">
-                        <small class="d-block opacity-75 text-uppercase" style="font-size: 0.65rem; letter-spacing: 1px;">Admin Panel</small>
+                        <small
+                            class="d-block opacity-75 text-uppercase"
+                            style="font-size: 0.65rem; letter-spacing: 1px;"
+                            >Admin Panel</small
+                        >
                         <span class="fw-medium">Administrador</span>
                     </div>
-                    
-                    <a href="/" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2 px-3">
+
+                    <button
+                        id="btn-logout"
+                        class="btn btn-outline-light btn-sm d-flex align-items-center gap-2 px-3"
+                    >
                         <i class="bi bi-box-arrow-right"></i>
                         <span class="d-none d-md-inline">Salir</span>
-                    </a>
+                    </button>
                 </div>
             </div>
         </header>
 
-		<main class="container-fluid px-4 py-4">
-			<slot />
-		</main>
+        <main class="container-fluid px-4 py-4">
+            <slot />
+        </main>
 
         <footer class="admin-footer text-center">
             <div class="container">
                 <div class="mb-1">
-                    <span class="fw-bold">Universidad de La Frontera</span> 
-                    <span class="mx-2">•</span> 
+                    <span class="fw-bold">Universidad de La Frontera</span>
+                    <span class="mx-2">•</span>
                     Centro de Investigación en Inteligencia Artificial Aplicada
                 </div>
-                <small>© {new Date().getFullYear()} - Plataforma de Gestión Interna</small>
+                <small
+                    >© {new Date().getFullYear()} - Plataforma de Gestión Interna</small
+                >
             </div>
         </footer>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-	</body>
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        ></script>
+
+        <script>
+            const btnLogout = document.getElementById("btn-logout");
+
+            if (btnLogout) {
+                btnLogout.addEventListener("click", async () => {
+                    try {
+                        // 1. Petición al servidor para borrar cookies
+                        const response = await fetch("/api/auth/logout", {
+                            method: "POST",
+                        });
+
+                        // 2. Si todo sale bien, forzamos la redirección al login
+                        if (response.ok) {
+                            window.location.href = "/login";
+                        }
+                    } catch (error) {
+                        console.error("Error al cerrar sesión:", error);
+                    }
+                });
+            }
+        </script>
+    </body>
 </html>
