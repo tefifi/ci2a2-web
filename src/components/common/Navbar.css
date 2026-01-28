@@ -1,0 +1,147 @@
+/* src/components/common/Navbar.css */
+
+:root {
+  --nav-bg: rgba(0, 55, 103, 0.95); /* Azul UFRO */
+  --nav-pink: #d63384; /* Rosado FICA */
+  --nav-link-color: rgba(255, 255, 255, 0.9);
+}
+
+/* BARRA PRINCIPAL */
+.navbar-custom {
+  background-color: var(--nav-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+/* ENLACES */
+.nav-link-react {
+  font-size: 1rem;
+  color: var(--nav-link-color);
+  font-weight: 500;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  position: relative; /* Necesario para el contexto */
+  transition: all 0.2s ease;
+}
+
+.nav-link-react:hover,
+.nav-link-react.active {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Flechita dropdown */
+.chevron-icon {
+  font-size: 0.75em;
+  margin-left: 8px;
+  opacity: 0.6;
+  transition: transform 0.2s;
+}
+.nav-link-react:hover .chevron-icon { opacity: 1; }
+
+/* CONTENEDOR DEL DROPDOWN */
+.dropdown-wrapper {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* MENU DESPLEGABLE */
+.dropdown-menu-react {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 0;
+  min-width: 230px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  
+  /* Separación visual (el espacio que te gustaba) */
+  margin-top: 15px; 
+  
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeIn 0.2s forwards;
+  z-index: 1000;
+}
+
+/* --- EL PUENTE INVISIBLE (SOLUCIÓN) --- */
+/* Esto crea un bloque transparente que llena el hueco entre el botón y el menú */
+.dropdown-menu-react::before {
+  content: '';
+  position: absolute;
+  top: -20px; /* Sube para cubrir el margen de 15px */
+  left: 0;
+  width: 100%;
+  height: 20px;
+  background: transparent; 
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ITEMS */
+.dropdown-item-react {
+  padding: 10px 20px;
+  color: #003767;
+  font-size: 0.95rem;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+/* Hover Rosado */
+.dropdown-item-react:hover {
+  background-color: #fcebf4;
+  color: var(--nav-pink);
+  border-left-color: var(--nav-pink);
+  padding-left: 25px;
+}
+
+.dropdown-item-react i { color: #888; transition: color 0.2s; }
+.dropdown-item-react:hover i { color: var(--nav-pink); }
+
+.dropdown-divider {
+  border-top: 1px solid #eee;
+  margin: 5px 0;
+}
+
+/* MÓVIL */
+@media (max-width: 1199.98px) {
+  .navbar-collapse-react {
+    background: var(--nav-bg);
+    padding: 1.5rem;
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+  }
+  .dropdown-menu-react {
+    position: static;
+    box-shadow: none;
+    background: transparent;
+    padding: 5px 0 5px 15px;
+    opacity: 1; transform: none; animation: none;
+    margin-top: 0; /* En móvil no hay espacio */
+  }
+  .dropdown-menu-react::before { display: none; } /* No necesario en móvil */
+
+  .dropdown-item-react { color: rgba(255,255,255,0.8); border: none; }
+  .dropdown-item-react:hover { 
+    background: transparent; 
+    color: var(--nav-pink);
+    padding-left: 20px; 
+  }
+}

@@ -2,175 +2,162 @@
 const currentYear = new Date().getFullYear();
 ---
 
-<div class="footer-illustration container-fluid p-0 overflow-hidden">
+<div class="footer-illustration container-fluid p-0 overflow-hidden bg-white">
   <img
     src="/img/footerFica.webp"
     alt="Ilustración UFRO"
     class="d-block mx-auto img-fluid"
-    style="max-height: 250px; width: auto;"
+    style="max-height: 220px; width: auto; object-fit: cover;"
   />
 </div>
 
-<footer class="bg-ufro text-white pt-5 pb-3 mt-auto position-relative">
+<footer class="bg-ufro text-white pt-5 pb-4 mt-auto position-relative">
   <div class="container">
-    <div class="row g-4 justify-content-between align-items-start">
+    <div class="row g-5 justify-content-between">
+      
       <div class="col-lg-4 col-md-6">
         <img
           src="/img/logo-ci2a2.png"
           alt="Logo CI2A2 Blanco"
-          class="mb-3 img-fluid"
-          style="max-height: 70px;"
+          class="mb-4 img-fluid"
+          style="max-height: 70px;" 
         />
-        <p class="small opacity-75 pe-lg-5">
+        <p class="small opacity-75 pe-lg-4 lh-lg fw-light">
           Articulando ciencia, tecnología y sociedad desde La Araucanía para el
           mundo. Liderando la innovación en IA aplicada.
         </p>
-        <div class="d-flex gap-3 mt-4">
-          <a href="#" class="text-white opacity-75 hover-opacity"
-            ><i class="bi bi-linkedin fs-5"></i></a
-          >
-          <a href="#" class="text-white opacity-75 hover-opacity"
-            ><i class="bi bi-twitter-x fs-5"></i></a
-          >
-          <a href="#" class="text-white opacity-75 hover-opacity"
-            ><i class="bi bi-instagram fs-5"></i></a
-          >
-        </div>
       </div>
 
       <div class="col-lg-2 col-md-6">
-        <h6 class="fw-bold text-uppercase mb-3 small ls-1 text-info">
+        <h6 class="fw-bold text-uppercase mb-4 small ls-1 text-fica">
           Explora
         </h6>
-        <ul class="list-unstyled d-flex flex-column gap-2 small">
-          <li>
-            <a
-              href="/"
-              class="text-white text-decoration-none opacity-75 hover-opacity"
-              >Inicio</a>
-          </li>
-          <li>
-            <a
-              href="/#mision"
-              class="text-white text-decoration-none opacity-75 hover-opacity"
-              >Nosotros</a>
-          </li>
-          <li>
-            <a
-              href="/proyectos"
-              class="text-white text-decoration-none opacity-75 hover-opacity"
-              >Proyectos</a>
-          </li>
-          <li>
-            <a
-              href="/noticias"
-              class="text-white text-decoration-none opacity-75 hover-opacity"
-              >Noticias</a>
-          </li>
-          <li>
-            <a
-              href="/admin"
-              class="text-white text-decoration-none opacity-75 hover-opacity"
-              >Intranet</a>
-          </li>
+        <ul class="list-unstyled d-flex flex-column gap-3 small fw-light">
+          <li><a href="/" class="footer-link">Inicio</a></li>
+          <li><a href="/nosotros" class="footer-link">Nosotros</a></li>
+          <li><a href="/proyectos" class="footer-link">Proyectos</a></li>
+          <li><a href="/noticias" class="footer-link">Noticias</a></li>
         </ul>
       </div>
 
       <div class="col-lg-3 col-md-6">
-        <h6 class="fw-bold text-uppercase mb-3 small ls-1 text-info">
+        <h6 class="fw-bold text-uppercase mb-4 small ls-1 text-fica">
           Contacto
         </h6>
-        <ul class="list-unstyled d-flex flex-column gap-3 small opacity-75">
-          <li class="d-flex gap-2">
-            <i class="bi bi-geo-alt-fill text-info"></i>
+        <ul class="list-unstyled d-flex flex-column gap-3 small opacity-85 fw-light">
+          <li class="d-flex gap-3 align-items-start">
+            <i class="bi bi-geo-alt text-fica mt-1 fs-6"></i>
             <span>Av. Francisco Salazar 01145,<br />Temuco, Chile.</span>
           </li>
-          <li class="d-flex gap-2">
-            <i class="bi bi-envelope-fill text-info"></i>
-            <a
-              href="mailto:contacto.ci2a2@ufro.cl"
-              class="text-white text-decoration-none">contacto.ci2a2@ufro.cl</a
-            >
+          <li class="d-flex gap-3 align-items-center">
+            <i class="bi bi-envelope text-fica fs-6"></i>
+            <a href="mailto:contacto.ci2a2@ufro.cl" class="text-white text-decoration-none footer-link-simple">
+                contacto.ci2a2@ufro.cl
+            </a>
           </li>
         </ul>
       </div>
 
-      <div
-        class="col-lg-3 col-md-6 text-lg-end d-flex flex-column align-items-center align-items-lg-end"
-      >
-        <h6
-          class="fw-bold text-uppercase mb-3 small ls-1 text-info w-100 text-lg-end"
-        >
+      <div class="col-lg-3 col-md-6 text-lg-end">
+        <h6 class="fw-bold text-uppercase mb-4 small ls-1 text-fica w-100">
           Institución
         </h6>
 
-        <img
-          src="/img/02-logo-UFRO-blanco-horizontal.png"
-          alt="Universidad de La Frontera"
-          class="img-fluid opacity-75 mb-3"
-          style="max-width: 200px;"
-        />
+        <a href="https://www.ufro.cl/" target="_blank" rel="noopener noreferrer" class="d-inline-block mb-4 ms-lg-auto logo-ufro-link">
+            <img
+            src="/img/02-logo-UFRO-blanco-horizontal.png"
+            alt="Universidad de La Frontera"
+            class="img-fluid opacity-100"
+            style="max-width: 180px;"
+            />
+        </a>
 
-        <div
-          class="d-flex gap-2 justify-content-lg-end align-items-center mb-2 flex-wrap"
-        >
-          <img
-            src="/img/selloAcreditacion.webp"
-            alt="Sello Acreditación"
-            class="img-fluid rounded border border-white border-opacity-25 shadow-sm"
-            style="max-height: 80px;"
-          />
+        <div class="d-flex justify-content-lg-end mb-2">
+            <img
+                src="/img/selloAcreditacion.webp"
+                alt="Sello Acreditación"
+                class="img-fluid rounded seal-image"
+            />
         </div>
 
-        <p class="small opacity-50 fst-italic text-lg-end mt-2">
-          Facultad de Ingeniería y Ciencias
+        <p class="small opacity-50 fst-italic text-lg-end m-0">
+            Facultad de Ingeniería y Ciencias
         </p>
       </div>
     </div>
 
-    <hr class="border-light opacity-25 my-4" />
+    <hr class="border-light opacity-10 my-4" />
 
-    <div class="row align-items-center">
+    <div class="row align-items-center pb-3">
       <div class="col-md-6 text-center text-md-start">
-        <p class="small mb-0 opacity-50">
+        <p class="small mb-0 opacity-40 fw-light">
           &copy; {currentYear} CI²A² - Universidad de La Frontera.
         </p>
+      </div>
+      <div class="col-md-6 text-center text-md-end d-none d-md-block">
+        <p class="small mb-0 opacity-25 fw-light">Desarrollado en La Araucanía</p>
       </div>
     </div>
   </div>
 </footer>
 
 <style>
-  .bg-ufro {
-    background-color: #003767;
+  :root {
+    --ufro-blue: #003767;
+    --fica-pink: #d63384; 
   }
-  .text-info {
-    color: #009fe3 !important;
-  }
-  .ls-1 {
-    letter-spacing: 1px;
-  }
+
+  .bg-ufro { background-color: var(--ufro-blue); }
+  .text-fica { color: var(--fica-pink) !important; }
+  .ls-1 { letter-spacing: 1px; }
+  .fw-light { font-weight: 300; }
 
   .footer-illustration {
-    background-color: #fff; /* Fondo blanco tras la ilustración para que el dibujo azul resalte */
-    margin-bottom: -1px; /* Evita gap de 1px entre imagen y footer */
+    position: relative; z-index: 1; margin-bottom: -1px; 
   }
 
-  .footer-illustration img {
-    max-height: 250px; /* Ajusta según el tamaño original de footerFica.webp */
-    object-fit: cover;
-    object-position: bottom center;
+  /* ENLACES */
+  .footer-link {
+    color: rgba(255, 255, 255, 0.65);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+  }
+  .footer-link:hover {
+    color: var(--fica-pink);
+    transform: translateX(4px);
+  }
+  .footer-link-simple:hover {
+    color: var(--fica-pink);
+    text-decoration: underline;
   }
 
-  .hover-opacity:hover {
-    opacity: 1 !important;
-    text-decoration: underline !important;
-    transition: opacity 0.2s;
+  /* Hover Logo UFRO */
+  .logo-ufro-link {
+    transition: opacity 0.3s ease;
+  }
+  .logo-ufro-link:hover {
+    opacity: 0.8;
   }
 
-  /* Efecto sutil para el sello de acreditación */
-  .col-lg-3 img[src*="sello"] {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 2px;
+  /* --- ESTILO DEL SELLO --- */
+  .seal-image {
+    /* Tamaño controlado */
+    max-height: 65px; 
+    width: auto;
+    
+    /* Borde fino blanco para separar el sello negro del fondo azul */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    
+    /* Sombra suave */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    
+    transition: transform 0.3s ease;
   }
+
+  .seal-image:hover {
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.8);
+  }
+
 </style>

@@ -174,8 +174,8 @@ export default function AdminNoticias() {
                         </div>
 
                         <div className="mb-2">
-                            <label className="form-label fw-bold small text-secondary">Bajada o Resumen (Máx. 200 caracteres)</label>
-                            <textarea className="form-control small" placeholder="Escriba un breve resumen..." rows="2" maxLength="200" value={formData.bajada} onChange={e => setFormData({ ...formData, bajada: e.target.value })} />
+                            <label className="form-label fw-bold small text-secondary">Bajada o Resumen (Máx. 300 caracteres)</label>
+                            <textarea className="form-control small" placeholder="Escriba un breve resumen..." rows="2" maxLength="300" value={formData.bajada} onChange={e => setFormData({ ...formData, bajada: e.target.value })} />
                         </div>
 
                         <div className="mb-3">
