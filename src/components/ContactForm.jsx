@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import emailjs from '@emailjs/browser';
 
 // Agregamos la prop 'mostrarCarrera'
-export default function ContactForm({ titulo, descripcion, destinatario, mostrarCarrera = false }) {
+/** @param {{ titulo: any, descripcion: any, destinatario?: string | null, mostrarCarrera?: boolean }} props */
+export default function ContactForm({ titulo, descripcion, destinatario = null, mostrarCarrera = false }) {
     
     const [formData, setFormData] = useState({ 
         nombre: '', 
