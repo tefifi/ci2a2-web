@@ -33,7 +33,9 @@ const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
   >
     <div class="container position-relative z-2">
       <div class="col-lg-8">
-        <h6 class="text-pink-light fw-bold text-uppercase ls-2 mb-2 animate-fade-in">
+        <h6
+          class="text-pink-light fw-bold text-uppercase ls-2 mb-2 animate-fade-in"
+        >
           Actualidad
         </h6>
         <h1 class="display-5 fw-bold mb-2">Noticias y Eventos</h1>
@@ -80,6 +82,8 @@ const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
                         <i class="bi bi-calendar3 text-ufro opacity-75" />
                         {item.fecha
                           ? new Date(item.fecha).toLocaleDateString("es-CL", {
+                              timeZone: "UTC",
+
                               year: "numeric",
                               month: "long",
                               day: "numeric",
@@ -177,26 +181,40 @@ const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
     --ufro-blue: #003767;
     --ufro-pink: #d63384;
   }
-  .text-pink-light { color: #ff85c0; }
-  .text-ufro { color: var(--ufro-blue); }
-  .ls-2 { letter-spacing: 2px; }
+  .text-pink-light {
+    color: #ff85c0;
+  }
+  .text-ufro {
+    color: var(--ufro-blue);
+  }
+  .ls-2 {
+    letter-spacing: 2px;
+  }
 
   /* --- TARJETAS --- */
   .modern-card {
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    transition:
+      transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.3s ease;
   }
   .card-link-wrapper:hover .modern-card {
     transform: translateY(-6px);
     /* Sombra ROSADA al levantar (Corregido) */
-    box-shadow: 0 15px 30px rgba(214, 51, 132, 0.15) !important; 
+    box-shadow: 0 15px 30px rgba(214, 51, 132, 0.15) !important;
   }
 
   /* Imagen Zoom */
-  .transition-img { transition: transform 0.6s ease; }
-  .card-link-wrapper:hover .transition-img { transform: scale(1.08); }
+  .transition-img {
+    transition: transform 0.6s ease;
+  }
+  .card-link-wrapper:hover .transition-img {
+    transform: scale(1.08);
+  }
 
   /* Título Azul al Hover */
-  .title-hover { transition: color 0.3s ease; }
+  .title-hover {
+    transition: color 0.3s ease;
+  }
   .card-link-wrapper:hover .title-hover {
     color: var(--ufro-blue) !important;
     text-decoration: underline;
@@ -204,12 +222,12 @@ const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
 
   /* --- BOTÓN LEER MÁS (ROSADO) --- */
   .btn-leermas {
-    color: var(--ufro-pink);            /* Texto Rosado */
+    color: var(--ufro-pink); /* Texto Rosado */
     border: 1px solid var(--ufro-pink); /* Borde Rosado */
     background: transparent;
     transition: all 0.3s ease;
   }
-  
+
   /* Al pasar el mouse por la tarjeta, el botón se llena de ROSADO */
   .card-link-wrapper:hover .btn-leermas {
     background-color: var(--ufro-pink);
@@ -222,7 +240,7 @@ const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
     border: 1px solid #dee2e6;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-  
+
   .pagination-btn:not(.active-page):not(.disabled):hover {
     transform: translateY(-4px) scale(1.05);
     border-color: var(--ufro-pink) !important;
@@ -235,8 +253,12 @@ const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
     box-shadow: 0 5px 15px rgba(0, 55, 103, 0.4) !important;
   }
 
-  .prev-btn:hover .bi-chevron-left { transform: translateX(-3px); }
-  .next-btn:hover .bi-chevron-right { transform: translateX(3px); }
+  .prev-btn:hover .bi-chevron-left {
+    transform: translateX(-3px);
+  }
+  .next-btn:hover .bi-chevron-right {
+    transform: translateX(3px);
+  }
 
   .page-item.disabled .pagination-btn {
     opacity: 0.5;

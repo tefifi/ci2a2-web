@@ -1,60 +1,78 @@
 ---
-import MainLayout from "../layouts/MainLayout.astro";
-import { supabase } from "../lib/supabase";
-import TransparenciaList from "../components/TransparenciaList.jsx";
+import MainLayout        from '../layouts/MainLayout.astro';
+import PageHeader        from '../components/common/PageHeader.astro';
+import TransparenciaList from '../components/TransparenciaList.jsx';
+import { supabase }      from '../lib/supabase';
 
-// Consulta de datos
 const { data: proyectos } = await supabase
-  .from("proyectos_adjudicados")
-  .select("*")
-  .order("anio", { ascending: false });
+  .from('proyectos_adjudicados')
+  .select('*')
+  .order('anio', { ascending: false });
 ---
 
-<MainLayout title="Transparencia | CI2A2">
-  
-  {/* --- 1. HEADER (Fondo degradado azul/rosa) --- */}
-  <section
-    class="py-5 text-white position-relative overflow-hidden shadow-sm"
-    style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);"
-  >
-    <div class="container position-relative z-2">
-      <div class="col-lg-8">
-        <h6 class="text-pink-light fw-bold text-uppercase ls-3 mb-2 animate-fade-in">
-          Institucional
-        </h6>
-        <h1 class="display-5 fw-bold mb-2">Transparencia</h1>
-        <p class="opacity-90 mb-0 lead small">
-          Acceso a la información pública.
-        </p>
-      </div>
-    </div>
-  </section>
+<MainLayout title="Transparencia">
 
-  {/* --- 2. SECCIÓN PRINCIPAL (Fondo gris claro) --- */}
+  <PageHeader
+    eyebrow="Institucional"
+    title="Transparencia"
+    description="Acceso a la información pública y normativa."
+  />
+
   <section class="bg-light py-5 min-vh-100">
     <div class="container">
-      
-      {/* Título de la lista (Opcional: Si sientes que sobra, puedes borrar este bloque div 'row') */}
+
+      <!-- Proyectos Adjudicados -->
       <div class="row mb-5">
         <div class="col-lg-8">
-            <h2 class="fw-bold text-dark mb-2">Proyectos Adjudicados</h2>
-            <div style="width: 50px; height: 4px; background: #d63384; border-radius: 2px;"></div>
-            <p class="text-muted mt-3">
-                Listado oficial de iniciativas de investigación, desarrollo e innovación vigentes e históricas.
-            </p>
+          <h2 class="fw-bold text-dark mb-2">Proyectos Adjudicados</h2>
+          <div style="width: 50px; height: 4px; background: var(--ufro-pink); border-radius: 2px;"></div>
+          <p class="text-muted mt-3">
+            Listado oficial de iniciativas de investigación, desarrollo e innovación vigentes e
+            históricas adjudicadas por el centro.
+          </p>
         </div>
       </div>
-      
-      {/* Componente de la Lista Interactiva */}
-      <TransparenciaList client:load iniciales={proyectos || []} />
-      
+
+      <div class="mb-5 pb-5 border-bottom">
+        <TransparenciaList client:load iniciales={proyectos || []} />
+      </div>
+
+      <!-- Marco Normativo -->
+      <div class="row mb-4 mt-5">
+        <div class="col-lg-8">
+          <h2 class="fw-bold text-dark mb-2">Resoluciones y Normativa</h2>
+          <div style="width: 50px; height: 4px; background: var(--ufro-pink); border-radius: 2px;"></div>
+          <p class="text-muted mt-3">
+            Documentos oficiales que establecen la creación y el reglamento de funcionamiento del centro.
+          </p>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        {[
+          { titulo: 'Resolución de Creación', desc: 'Documento fundacional que formaliza la existencia del centro y sus objetivos institucionales.' },
+          { titulo: 'Normativa Interna',      desc: 'Reglamento que rige el funcionamiento, estructura y deberes de los integrantes del centro.' },
+        ].map(doc => (
+          <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm hover-up rounded-4">
+              <div class="card-body p-4 d-flex align-items-start gap-3">
+                <div class="flex-shrink-0 rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center"
+                     style="width: 60px; height: 60px;">
+                  <i class="bi bi-file-earmark-pdf-fill text-danger fs-3"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <h5 class="fw-bold text-dark mb-1">{doc.titulo}</h5>
+                  <p class="text-muted small mb-3">{doc.desc}</p>
+                  <a href="#" class="btn btn-sm btn-outline-danger rounded-pill fw-medium px-3" target="_blank">
+                    <i class="bi bi-download me-2"></i>Descargar PDF
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
     </div>
   </section>
-
 </MainLayout>
-
-<style>
-    /* Estilos auxiliares para el Header si no están globales */
-    .text-pink-light { color: #ff85c0; }
-    .ls-3 { letter-spacing: 3px; }
-</style>

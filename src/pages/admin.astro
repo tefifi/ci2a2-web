@@ -1,9 +1,9 @@
 ---
 // 1. IMPORTS DE ASTRO Y LIBRERÍAS
 import AdminLayout from "../layouts/AdminLayout.astro";
-import { supabase } from "../lib/supabase"; // <--- FALTABA ESTO
+import { supabase } from "../lib/supabase";
 
-// 2. IMPORTS DE COMPONENTES (Ajustados según tu Tree)
+// 2. IMPORTS DE COMPONENTES
 import AdminNoticias from "../components/admin/AdminNoticias.jsx";
 import AdminProyectos from "../components/admin/AdminProyectos.jsx";
 import AdminColaboradores from "../components/admin/AdminColaboradores.jsx";
@@ -11,37 +11,35 @@ import AdminPublicaciones from "../components/admin/AdminPublicaciones.jsx";
 import AdminAgenda from "../components/admin/AdminAgenda.jsx";
 import AdminBanners from "../components/admin/AdminBanners.jsx";
 import AdminAlianzas from "../components/admin/AdminAlianzas.jsx";
-// OJO: Tu archivo se llama 'adminGraficos.jsx' (minúscula) en el tree.
-// Asegúrate de que dentro de ese archivo tengas "export default function..."
-import AdminGraficos from "../components/admin/adminGraficos"; 
+import AdminGraficos from "../components/admin/adminGraficos";
 import AdminTransparencia from "../components/admin/AdminTransparencia";
+import AdminBiblioteca from "../components/admin/AdminBiblioteca.jsx"; // <--- 1. NUEVO IMPORT
 
-import TiempoSesion from '../components/admin/TiempoSesion'; // <--- IMPORTAR ESTO
+import TiempoSesion from "../components/admin/TiempoSesion";
 
-// 3. LÓGICA DE SERVIDOR (Protección extra y datos de usuario)
+// 3. LÓGICA DE SERVIDOR
 const accessToken = Astro.cookies.get("sb-access-token")?.value;
 const refreshToken = Astro.cookies.get("sb-refresh-token")?.value;
 
-// Si no hay cookies, redirigir (aunque el middleware ayuda, esto asegura que el componente no falle)
 if (!accessToken || !refreshToken) {
-  return Astro.redirect("/login");
+    return Astro.redirect("/login");
 }
 
-
-// Obtener usuario para asegurarnos que el token es válido
-const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+const {
+    data: { user },
+    error,
+} = await supabase.auth.getUser(accessToken);
 
 if (error || !user) {
-  return Astro.redirect("/api/auth/logout");
+    return Astro.redirect("/api/auth/logout");
 }
 ---
 
 <AdminLayout title="Panel de Administración">
     <TiempoSesion client:only="react" minutes={20} />
-    
+
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            
             <h1 class="fw-bold text-ufro">Panel de Control</h1>
         </div>
 
@@ -50,71 +48,156 @@ if (error || !user) {
         <ul class="nav nav-pills mb-4 gap-2" id="adminTabs" role="tablist">
             {/* 1. PESTAÑA MÉTRICAS */}
             <li class="nav-item" role="presentation">
-                <button class="nav-link active fw-bold rounded-pill px-4" id="graficos-tab" data-bs-toggle="pill" data-bs-target="#graficos" type="button" role="tab">
+                <button
+                    class="nav-link active fw-bold rounded-pill px-4"
+                    id="graficos-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#graficos"
+                    type="button"
+                    role="tab"
+                >
                     <i class="bi bi-speedometer2 me-2"></i>Métricas
                 </button>
             </li>
 
             {/* 2. PESTAÑA BANNERS */}
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold rounded-pill px-4" id="banners-tab" data-bs-toggle="pill" data-bs-target="#banners" type="button" role="tab">
+                <button
+                    class="nav-link fw-bold rounded-pill px-4"
+                    id="banners-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#banners"
+                    type="button"
+                    role="tab"
+                >
                     <i class="bi bi-images me-2"></i>Banners
                 </button>
             </li>
-            
+
             {/* 3. PROYECTOS */}
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold rounded-pill px-4" id="proyectos-tab" data-bs-toggle="pill" data-bs-target="#proyectos" type="button" role="tab">
+                <button
+                    class="nav-link fw-bold rounded-pill px-4"
+                    id="proyectos-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#proyectos"
+                    type="button"
+                    role="tab"
+                >
                     <i class="bi bi-briefcase me-2"></i>Proyectos
                 </button>
             </li>
 
             {/* 4. NOTICIAS */}
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold rounded-pill px-4" id="noticias-tab" data-bs-toggle="pill" data-bs-target="#noticias" type="button" role="tab">
+                <button
+                    class="nav-link fw-bold rounded-pill px-4"
+                    id="noticias-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#noticias"
+                    type="button"
+                    role="tab"
+                >
                     <i class="bi bi-newspaper me-2"></i>Noticias
                 </button>
             </li>
 
             {/* 5. AGENDA */}
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold rounded-pill px-4" id="agenda-tab" data-bs-toggle="pill" data-bs-target="#agenda" type="button" role="tab">
+                <button
+                    class="nav-link fw-bold rounded-pill px-4"
+                    id="agenda-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#agenda"
+                    type="button"
+                    role="tab"
+                >
                     <i class="bi bi-calendar-event me-2"></i>Agenda
                 </button>
             </li>
 
             {/* 6. ALIANZAS */}
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold rounded-pill px-4" id="alianzas-tab" data-bs-toggle="pill" data-bs-target="#alianzas" type="button" role="tab">
+                <button
+                    class="nav-link fw-bold rounded-pill px-4"
+                    id="alianzas-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#alianzas"
+                    type="button"
+                    role="tab"
+                >
                     <i class="bi bi-diagram-3 me-2"></i>Alianzas
                 </button>
             </li>
 
             {/* 7. COLABORADORES */}
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold rounded-pill px-4" id="colaboradores-tab" data-bs-toggle="pill" data-bs-target="#colaboradores" type="button" role="tab">
+                <button
+                    class="nav-link fw-bold rounded-pill px-4"
+                    id="colaboradores-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#colaboradores"
+                    type="button"
+                    role="tab"
+                >
                     <i class="bi bi-people me-2"></i>Colaboradores
                 </button>
             </li>
-            
+
             {/* 8. PUBLICACIONES */}
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold rounded-pill px-4" id="publicaciones-tab" data-bs-toggle="pill" data-bs-target="#publicaciones" type="button" role="tab">
+                <button
+                    class="nav-link fw-bold rounded-pill px-4"
+                    id="publicaciones-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#publicaciones"
+                    type="button"
+                    role="tab"
+                >
                     <i class="bi bi-book me-2"></i>Publicaciones
                 </button>
             </li>
 
-            {/* 9. TRANSPARENCIA */}
+            {/* 9. NUEVO: BIBLIOTECA DIGITAL */}
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold rounded-pill px-4" id="transparencia-tab" data-bs-toggle="pill" data-bs-target="#transparencia" type="button" role="tab">
+                <button
+                    class="nav-link fw-bold rounded-pill px-4"
+                    id="biblioteca-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#biblioteca"
+                    type="button"
+                    role="tab"
+                >
+                    <i class="bi bi-collection-play me-2"></i>Biblioteca {
+                        /* <--- 2. NUEVA PESTAÑA */
+                    }
+                </button>
+            </li>
+
+            {/* 10. TRANSPARENCIA */}
+            <li class="nav-item" role="presentation">
+                <button
+                    class="nav-link fw-bold rounded-pill px-4"
+                    id="transparencia-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#transparencia"
+                    type="button"
+                    role="tab"
+                >
                     <i class="bi bi-shield-check me-2"></i>Transparencia
                 </button>
             </li>
         </ul>
 
-        <div class="tab-content bg-white p-4 rounded shadow-sm border" id="adminTabContent">
-            
-            <div class="tab-pane fade show active" id="graficos" role="tabpanel">
+        <div
+            class="tab-content bg-white p-4 rounded shadow-sm border"
+            id="adminTabContent"
+        >
+            <div
+                class="tab-pane fade show active"
+                id="graficos"
+                role="tabpanel"
+            >
                 <AdminGraficos client:only="react" />
             </div>
 
@@ -145,7 +228,12 @@ if (error || !user) {
             <div class="tab-pane fade" id="publicaciones" role="tabpanel">
                 <AdminPublicaciones client:only="react" />
             </div>
-            
+
+            {/* NUEVO: CONTENIDO BIBLIOTECA */}
+            <div class="tab-pane fade" id="biblioteca" role="tabpanel">
+                <AdminBiblioteca client:only="react" token={accessToken} />
+            </div>
+
             <div class="tab-pane fade" id="transparencia" role="tabpanel">
                 <AdminTransparencia client:only="react" />
             </div>

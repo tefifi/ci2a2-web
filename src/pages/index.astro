@@ -1,94 +1,145 @@
 ---
 import MainLayout from "../layouts/MainLayout.astro";
 import { supabase } from "../lib/supabase";
+import Carrusel from "../components/Carrusel";
 
 // --- 1. CARGA DE CONTENIDOS ---
 
 // Noticias
-const { data: noticias, error: errorNoticias } = await supabase
+const { data: noticiasData } = await supabase
     .from("noticias")
     .select("*")
     .order("created_at", { ascending: false })
     .limit(6);
-const noticiasSeguras = errorNoticias || !noticias ? [] : noticias;
+const noticiasSeguras = noticiasData || [];
 
 // Proyectos
-const { data: proyectos } = await supabase
+const { data: proyectosData } = await supabase
     .from("proyectos")
     .select("*")
     .eq("status", "En curso")
     .order("created_at", { ascending: false })
-    .limit(3);
+    .limit(6);
+const proyectos = proyectosData || [];
 
 // Publicaciones
-const { data: publicaciones } = await supabase
+const { data: publicacionesData } = await supabase
     .from("publicaciones")
     .select("*")
     .eq("is_visible", true)
     .order("year", { ascending: false })
     .limit(3);
+const publicaciones = publicacionesData || [];
 
 // Banners
-const { data: bannersSeguros } = await supabase
+const { data: bannersData } = await supabase
     .from("banners")
     .select("*")
     .eq("active", true)
     .order("order", { ascending: true });
+const bannersSeguros = bannersData || [];
 
-// --- 2. ALIANZAS (DINÁMICO) ---
+// --- 2. ALIANZAS ---
 let alianzas = [];
 const { data: dataAlianzas, error: errorAlianzas } = await supabase
-  .from("alianzas")
-  .select("*")
-  .order("nombre", { ascending: true });
+    .from("alianzas")
+    .select("*")
+    .order("nombre", { ascending: true });
 
 if (!errorAlianzas) alianzas = dataAlianzas || [];
 
-// Agrupación de Alianzas
-const ordenSecciones = ["Clientes", "Alianzas", "Universidades Socias", "Ecosistema"];
-
 const normalizarCategoria = (valor: any) => {
-  if (!valor) return "Otras";
-  const v = valor.trim();
-  if (v === "Cliente") return "Clientes";
-  if (v === "Alianza") return "Alianzas";
-  if (v === "Universidad Socia") return "Universidades Socias";
-  return v;
+    if (!valor) return "Otras";
+    const v = valor.trim();
+    if (v === "Cliente") return "Clientes";
+    if (v === "Alianza") return "Alianzas";
+    if (v === "Universidad Socia") return "Universidades Socias";
+    return v;
 };
 
-const alianzasPorCategoria = alianzas.reduce((acc: any, item: any) => {
-  const rawCategoria = item.tipo_entidad || item.categoria || "Otras";
-  const categoria = normalizarCategoria(rawCategoria);
-  if (!acc[categoria]) acc[categoria] = [];
-  acc[categoria].push(item);
-  return acc;
-}, {});
+// Agrupación simple
+const alianzasPorCategoria: Record<string, any[]> = {};
 
+alianzas.forEach((item) => {
+    const raw = item.tipo_entidad || item.categoria || "Otras";
+    const cat = normalizarCategoria(raw);
+
+    if (!alianzasPorCategoria[cat]) {
+        alianzasPorCategoria[cat] = [];
+    }
+    alianzasPorCategoria[cat].push(item);
+});
+
+const ordenSecciones = [
+    "Clientes",
+    "Alianzas",
+    "Universidades Socias",
+    "Ecosistema",
+];
 const categoriasAmostrar = [
-  ...ordenSecciones.filter((cat) => alianzasPorCategoria[cat]),
-  ...Object.keys(alianzasPorCategoria).filter((cat) => !ordenSecciones.includes(cat)),
+    ...ordenSecciones.filter((cat) => alianzasPorCategoria[cat]),
+    ...Object.keys(alianzasPorCategoria).filter(
+        (cat) => !ordenSecciones.includes(cat),
+    ),
 ];
 
 // Líneas de Investigación
 const lineasInvestigacion = [
-    { titulo: "Smart Agro", desc: "IA para la gestión hídrica y optimización de cultivos.", icon: "bi-flower1" },
-    { titulo: "Salud y Bienestar", desc: "Diagnóstico asistido y telemedicina inteligente.", icon: "bi-heart-pulse" },
-    { titulo: "Industria 4.0", desc: "Automatización y optimización de procesos productivos.", icon: "bi-gear-wide-connected" },
-    { titulo: "Gobernanza de Datos", desc: "Políticas públicas basadas en evidencia y ética de datos.", icon: "bi-bank" },
+    {
+        titulo: "Smart Agro",
+        desc: "IA para la gestión hídrica y optimización de cultivos.",
+        icon: "bi-flower1",
+    },
+    {
+        titulo: "Salud y Bienestar",
+        desc: "Diagnóstico asistido y telemedicina inteligente.",
+        icon: "bi-heart-pulse",
+    },
+    {
+        titulo: "Industria 4.0",
+        desc: "Automatización y optimización de procesos productivos.",
+        icon: "bi-gear-wide-connected",
+    },
+    {
+        titulo: "Gobernanza de Datos",
+        desc: "Políticas públicas basadas en evidencia y ética de datos.",
+        icon: "bi-bank",
+    },
 ];
 
 // --- 3. CIFRAS ---
-const { count: totalEquipo } = await supabase.from("colaboradores").select("*", { count: "exact", head: true });
-const { count: totalProyectos } = await supabase.from("proyectos").select("*", { count: "exact", head: true });
-const { count: totalAlianzasCount } = await supabase.from("alianzas").select("*", { count: "exact", head: true });
-const { count: totalPublicaciones } = await supabase.from("publicaciones").select("*", { count: "exact", head: true });
+const { count: totalEquipo } = await supabase
+    .from("colaboradores")
+    .select("*", { count: "exact", head: true });
+const { count: totalProyectos } = await supabase
+    .from("proyectos")
+    .select("*", { count: "exact", head: true });
+const { count: totalAlianzasCount } = await supabase
+    .from("alianzas")
+    .select("*", { count: "exact", head: true });
+const { count: totalPublicaciones } = await supabase
+    .from("publicaciones")
+    .select("*", { count: "exact", head: true });
 
 // --- 4. CONFIGURACIÓN ---
 const { data: configData } = await supabase.from("config_graficos").select("*");
-const config = (configData || []).reduce((acc, item) => { acc[item.clave] = item.activo; return acc; }, { 
-    stat_colaboradores: true, stat_proyectos: true, stat_alianzas: true, stat_papers: true 
-});
-const mostrarSeccionImpacto = config.stat_colaboradores || config.stat_proyectos || config.stat_alianzas || config.stat_papers;
+// 'as any' silencia errores de tipo en la configuración
+const configInicial = {
+    stat_colaboradores: true,
+    stat_proyectos: true,
+    stat_alianzas: true,
+    stat_papers: true,
+};
+const config = (configData || []).reduce((acc, item) => {
+    acc[item.clave] = item.activo;
+    return acc;
+}, configInicial);
+
+const mostrarSeccionImpacto =
+    config.stat_colaboradores ||
+    config.stat_proyectos ||
+    config.stat_alianzas ||
+    config.stat_papers;
 
 function formatAuthorsHome(autoresStr: any) {
     if (!autoresStr) return "Autoría CI2A2";
@@ -98,42 +149,98 @@ function formatAuthorsHome(autoresStr: any) {
 ---
 
 <MainLayout title="Inicio">
-    
     <section class="bg-light pb-0 pt-4">
         <div class="container">
-            <div id="mainBannerCarousel" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner shadow-lg rounded-4 overflow-hidden bg-white">
-                    {bannersSeguros && bannersSeguros.length > 0 ? (
-                        bannersSeguros.map((banner, index) => (
-                            <div class={`carousel-item ${index === 0 ? "active" : ""}`} data-bs-interval="5000">
-                                <div style={{ width: "100%", aspectRatio: "21/7", overflow: "hidden" }}>
-                                    {banner.link ? (
-                                        <a href={banner.link} target="_blank" rel="noopener noreferrer">
-                                            <img src={banner.image_url} class="d-block w-100 h-100 object-fit-cover" />
-                                        </a>
-                                    ) : (
-                                        <img src={banner.image_url} class="d-block w-100 h-100 object-fit-cover" />
-                                    )}
+            <div
+                id="mainBannerCarousel"
+                class="carousel slide"
+                data-bs-ride="carousel"
+            >
+                <div
+                    class="carousel-inner shadow-lg rounded-4 overflow-hidden bg-white"
+                >
+                    {
+                        bannersSeguros && bannersSeguros.length > 0 ? (
+                            bannersSeguros.map((banner, index) => (
+                                <div
+                                    class={`carousel-item ${index === 0 ? "active" : ""}`}
+                                    data-bs-interval="5000"
+                                >
+                                    <div
+                                        style={{
+                                            width: "100%",
+                                            aspectRatio: "21/7",
+                                            overflow: "hidden",
+                                        }}
+                                    >
+                                        {banner.link ? (
+                                            <a
+                                                href={banner.link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                <img
+                                                    src={banner.image_url}
+                                                    class="d-block w-100 h-100 object-fit-cover"
+                                                    alt={
+                                                        banner.title ||
+                                                        "Banner del CI²A²"
+                                                    }
+                                                    loading="lazy"
+                                                    width="1250"
+                                                    height="450"
+                                                />
+                                            </a>
+                                        ) : (
+                                            <img
+                                                src={banner.image_url}
+                                                class="d-block w-100 h-100 object-fit-cover"
+                                                alt={
+                                                    banner.title ||
+                                                    "Banner del CI²A²"
+                                                }
+                                                loading="lazy"
+                                                width="1250"
+                                                height="450"
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div class="carousel-item active">
+                                <div
+                                    style={{
+                                        width: "100%",
+                                        aspectRatio: "21/9",
+                                    }}
+                                    class="bg-secondary d-flex align-items-center justify-content-center text-white"
+                                >
+                                    <p>Cargando banners...</p>
                                 </div>
                             </div>
-                        ))
-                    ) : (
-                        <div class="carousel-item active">
-                            <div style={{ width: "100%", aspectRatio: "21/9" }} class="bg-secondary d-flex align-items-center justify-content-center text-white">
-                                <p>Cargando banners...</p>
+                        )
+                    }
+                </div>
+                {
+                    bannersSeguros && bannersSeguros.length > 1 && (
+                        <div class="custom-indicators-container">
+                            <div class="carousel-indicators">
+                                {bannersSeguros.map((_, index) => (
+                                    <button
+                                        type="button"
+                                        data-bs-target="#mainBannerCarousel"
+                                        data-bs-slide-to={index}
+                                        class={index === 0 ? "active" : ""}
+                                        aria-current={
+                                            index === 0 ? "true" : "false"
+                                        }
+                                    />
+                                ))}
                             </div>
                         </div>
-                    )}
-                </div>
-                {bannersSeguros && bannersSeguros.length > 1 && (
-                    <div class="custom-indicators-container">
-                        <div class="carousel-indicators">
-                            {bannersSeguros.map((_, index) => (
-                                <button type="button" data-bs-target="#mainBannerCarousel" data-bs-slide-to={index} class={index === 0 ? "active" : ""} aria-current={index === 0 ? "true" : "false"}></button>
-                            ))}
-                        </div>
-                    </div>
-                )}
+                    )
+                }
             </div>
         </div>
     </section>
@@ -142,163 +249,265 @@ function formatAuthorsHome(autoresStr: any) {
         <div class="container">
             <div class="row align-items-center g-5">
                 <div class="col-lg-6">
-                    <h6 class="text-pink fw-bold text-uppercase ls-2 mb-3">Sobre el Centro</h6>
-                    <h2 class="fw-bold text-dark mb-4">Liderando la revolución de la IA en el sur de Chile</h2>
+                    <h6 class="text-pink fw-bold text-uppercase ls-2 mb-3">
+                        Sobre el Centro
+                    </h6>
+                    <h2 class="fw-bold text-dark mb-4">
+                        Liderando la revolución de la IA en el sur de Chile
+                    </h2>
                     <p class="text-muted lead mb-4">
-                        El <strong>CI²A²</strong> nace con la misión de impulsar la investigación, formación y transferencia tecnológica en Inteligencia Artificial, contribuyendo al desarrollo científico y social del territorio.
+                        El <strong>CI²A²</strong> nace con la misión de impulsar la
+                        investigación, formación y transferencia tecnológica en Inteligencia
+                        Artificial, contribuyendo al desarrollo científico y social
+                        del territorio.
                     </p>
                     <p class="text-secondary mb-4">
-                        Perteneciente a la Universidad de La Frontera, nuestro centro actúa como un núcleo articulador entre la academia, el sector productivo y el sector público.
+                        En el marco de la iniciativa Ingeniería 2030 de la
+                        Facultad de Ingeniería y Ciencias, el CI²A²
+                        fortalece la I+D aplicada, promoviendo un ecosistema de
+                        innovación que articula academia, industria y sector
+                        público, con foco en el impacto y la transferencia de
+                        conocimiento.
                     </p>
                     <div class="d-flex gap-4 border-top pt-4">
                         <div>
                             <h3 class="fw-bold text-ufro mb-0">4+</h3>
-                            <small class="text-muted" style="font-size: 0.85rem;">Áreas Estratégicas</small>
+                            <small
+                                class="text-muted"
+                                style="font-size: 0.85rem;"
+                                >Áreas Estratégicas</small
+                            >
                         </div>
                         <div class="vr opacity-25"></div>
                         <div>
                             <h3 class="fw-bold text-ufro mb-0">2025</h3>
-                            <small class="text-muted" style="font-size: 0.85rem;">Fundación</small>
+                            <small
+                                class="text-muted"
+                                style="font-size: 0.85rem;">Fundación</small
+                            >
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-6">
                     <div class="position-relative ps-lg-4">
-                        <img src="https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80" alt="Investigadores UFRO" class="img-fluid rounded-4 shadow position-relative z-1" />
+                        <img
+                            src="https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80"
+                            alt="Investigadores UFRO"
+                            class="img-fluid rounded-4 shadow position-relative z-1"
+                        />
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    {mostrarSeccionImpacto && (
-        <section class="py-6 position-relative text-white overflow-hidden" style="background-color: var(--ufro-blue);">
-            <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10" style="background-image: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.3) 0%, transparent 20%);"></div>
-            
-            <div class="container position-relative z-2">
-                <div class="text-center mb-5">
-                    <h6 class="text-pink fw-bold text-uppercase ls-2 mb-2">Nuestra Gestión</h6>
-                    <h3 class="fw-bold text-white display-6">Impacto en Cifras</h3>
-                </div>
+    {
+        mostrarSeccionImpacto && (
+            <section
+                class="py-6 position-relative text-white overflow-hidden"
+                style="background-color: var(--ufro-blue);"
+            >
+                <div
+                    class="position-absolute top-0 start-0 w-100 h-100 opacity-10"
+                    style="background-image: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.3) 0%, transparent 20%);"
+                />
 
-                <div class="row g-4 text-center justify-content-center">
-                    {config.stat_colaboradores && (
-                        <div class="col-6 col-md-3">
-                            <div class="p-4 border border-white border-opacity-25 rounded-4 h-100 bg-white bg-opacity-10 backdrop-blur hover-lift transition-all">
-                                <i class="bi bi-people-fill fs-2 text-pink mb-3 d-block"></i>
-                                <h2 class="display-5 fw-bold mb-0 counter" data-target={totalEquipo || 0}>0</h2>
-                                <p class="text-white-50 text-uppercase small fw-bold mt-2 mb-0 ls-1">Colaboradores</p>
+                <div class="container position-relative z-2">
+                    <div class="text-center mb-5">
+                        <h6 class="text-pink fw-bold text-uppercase ls-2 mb-2">
+                            Nuestra Gestión
+                        </h6>
+                        <h3 class="fw-bold text-white display-6">
+                            Impacto en Cifras
+                        </h3>
+                    </div>
+
+                    <div class="row g-4 text-center justify-content-center">
+                        {config.stat_colaboradores && (
+                            <div class="col-6 col-md-3">
+                                <div class="p-4 border border-white border-opacity-25 rounded-4 h-100 bg-white bg-opacity-10 backdrop-blur hover-lift transition-all">
+                                    <i class="bi bi-people-fill fs-2 text-pink mb-3 d-block" />
+                                    <h2
+                                        class="display-5 fw-bold mb-0 counter"
+                                        data-target={totalEquipo || 0}
+                                    >
+                                        0
+                                    </h2>
+                                    <p class="text-white-50 text-uppercase small fw-bold mt-2 mb-0 ls-1">
+                                        Colaboradores
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    )}
-                    {config.stat_proyectos && (
-                        <div class="col-6 col-md-3">
-                            <div class="p-4 border border-white border-opacity-25 rounded-4 h-100 bg-white bg-opacity-10 backdrop-blur hover-lift transition-all">
-                                <i class="bi bi-kanban-fill fs-2 text-pink mb-3 d-block"></i>
-                                <h2 class="display-5 fw-bold mb-0 counter" data-target={totalProyectos || 0}>0</h2>
-                                <p class="text-white-50 text-uppercase small fw-bold mt-2 mb-0 ls-1">Proyectos I+D</p>
+                        )}
+                        {config.stat_proyectos && (
+                            <div class="col-6 col-md-3">
+                                <div class="p-4 border border-white border-opacity-25 rounded-4 h-100 bg-white bg-opacity-10 backdrop-blur hover-lift transition-all">
+                                    <i class="bi bi-kanban-fill fs-2 text-pink mb-3 d-block" />
+                                    <h2
+                                        class="display-5 fw-bold mb-0 counter"
+                                        data-target={totalProyectos || 0}
+                                    >
+                                        0
+                                    </h2>
+                                    <p class="text-white-50 text-uppercase small fw-bold mt-2 mb-0 ls-1">
+                                        Proyectos I+D
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    )}
-                    {config.stat_alianzas && (
-                        <div class="col-6 col-md-3">
-                            <div class="p-4 border border-white border-opacity-25 rounded-4 h-100 bg-white bg-opacity-10 backdrop-blur hover-lift transition-all">
-                                <i class="bi bi-diagram-3-fill fs-2 text-pink mb-3 d-block"></i>
-                                <h2 class="display-5 fw-bold mb-0 counter" data-target={totalAlianzasCount || 0}>0</h2>
-                                <p class="text-white-50 text-uppercase small fw-bold mt-2 mb-0 ls-1">Alianzas</p>
+                        )}
+                        {config.stat_alianzas && (
+                            <div class="col-6 col-md-3">
+                                <div class="p-4 border border-white border-opacity-25 rounded-4 h-100 bg-white bg-opacity-10 backdrop-blur hover-lift transition-all">
+                                    <i class="bi bi-diagram-3-fill fs-2 text-pink mb-3 d-block" />
+                                    <h2
+                                        class="display-5 fw-bold mb-0 counter"
+                                        data-target={totalAlianzasCount || 0}
+                                    >
+                                        0
+                                    </h2>
+                                    <p class="text-white-50 text-uppercase small fw-bold mt-2 mb-0 ls-1">
+                                        Alianzas
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    )}
-                    {config.stat_papers && (
-                        <div class="col-6 col-md-3">
-                            <div class="p-4 border border-white border-opacity-25 rounded-4 h-100 bg-white bg-opacity-10 backdrop-blur hover-lift transition-all">
-                                <i class="bi bi-file-earmark-richtext-fill fs-2 text-pink mb-3 d-block"></i>
-                                <h2 class="display-5 fw-bold mb-0 counter" data-target={totalPublicaciones || 0}>0</h2>
-                                <p class="text-white-50 text-uppercase small fw-bold mt-2 mb-0 ls-1">Papers</p>
+                        )}
+                        {config.stat_papers && (
+                            <div class="col-6 col-md-3">
+                                <div class="p-4 border border-white border-opacity-25 rounded-4 h-100 bg-white bg-opacity-10 backdrop-blur hover-lift transition-all">
+                                    <i class="bi bi-file-earmark-richtext-fill fs-2 text-pink mb-3 d-block" />
+                                    <h2
+                                        class="display-5 fw-bold mb-0 counter"
+                                        data-target={totalPublicaciones || 0}
+                                    >
+                                        0
+                                    </h2>
+                                    <p class="text-white-50 text-uppercase small fw-bold mt-2 mb-0 ls-1">
+                                        Papers
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
-            </div>
-        </section>
-    )}
+            </section>
+        )
+    }
 
     <section class="py-6 bg-light">
         <div class="container">
             <div class="text-center mb-5">
-                <h6 class="text-pink fw-bold text-uppercase ls-2">Enfoque Estratégico</h6>
+                <h6 class="text-pink fw-bold text-uppercase ls-2">
+                    Enfoque Estratégico
+                </h6>
                 <h2 class="fw-bold text-dark">Líneas de Investigación</h2>
-                <div class="mx-auto mt-3 bg-pink rounded-pill" style="width: 50px; height: 3px;"></div>
+                <div
+                    class="mx-auto mt-3 bg-pink rounded-pill"
+                    style="width: 50px; height: 3px;"
+                >
+                </div>
             </div>
-            
+
             <div class="row g-4">
-                {lineasInvestigacion.map((linea) => (
-                    <div class="col-md-6 col-lg-3">
-                        <div class="card h-100 border-0 shadow-sm p-4 hover-lift card-research position-relative overflow-hidden bg-white">
-                            <div class="position-absolute top-0 start-0 h-100 bg-pink" style="width: 4px;"></div>
-                            <div class="icon-box bg-light text-pink mb-4 rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                <i class={`bi ${linea.icon} fs-3`} />
+                {
+                    lineasInvestigacion.map((linea) => (
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card h-100 border-0 shadow-sm p-4 hover-lift card-research position-relative overflow-hidden bg-white">
+                                <div
+                                    class="position-absolute top-0 start-0 h-100 bg-pink"
+                                    style="width: 4px;"
+                                />
+                                <div
+                                    class="icon-box bg-light text-pink mb-4 rounded-circle d-flex align-items-center justify-content-center"
+                                    style="width: 60px; height: 60px;"
+                                >
+                                    <i class={`bi ${linea.icon} fs-3`} />
+                                </div>
+                                <h5 class="fw-bold text-dark mb-3">
+                                    {linea.titulo}
+                                </h5>
+                                <p class="text-muted small mb-0 opacity-75">
+                                    {linea.desc}
+                                </p>
                             </div>
-                            <h5 class="fw-bold text-dark mb-3">{linea.titulo}</h5>
-                            <p class="text-muted small mb-0 opacity-75">{linea.desc}</p>
                         </div>
-                    </div>
-                ))}
+                    ))
+                }
             </div>
         </div>
     </section>
 
     <section id="proyectos" class="py-6 bg-white border-top">
         <div class="container">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-end mb-5 gap-3">
+            <div
+                class="d-flex flex-column flex-md-row justify-content-between align-items-end mb-5 gap-3"
+            >
                 <div class="text-center text-md-start w-100">
-                    <h6 class="text-pink fw-bold text-uppercase ls-2">Innovación Aplicada</h6>
+                    <h6 class="text-pink fw-bold text-uppercase ls-2">
+                        Innovación Aplicada
+                    </h6>
                     <h2 class="fw-bold text-dark">Proyectos Destacados</h2>
                 </div>
-                <a href="/proyectos" class="btn btn-outline-pink rounded-pill px-4 py-2 fw-bold hover-scale text-nowrap align-self-center align-self-md-end shadow-sm">
+                <a
+                    href="/proyectos"
+                    class="btn btn-outline-pink rounded-pill px-4 py-2 fw-bold hover-scale text-nowrap align-self-center align-self-md-end shadow-sm"
+                >
                     Ver Portafolio <i class="bi bi-arrow-right ms-2"></i>
                 </a>
             </div>
-
-            {proyectos && proyectos.length > 0 ? (
-                <div class="row g-4">
-                    {proyectos.map((p) => (
-                        <div class="col-lg-4 col-md-6">
-                            <article class="card h-100 border-0 shadow-sm project-card overflow-hidden hover-lift transition-all">
-                                <div class="position-relative" style="height: 200px;">
-                                    <img src={p.image_url || "/img/placeholder-project.jpg"} class="w-100 h-100 object-fit-cover" alt={p.title} />
-                                    <div class="position-absolute top-0 end-0 m-3">
-                                        <span class="badge bg-white text-dark shadow-sm border">{p.area}</span>
-                                    </div>
-                                </div>
-                                <div class="card-body p-4 d-flex flex-column">
-                                    <h5 class="fw-bold text-dark mb-2 fs-5 line-clamp-2" style="min-height: 3rem;">{p.title}</h5>
-                                    <p class="text-muted small line-clamp-3 mb-4 flex-grow-1">{p.resumen || "Sin descripción disponible."}</p>
-                                    <div class="mt-auto border-top pt-3 d-flex justify-content-between align-items-center">
-                                        <small class="text-success fw-bold"><i class="bi bi-circle-fill small me-1"></i> {p.status}</small>
-                                        <a href={`/proyectos/${p.id}`} class="text-pink text-decoration-none fw-bold small stretched-link">Ver detalles <i class="bi bi-arrow-right"></i></a>
-                                    </div>
-                                </div>
-                            </article>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <div class="text-center py-5"><p class="text-muted">Cargando proyectos...</p></div>
-            )}
+            {
+                proyectos && proyectos.length > 0 ? (
+                    <Carrusel
+                        client:load
+                        tipo="proyectos"
+                        banners={[]}
+                        datos={
+                            proyectos.map((p) => ({
+                                id: p.id,
+                                title: p.title || p.nombre || "Sin Título", // Esto es vital
+                                image_url:
+                                    p.imagen_url ||
+                                    p.portada_url ||
+                                    p.image_url,
+                                resumen:
+                                    p.descripcion ||
+                                    p.resumen ||
+                                    "Sin descripción disponible.",
+                                area: p.area || p.categoria || "I+D",
+                                status: p.status || p.estado || "En curso",
+                            })) as any
+                        }
+                    />
+                ) : (
+                    <div class="text-center py-5">
+                        <p class="text-muted">Cargando proyectos...</p>
+                    </div>
+                )
+            }
         </div>
     </section>
 
-    <section class="py-6 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #003767 0%, #d63384 100%);">
+    <section
+        class="py-6 text-white position-relative overflow-hidden"
+        style="background: linear-gradient(135deg, #003767 0%, #d63384 100%);"
+    >
         <div class="container position-relative z-2">
             <div class="row align-items-center g-5">
                 <div class="col-lg-5">
-                    <h6 class="text-pink fw-bold text-uppercase ls-2 mb-2">Talento Joven</h6>
-                    <h2 class="fw-bold mb-4 display-5 text-white">Formación y Docencia</h2>
+                    <h6 class="text-pink fw-bold text-uppercase ls-2 mb-2">
+                        Talento Joven
+                    </h6>
+                    <h2 class="fw-bold mb-4 display-5 text-white">
+                        Formación y Docencia
+                    </h2>
                     <p class="lead opacity-90 mb-5">
-                        Vinculamos a estudiantes con proyectos de frontera. Ofrecemos oportunidades reales para tu desarrollo profesional en un entorno de alto nivel.
+                        Vinculamos a estudiantes con proyectos de frontera.
+                        Ofrecemos oportunidades reales para tu desarrollo
+                        profesional en un entorno de alto nivel.
                     </p>
-                    <a href="/contacto" class="btn btn-action-white rounded-pill px-5 py-3 fw-bold shadow-lg d-inline-flex align-items-center gap-2">
+                    <a
+                        href="/contacto"
+                        class="btn btn-action-white rounded-pill px-5 py-3 fw-bold shadow-lg d-inline-flex align-items-center gap-2"
+                    >
                         <span>¡Quiero participar!</span>
                         <i class="bi bi-chevron-right small"></i>
                     </a>
@@ -306,24 +515,56 @@ function formatAuthorsHome(autoresStr: any) {
                 <div class="col-lg-6 offset-lg-1">
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <a href="/contacto" class="text-decoration-none text-white h-100 d-block">
-                                <div class="p-4 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-25 h-100 hover-glass text-center text-md-start transition-all cursor-pointer">
-                                    <div class="mb-3 d-inline-block p-3 rounded-circle bg-white bg-opacity-10">
-                                        <i class="bi bi-mortarboard fs-3 text-white"></i>
+                            <a
+                                href="/contacto"
+                                class="text-decoration-none text-white h-100 d-block"
+                            >
+                                <div
+                                    class="p-4 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-25 h-100 hover-glass text-center text-md-start transition-all cursor-pointer"
+                                >
+                                    <div
+                                        class="mb-3 d-inline-block p-3 rounded-circle bg-white bg-opacity-10"
+                                    >
+                                        <i
+                                            class="bi bi-mortarboard fs-3 text-white"
+                                        ></i>
                                     </div>
-                                    <h5 class="fw-bold text-white">Tesis y Articulación</h5>
-                                    <p class="small opacity-75 mb-0">Desarrolla tu memoria de título con posibilidad de <strong>articulación directa con el Magíster</strong>.</p>
+                                    <h5 class="fw-bold text-white">
+                                        Tesis y Articulación
+                                    </h5>
+                                    <p class="small opacity-75 mb-0">
+                                        Desarrolla tu memoria de título con
+                                        posibilidad de <strong
+                                            >articulación directa con el
+                                            Magíster</strong
+                                        >.
+                                    </p>
                                 </div>
                             </a>
                         </div>
                         <div class="col-md-6">
-                            <a href="/contacto" class="text-decoration-none text-white h-100 d-block">
-                                <div class="p-4 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-25 h-100 hover-glass text-center text-md-start transition-all cursor-pointer">
-                                    <div class="mb-3 d-inline-block p-3 rounded-circle bg-white bg-opacity-10">
-                                        <i class="bi bi-briefcase fs-3 text-white"></i>
+                            <a
+                                href="/contacto"
+                                class="text-decoration-none text-white h-100 d-block"
+                            >
+                                <div
+                                    class="p-4 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-25 h-100 hover-glass text-center text-md-start transition-all cursor-pointer"
+                                >
+                                    <div
+                                        class="mb-3 d-inline-block p-3 rounded-circle bg-white bg-opacity-10"
+                                    >
+                                        <i
+                                            class="bi bi-briefcase fs-3 text-white"
+                                        ></i>
                                     </div>
-                                    <h5 class="fw-bold text-white">Prácticas</h5>
-                                    <p class="small opacity-75 mb-0">Oportunidades de <strong>Práctica Controlada</strong> y Profesional en proyectos de innovación.</p>
+                                    <h5 class="fw-bold text-white">
+                                        Prácticas
+                                    </h5>
+                                    <p class="small opacity-75 mb-0">
+                                        Oportunidades de <strong
+                                            >Práctica Controlada</strong
+                                        > y Profesional en proyectos de innovación.
+                                    </p>
                                 </div>
                             </a>
                         </div>
@@ -336,39 +577,44 @@ function formatAuthorsHome(autoresStr: any) {
     <section class="py-6 bg-light overflow-hidden">
         <div class="container">
             <div class="text-center mb-5">
-                <h6 class="text-pink fw-bold text-uppercase ls-2">Actualidad</h6>
+                <h6 class="text-pink fw-bold text-uppercase ls-2">
+                    Actualidad
+                </h6>
                 <h2 class="fw-bold text-dark">Noticias y Eventos</h2>
             </div>
 
-            <div class="swiper swiper-noticias pb-5 px-2">
-                <div class="swiper-wrapper">
-                    {noticiasSeguras.map((n) => (
-                        <div class="swiper-slide h-auto">
-                            <div class="card border-0 shadow-sm news-card-clean h-100 w-100">
-                                {n.image_url && (
-                                    <div class="img-container-fija">
-                                        <img src={n.image_url} alt={n.titulo} loading="lazy" />
-                                    </div>
-                                )}
-                                <div class="card-body p-4 d-flex flex-column">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <small class="text-pink fw-bold text-uppercase" style="font-size: 0.7rem;">{n.categoria || "Actualidad"}</small>
-                                        <small class="text-muted" style="font-size: 0.75rem;">{new Date(n.created_at).toLocaleDateString('es-CL')}</small>
-                                    </div>
-                                    <h5 class="fw-bold mb-3">
-                                        <a href={`/noticias/${n.id}`} class="news-title-link stretched-link text-decoration-none text-dark">{n.titulo}</a>
-                                    </h5>
-                                    <p class="text-muted small mb-0 line-clamp-3">{n.bajada}</p>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                <div class="swiper-pagination"></div>
-            </div>
+            {/* AQUÍ: Usamos 'as any' para borrar errores de TypeScript */}
+            {
+                noticiasSeguras && noticiasSeguras.length > 0 ? (
+                    <Carrusel
+                        client:load
+                        tipo="noticias"
+                        banners={[]}
+                        datos={
+                            (noticiasSeguras || []).map((n) => ({
+                                id: n.id,
+                                title: n.titulo,
+                                image_url: n.image_url,
+                                resumen: n.bajada || n.resumen,
+                                area: n.categoria,
+                                fecha: new Date(
+                                    n.created_at,
+                                ).toLocaleDateString("es-CL"),
+                            })) as any
+                        }
+                    />
+                ) : (
+                    <div class="text-center py-5">
+                        <p class="text-muted">Cargando noticias...</p>
+                    </div>
+                )
+            }
 
             <div class="text-center mt-3">
-                <a href="/noticias" class="btn btn-outline-pink rounded-pill px-5 py-2 fw-bold hover-scale shadow-sm d-inline-flex align-items-center gap-2">
+                <a
+                    href="/noticias"
+                    class="btn btn-outline-pink rounded-pill px-5 py-2 fw-bold hover-scale shadow-sm d-inline-flex align-items-center gap-2"
+                >
                     Ver todas las noticias <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
@@ -379,26 +625,64 @@ function formatAuthorsHome(autoresStr: any) {
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-4 mb-4 mb-lg-0">
-                    <h6 class="text-pink fw-bold text-uppercase ls-2">Ciencia Abierta</h6>
-                    <h2 class="fw-bold text-dark mb-3">Producción Científica</h2>
-                    <p class="text-muted mb-4">Difundimos el conocimiento a través de revistas indexadas y conferencias de alto impacto.</p>
-                    <a href="/publicaciones" class="btn btn-outline-pink rounded-pill px-4 shadow-sm hover-lift fw-bold">Ver repositorio</a>
+                    <h6 class="text-pink fw-bold text-uppercase ls-2">
+                        Ciencia Abierta
+                    </h6>
+                    <h2 class="fw-bold text-dark mb-3">
+                        Producción Científica
+                    </h2>
+                    <p class="text-muted mb-4">
+                        Difundimos el conocimiento a través de revistas
+                        indexadas y conferencias de alto impacto.
+                    </p>
+                    <a
+                        href="/publicaciones"
+                        class="btn btn-outline-pink rounded-pill px-4 shadow-sm hover-lift fw-bold"
+                        >Ver repositorio</a
+                    >
                 </div>
-                
+
                 <div class="col-lg-8">
-                    <div class="list-group list-group-flush border-start border-3 ps-4 mt-4 mt-lg-0" style="border-color: #d63384 !important;">
-                        {publicaciones && publicaciones.length > 0 ? (
-                            publicaciones.map((pub) => (
-                                <div class="mb-4">
-                                    <h6 class="fw-bold text-dark mb-1">
-                                        {pub.url ? <a href={pub.url} target="_blank" rel="noopener noreferrer" class="text-dark text-decoration-none hover-primary pub-link">{pub.title} <i class="bi bi-box-arrow-up-right small text-muted ms-1" style="font-size: 0.7em;"></i></a> : pub.title}
-                                    </h6>
-                                    <p class="small text-muted mb-0"><span class="badge bg-light text-dark border me-1">{pub.year}</span> {formatAuthorsHome(pub.autores)}</p>
+                    <div
+                        class="list-group list-group-flush border-start border-3 ps-4 mt-4 mt-lg-0"
+                        style="border-color: #d63384 !important;"
+                    >
+                        {
+                            publicaciones && publicaciones.length > 0 ? (
+                                publicaciones.map((pub) => (
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold text-dark mb-1">
+                                            {pub.url ? (
+                                                <a
+                                                    href={pub.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="text-dark text-decoration-none hover-primary pub-link"
+                                                >
+                                                    {pub.title}{" "}
+                                                    <i
+                                                        class="bi bi-box-arrow-up-right small text-muted ms-1"
+                                                        style="font-size: 0.7em;"
+                                                    />
+                                                </a>
+                                            ) : (
+                                                pub.title
+                                            )}
+                                        </h6>
+                                        <p class="small text-muted mb-0">
+                                            <span class="badge bg-light text-dark border me-1">
+                                                {pub.year}
+                                            </span>{" "}
+                                            {formatAuthorsHome(pub.autores)}
+                                        </p>
+                                    </div>
+                                ))
+                            ) : (
+                                <div class="text-muted fst-italic">
+                                    Cargando publicaciones...
                                 </div>
-                            ))
-                        ) : (
-                            <div class="text-muted fst-italic">Cargando publicaciones...</div>
-                        )}
+                            )
+                        }
                     </div>
                 </div>
             </div>
@@ -407,33 +691,63 @@ function formatAuthorsHome(autoresStr: any) {
 
     <section class="py-6 bg-light border-top">
         <div class="container">
-            
             <div class="text-center mb-5">
-                <p class="small text-uppercase text-muted fw-bold mb-4 ls-2">Colaboración y Vinculación</p>
-                
-                {alianzas.length === 0 ? (
-                    <div class="text-muted">Cargando alianzas...</div>
-                ) : (
-                    categoriasAmostrar.map((categoria) => (
-                        <div class="mb-5">
-                            <h6 class="text-ufro fw-bold text-uppercase opacity-75 mb-3" style="font-size: 0.8rem;">{categoria}</h6>
-                            <div class="d-flex justify-content-center align-items-center gap-4 flex-wrap colorful-logos">
-                                {alianzasPorCategoria[categoria].map((item: any) => (
-                                    <a href={item.link_web || "#"} target={item.link_web ? "_blank" : "_self"} class="logo-item text-decoration-none text-center" title={item.nombre}>
-                                        {item.logo_url ? (
-                                            <img src={item.logo_url} alt={item.nombre} class="img-fluid" style="max-height: 50px; max-width: 120px;" loading="lazy" />
-                                        ) : (
-                                            <span class="text-muted fw-bold small">{item.nombre}</span>
-                                        )}
-                                    </a>
-                                ))}
+                <p class="small text-uppercase text-muted fw-bold mb-4 ls-2">
+                    Colaboración y Vinculación
+                </p>
+
+                {
+                    alianzas.length === 0 ? (
+                        <div class="text-muted">Cargando alianzas...</div>
+                    ) : (
+                        categoriasAmostrar.map((categoria) => (
+                            <div class="mb-5">
+                                <h6
+                                    class="text-ufro fw-bold text-uppercase opacity-75 mb-3"
+                                    style="font-size: 0.8rem;"
+                                >
+                                    {categoria}
+                                </h6>
+                                <div class="d-flex justify-content-center align-items-center gap-4 flex-wrap colorful-logos">
+                                    {(
+                                        alianzasPorCategoria[categoria] || []
+                                    ).map((item) => (
+                                        <a
+                                            href={item.link_web || "#"}
+                                            target={
+                                                item.link_web
+                                                    ? "_blank"
+                                                    : "_self"
+                                            }
+                                            class="logo-item text-decoration-none text-center"
+                                            title={item.nombre}
+                                        >
+                                            {item.logo_url ? (
+                                                <img
+                                                    src={item.logo_url}
+                                                    alt={item.nombre}
+                                                    class="img-fluid"
+                                                    style="max-height: 50px; max-width: 120px;"
+                                                    loading="lazy"
+                                                />
+                                            ) : (
+                                                <span class="text-muted fw-bold small">
+                                                    {item.nombre}
+                                                </span>
+                                            )}
+                                        </a>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    ))
-                )}
+                        ))
+                    )
+                }
 
                 <div class="mt-4">
-                    <a href="/alianzas" class="btn btn-link text-pink fw-bold text-decoration-none hover-scale">
+                    <a
+                        href="/alianzas"
+                        class="btn btn-link text-pink fw-bold text-decoration-none hover-scale"
+                    >
                         Ver todas las alianzas <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
@@ -441,15 +755,33 @@ function formatAuthorsHome(autoresStr: any) {
 
             <div class="row justify-content-center mt-5">
                 <div class="col-lg-8">
-                    <div class="bg-white rounded-4 p-5 shadow-lg border-start border-5 border-pink position-relative overflow-hidden hover-lift transition-all">
-                        <div class="position-absolute top-0 end-0 p-3 opacity-10 text-pink pe-none"><i class="bi bi-rocket-takeoff-fill fs-1"></i></div>
-                        
-                        <h3 class="fw-bold text-dark mb-3 text-center text-md-start">¿Tienes un desafío tecnológico?</h3>
-                        <p class="text-muted mb-4 mx-auto lead text-center text-md-start" style="font-size: 1rem;">
-                            Buscamos socios estratégicos en la industria y el sector público para desarrollar proyectos de I+D conjuntos.
+                    <div
+                        class="bg-white rounded-4 p-5 shadow-lg border-start border-5 border-pink position-relative overflow-hidden hover-lift transition-all"
+                    >
+                        <div
+                            class="position-absolute top-0 end-0 p-3 opacity-10 text-pink pe-none"
+                        >
+                            <i class="bi bi-rocket-takeoff-fill fs-1"></i>
+                        </div>
+
+                        <h3
+                            class="fw-bold text-dark mb-3 text-center text-md-start"
+                        >
+                            ¿Tienes un desafío tecnológico?
+                        </h3>
+                        <p
+                            class="text-muted mb-4 mx-auto lead text-center text-md-start"
+                            style="font-size: 1rem;"
+                        >
+                            Buscamos socios estratégicos en la industria y el
+                            sector público para desarrollar proyectos de I+D
+                            conjuntos.
                         </p>
                         <div class="text-center text-md-start">
-                            <a href="/contacto" class="btn btn-pink text-white rounded-pill px-5 py-3 fw-bold shadow hover-scale">
+                            <a
+                                href="/contacto"
+                                class="btn btn-pink text-white rounded-pill px-5 py-3 fw-bold shadow hover-scale"
+                            >
                                 Contáctanos Ahora
                             </a>
                         </div>
@@ -460,9 +792,12 @@ function formatAuthorsHome(autoresStr: any) {
     </section>
 </MainLayout>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+/>
 
-<style>
+<style is:global>
     :root {
         --ufro-blue: #003767;
         --ufro-pink: #d63384;
@@ -470,73 +805,130 @@ function formatAuthorsHome(autoresStr: any) {
     }
 
     /* Colores */
-    .text-ufro { color: var(--ufro-blue); }
-    .bg-ufro { background-color: var(--ufro-blue); }
-    .text-pink { color: var(--ufro-pink) !important; }
-    .bg-pink { background-color: var(--ufro-pink) !important; }
-    .bg-pink-subtle { background-color: var(--ufro-pink-light) !important; }
-    .border-pink { border-color: var(--ufro-pink) !important; }
-    
-    .ls-1 { letter-spacing: 1px; }
-    .ls-2 { letter-spacing: 2px; }
-    .py-6 { padding-top: 5rem; padding-bottom: 5rem; }
+    .text-ufro {
+        color: var(--ufro-blue);
+    }
+    .bg-ufro {
+        background-color: var(--ufro-blue);
+    }
+    .text-pink {
+        color: var(--ufro-pink) !important;
+    }
+    .bg-pink {
+        background-color: var(--ufro-pink) !important;
+    }
+    .bg-pink-subtle {
+        background-color: var(--ufro-pink-light) !important;
+    }
+    .border-pink {
+        border-color: var(--ufro-pink) !important;
+    }
+
+    .ls-1 {
+        letter-spacing: 1px;
+    }
+    .ls-2 {
+        letter-spacing: 2px;
+    }
+    .py-6 {
+        padding-top: 5rem;
+        padding-bottom: 5rem;
+    }
 
     /* Transiciones Generales */
-    .transition-all { transition: all 0.3s ease; }
-    .hover-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-    .hover-lift:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important; }
-    .hover-scale:hover { transform: scale(1.05); }
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+    .hover-lift {
+        transition:
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+    }
+    .hover-scale:hover {
+        transform: scale(1.05);
+    }
 
     /* --- NOTICIAS --- */
-    .swiper-noticias { padding: 20px 10px 50px 10px; overflow: visible; }
-    .swiper-slide { height: auto; display: flex; }
-    
-    .news-card-clean { 
-        width: 100%; 
-        border-radius: 12px; 
+    .swiper-noticias {
+        padding: 20px 10px 50px 10px;
+        overflow: visible;
+    }
+    .swiper-slide {
+        height: auto;
+        display: flex;
+    }
+
+    .news-card-clean {
+        width: 100%;
+        border-radius: 12px;
         background-color: #fff;
-        transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
+        transition:
+            transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
+            box-shadow 0.4s ease;
         overflow: hidden;
     }
-    .news-card-clean:hover { 
-        transform: translateY(-10px); 
-        box-shadow: 0 15px 35px rgba(0, 55, 103, 0.12) !important; 
+    .news-card-clean:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(0, 55, 103, 0.12) !important;
     }
-    
-    .img-container-fija { width: 100%; height: 240px; background-color: #eee; overflow: hidden; border-top-left-radius: 12px; border-top-right-radius: 12px;}
-    .img-container-fija img { 
-        width: 100%; height: 100%; object-fit: cover; object-position: center 20%;
+
+    .img-container-fija {
+        width: 100%;
+        height: 240px;
+        background-color: #eee;
+        overflow: hidden;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    .img-container-fija img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 20%;
         transition: transform 0.5s ease;
     }
-    .news-card-clean:hover .img-container-fija img { transform: scale(1.05); }
+    .news-card-clean:hover .img-container-fija img {
+        transform: scale(1.05);
+    }
 
     /* Subrayado Azul Animado */
     .news-title-link {
         color: #212529 !important;
         text-decoration: none !important;
-        display: inline !important;
-        background-image: linear-gradient(var(--ufro-blue), var(--ufro-blue));
-        background-repeat: no-repeat;
-        background-position: 0% 100%;
-        background-size: 0% 2px;
-        transition: background-size 0.3s ease-in-out, color 0.3s ease;
-        padding-bottom: 2px;
-        box-decoration-break: clone;
-        -webkit-box-decoration-break: clone;
+        transition: color 0.3s ease;
+        display: inline-block;
     }
+
+    /* Al pasar el mouse sobre la tarjeta, el título cambia a azul UFRO */
     .news-card-clean:hover .news-title-link {
         color: var(--ufro-blue) !important;
-        background-size: 100% 2px;
+    }
+
+    /* Mantenemos el zoom de la imagen porque se ve muy bien */
+    .news-card-clean:hover .img-container-fija img {
+        transform: scale(1.05);
     }
 
     /* --- PROYECTOS (BOTÓN) --- */
-    .btn-outline-pink { color: var(--ufro-pink); border: 2px solid var(--ufro-pink); transition: all 0.3s; }
-    .btn-outline-pink:hover { background-color: var(--ufro-pink); color: white; box-shadow: 0 5px 15px rgba(214, 51, 132, 0.4); }
+    .btn-outline-pink {
+        color: var(--ufro-pink);
+        border: 2px solid var(--ufro-pink);
+        transition: all 0.3s;
+    }
+    .btn-outline-pink:hover {
+        background-color: var(--ufro-pink);
+        color: white;
+        box-shadow: 0 5px 15px rgba(214, 51, 132, 0.4);
+    }
 
     /* --- CAPITAL HUMANO (HOVER & BUTTON) --- */
     .btn-action-white {
         background-color: #ffffff;
-        color: #d63384; 
+        color: #d63384;
         border: 2px solid #ffffff;
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
@@ -545,16 +937,23 @@ function formatAuthorsHome(autoresStr: any) {
         transform: translateY(-4px) scale(1.05);
         box-shadow: 0 0 25px rgba(255, 255, 255, 0.6);
     }
-    
-    .hover-glass { transition: transform 0.3s ease, background-color 0.3s ease; }
+
+    .hover-glass {
+        transition:
+            transform 0.3s ease,
+            background-color 0.3s ease;
+    }
     .hover-glass:hover {
         background-color: rgba(255, 255, 255, 0.2) !important;
         transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
 
     /* --- IMPACTO (GLASS) --- */
-    .backdrop-blur { backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
+    .backdrop-blur {
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+    }
 
     #mainBannerCarousel .carousel-indicators {
         position: relative; /* Lo saca de encima de la imagen */
@@ -577,38 +976,67 @@ function formatAuthorsHome(autoresStr: any) {
 
     /* 3. Color cuando el botón está activo */
     #mainBannerCarousel .carousel-indicators button.active {
-        background-color: var(--ufro-pink); /* Tu color rosa definido en :root */
+        background-color: var(
+            --ufro-pink
+        ); /* Tu color rosa definido en :root */
         width: 30px; /* Opcional: los hace un poco más largos cuando están activos */
         border-radius: 10px;
     }
 
     /* 4. Cambio de color al hacer Hover */
     #mainBannerCarousel .carousel-indicators button:hover {
-        background-color: var(--ufro-blue); /* Cambia a azul al pasar el mouse */
+        background-color: var(
+            --ufro-blue
+        ); /* Cambia a azul al pasar el mouse */
         transform: scale(1.2); /* Un pequeño zoom para feedback visual */
     }
 
     /* --- PUBLICACIONES (LINK REACTIVO) --- */
-    .pub-link:hover { text-decoration: underline !important; color: var(--ufro-pink) !important; }
+    .pub-link:hover {
+        text-decoration: underline !important;
+        color: var(--ufro-pink) !important;
+    }
 
     /* --- VINCULACIÓN (LOGOS COLORIDOS) --- */
-    .colorful-logos .logo-item { transition: all 0.3s; }
-    .colorful-logos .logo-item img { 
-        filter: none; /* Color Original */
-        opacity: 1; 
-        transition: transform 0.3s ease; 
+    .colorful-logos .logo-item {
+        transition: all 0.3s;
     }
-    .colorful-logos .logo-item:hover img { 
+    .colorful-logos .logo-item img {
+        filter: none; /* Color Original */
+        opacity: 1;
+        transition: transform 0.3s ease;
+    }
+    .colorful-logos .logo-item:hover img {
         transform: scale(1.15); /* Zoom interactivo */
     }
 
     /* Botón Rosa Solido */
-    .btn-pink { background-color: var(--ufro-pink); border-color: var(--ufro-pink); color: white; transition: all 0.3s; }
-    .btn-pink:hover { background-color: #c02873; border-color: #c02873; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(192, 40, 115, 0.4); }
+    .btn-pink {
+        background-color: var(--ufro-pink);
+        border-color: var(--ufro-pink);
+        color: white;
+        transition: all 0.3s;
+    }
+    .btn-pink:hover {
+        background-color: #c02873;
+        border-color: #c02873;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(192, 40, 115, 0.4);
+    }
 
-    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-    
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
     /* Botón Outline Dark para Publicaciones */
     .btn-outline-dark:hover {
         background-color: #212529;
@@ -616,13 +1044,15 @@ function formatAuthorsHome(autoresStr: any) {
     }
 </style>
 
-<script is:inline src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script
+    is:inline
+    src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
 <script is:inline>
     // 1. Swiper Noticias
-    document.addEventListener('DOMContentLoaded', () => {
-        if (document.querySelector('.swiper-noticias')) {
-            new Swiper('.swiper-noticias', {
+    document.addEventListener("DOMContentLoaded", () => {
+        if (document.querySelector(".swiper-noticias")) {
+            new Swiper(".swiper-noticias", {
                 slidesPerView: 1,
                 spaceBetween: 24,
                 loop: true,
@@ -631,35 +1061,38 @@ function formatAuthorsHome(autoresStr: any) {
                 autoplay: { delay: 4000, disableOnInteraction: false },
                 breakpoints: {
                     768: { slidesPerView: 2 },
-                    1024: { slidesPerView: 3 }
-                }
+                    1024: { slidesPerView: 3 },
+                },
             });
         }
 
         // 2. Count Up
-        const counters = document.querySelectorAll('.counter');
-        const observer = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const counter = entry.target;
-                    const target = +counter.getAttribute('data-target');
-                    const speed = 200; 
-                    const updateCount = () => {
-                        const count = +counter.innerText;
-                        const inc = target / speed;
-                        if (count < target) {
-                            counter.innerText = Math.ceil(count + inc);
-                            setTimeout(updateCount, 20);
-                        } else {
-                            counter.innerText = target + "+";
-                        }
-                    };
-                    updateCount();
-                    observer.unobserve(counter);
-                }
-            });
-        }, { threshold: 0.5 });
+        const counters = document.querySelectorAll(".counter");
+        const observer = new IntersectionObserver(
+            (entries, observer) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const counter = entry.target;
+                        const target = +counter.getAttribute("data-target");
+                        const speed = 200;
+                        const updateCount = () => {
+                            const count = +counter.innerText;
+                            const inc = target / speed;
+                            if (count < target) {
+                                counter.innerText = Math.ceil(count + inc);
+                                setTimeout(updateCount, 20);
+                            } else {
+                                counter.innerText = target + "+";
+                            }
+                        };
+                        updateCount();
+                        observer.unobserve(counter);
+                    }
+                });
+            },
+            { threshold: 0.5 },
+        );
 
-        counters.forEach(counter => observer.observe(counter));
+        counters.forEach((counter) => observer.observe(counter));
     });
 </script>

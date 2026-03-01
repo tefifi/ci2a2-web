@@ -19,20 +19,20 @@ if (error || !proyecto) {
 }
 
 const getStatusStyle = (status: string) => {
-  if (!status) return "bg-light text-secondary border-secondary";
-  const s = status.toLowerCase();
+    if (!status) return "bg-light text-secondary border-secondary";
+    const s = status.toLowerCase();
 
-  // Usamos bg-opacity-25 para que el color de fondo "brille" sobre el azul marino
-  if (s.includes("curso") || s.includes("activo") || s.includes("desarrollo"))
-    return "bg-success bg-opacity-25 text-success border-success";
-  
-  if (s.includes("finalizado") || s.includes("terminado"))
-    return "bg-secondary bg-opacity-25 text-white border-secondary"; // Texto blanco para gris
-  
-  if (s.includes("plan") || s.includes("diseño"))
-    return "bg-warning bg-opacity-25 text-warning border-warning";
-  
-  return "bg-light text-secondary border-secondary";
+    // Usamos bg-opacity-25 para que el color de fondo "brille" sobre el azul marino
+    if (s.includes("curso") || s.includes("activo") || s.includes("desarrollo"))
+        return "bg-success bg-opacity-25 text-success border-success";
+
+    if (s.includes("finalizado") || s.includes("terminado"))
+        return "bg-secondary bg-opacity-25 text-white border-secondary"; // Texto blanco para gris
+
+    if (s.includes("plan") || s.includes("diseño"))
+        return "bg-warning bg-opacity-25 text-warning border-warning";
+
+    return "bg-light text-secondary border-secondary";
 };
 ---
 
@@ -47,14 +47,7 @@ const getStatusStyle = (status: string) => {
         <div class="container position-relative z-2">
             <div class="row">
                 <div class="col-lg-10">
-                    {/* Expandido a 10 para dar más aire horizontal al texto */}
-                    <a
-                        href="/proyectos"
-                        class="text-decoration-none small mb-3 d-inline-block back-link-gray"
-                    >
-                        <i class="bi bi-arrow-left me-1 transition-icon"></i> Volver
-                        al portafolio
-                    </a>
+
 
                     <div class="d-flex align-items-center gap-2 mb-2">
                         <span
@@ -105,64 +98,67 @@ const getStatusStyle = (status: string) => {
                             </h5>
 
                             <ul class="list-unstyled mb-4">
-                                <li class="mb-3 d-flex align-items-start gap-3">
-                                    <i
-                                        class="bi bi-calendar-check text-pink fs-5"
-                                    ></i>
-                                    <div>
-                                        <span
-                                            class="d-block fw-bold small text-uppercase text-muted"
-                                            >Período</span
-                                        >
-                                        <span>
-                                            {
-                                                proyecto?.fecha_inicio
-                                                    ? new Date(
-                                                          proyecto?.fecha_inicio,
-                                                      ).toLocaleDateString(
-                                                          "es-CL",
-                                                      )
-                                                    : "Fecha por definir"
-                                            }
-                                            {
-                                                proyecto?.fecha_termino && (
-                                                    <>
-                                                        {" "}
-                                                        -{" "}
-                                                        {new Date(
-                                                            proyecto?.fecha_termino,
-                                                        ).toLocaleDateString(
-                                                            "es-CL",
-                                                        )}
-                                                    </>
-                                                )
-                                            }
-                                        </span>
-                                    </div>
-                                </li>
+                                {
+                                    /* --- CAMBIO: Bloque condicional para Período --- */
+                                }
+                                {
+                                    proyecto?.fecha_inicio && (
+                                        <li class="mb-3 d-flex align-items-start gap-3">
+                                            <i class="bi bi-calendar-check text-pink fs-5" />
+                                            <div>
+                                                <span class="d-block fw-bold small text-uppercase text-muted">
+                                                    Período
+                                                </span>
+                                                <span>
+                                                    {new Date(
+                                                        proyecto.fecha_inicio,
+                                                    ).toLocaleDateString(
+                                                        "es-CL",
+                                                    )}
+                                                    {proyecto?.fecha_termino && (
+                                                        <>
+                                                            {" "}
+                                                            -{" "}
+                                                            {new Date(
+                                                                proyecto.fecha_termino,
+                                                            ).toLocaleDateString(
+                                                                "es-CL",
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </span>
+                                            </div>
+                                        </li>
+                                    )
+                                }
+
+                                {/* --- Resto de ítems (Área, etc.) --- */}
                                 <li class="mb-3 d-flex align-items-start gap-3">
                                     <i class="bi bi-layers text-pink fs-5"></i>
                                     <div>
                                         <span
                                             class="d-block fw-bold small text-uppercase text-muted"
-                                            >Área</span
                                         >
+                                            Área
+                                        </span>
                                         <span>{proyecto?.area}</span>
                                     </div>
                                 </li>
+
                                 {
                                     proyecto?.link_externo && (
                                         <li class="mb-3 d-flex align-items-start gap-3">
                                             <i class="bi bi-link-45deg text-pink fs-5" />
                                             <div>
                                                 <span class="d-block fw-bold small text-uppercase text-muted">
-                                                    Recurso Externo
+                                                    Proyecto
                                                 </span>
                                                 <a
                                                     href={
                                                         proyecto?.link_externo
                                                     }
                                                     target="_blank"
+                                                    rel="noopener noreferrer"
                                                     class="text-decoration-none text-break link-pink"
                                                 >
                                                     Ver enlace
@@ -177,7 +173,7 @@ const getStatusStyle = (status: string) => {
 
                             <div class="d-grid">
                                 <a
-                                    href="mailto:contacto.ci2a2@ufro.cl"
+                                    href="/contacto"
                                     class="btn btn-outline-pink rounded-pill fw-bold"
                                 >
                                     Consultar por este proyecto
@@ -223,19 +219,43 @@ const getStatusStyle = (status: string) => {
                                                                         class="mb-2 d-flex align-items-center justify-content-center"
                                                                         style="height: 100px; width: 160px;"
                                                                     >
+                                                                        {/* AQUÍ ESTÁ EL CAMBIO: Condicional para el enlace */}
                                                                         {socio.imagen ? (
-                                                                            <img
-                                                                                src={
-                                                                                    socio.imagen
-                                                                                }
-                                                                                alt={
-                                                                                    socio.nombre
-                                                                                }
-                                                                                title={
-                                                                                    socio.nombre
-                                                                                }
-                                                                                style="max-width: 100%; max-height: 100%; object-fit: contain;"
-                                                                            />
+                                                                            socio.url ? (
+                                                                                <a
+                                                                                    href={
+                                                                                        socio.url
+                                                                                    }
+                                                                                    target="_blank"
+                                                                                    rel="noopener noreferrer"
+                                                                                >
+                                                                                    <img
+                                                                                        src={
+                                                                                            socio.imagen
+                                                                                        }
+                                                                                        alt={
+                                                                                            socio.nombre
+                                                                                        }
+                                                                                        title={
+                                                                                            socio.nombre
+                                                                                        }
+                                                                                        style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                                                                                    />
+                                                                                </a>
+                                                                            ) : (
+                                                                                <img
+                                                                                    src={
+                                                                                        socio.imagen
+                                                                                    }
+                                                                                    alt={
+                                                                                        socio.nombre
+                                                                                    }
+                                                                                    title={
+                                                                                        socio.nombre
+                                                                                    }
+                                                                                    style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                                                                                />
+                                                                            )
                                                                         ) : (
                                                                             <i class="bi bi-building fs-1 text-muted opacity-25" />
                                                                         )}
@@ -271,19 +291,43 @@ const getStatusStyle = (status: string) => {
                                                                         class="mb-2 d-flex align-items-center justify-content-center"
                                                                         style="height: 100px; width: 160px;"
                                                                     >
+                                                                        {/* AQUÍ ESTÁ EL CAMBIO: Condicional para el enlace */}
                                                                         {finan.imagen ? (
-                                                                            <img
-                                                                                src={
-                                                                                    finan.imagen
-                                                                                }
-                                                                                alt={
-                                                                                    finan.nombre
-                                                                                }
-                                                                                title={
-                                                                                    finan.nombre
-                                                                                }
-                                                                                style="max-width: 100%; max-height: 100%; object-fit: contain;"
-                                                                            />
+                                                                            finan.url ? (
+                                                                                <a
+                                                                                    href={
+                                                                                        finan.url
+                                                                                    }
+                                                                                    target="_blank"
+                                                                                    rel="noopener noreferrer"
+                                                                                >
+                                                                                    <img
+                                                                                        src={
+                                                                                            finan.imagen
+                                                                                        }
+                                                                                        alt={
+                                                                                            finan.nombre
+                                                                                        }
+                                                                                        title={
+                                                                                            finan.nombre
+                                                                                        }
+                                                                                        style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                                                                                    />
+                                                                                </a>
+                                                                            ) : (
+                                                                                <img
+                                                                                    src={
+                                                                                        finan.imagen
+                                                                                    }
+                                                                                    alt={
+                                                                                        finan.nombre
+                                                                                    }
+                                                                                    title={
+                                                                                        finan.nombre
+                                                                                    }
+                                                                                    style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                                                                                />
+                                                                            )
                                                                         ) : (
                                                                             <i class="bi bi-bank fs-1 text-muted opacity-25" />
                                                                         )}
@@ -426,15 +470,14 @@ const getStatusStyle = (status: string) => {
         overflow: hidden;
     }
 
-
-/* Estilo general para las píldoras sobre fondo oscuro */
+    /* Estilo general para las píldoras sobre fondo oscuro */
     .badge.small {
         font-size: 0.75rem !important;
         font-weight: 700 !important;
         letter-spacing: 0.03em;
         padding: 0.4em 0.9em !important;
         border-radius: 50px;
-        
+
         /* Grosor del borde para que se vea como en tus capturas */
         border-width: 1.5px !important;
         border-style: solid !important;
@@ -445,9 +488,13 @@ const getStatusStyle = (status: string) => {
     }
 
     /* Corrección de color de texto para máxima legibilidad sobre fondo azul */
-    .text-success { color: #2ecc71 !important; } /* Un verde más brillante */
-    .text-warning { color: #f1c40f !important; } /* Un amarillo más sólido */
-    
+    .text-success {
+        color: #2ecc71 !important;
+    } /* Un verde más brillante */
+    .text-warning {
+        color: #f1c40f !important;
+    } /* Un amarillo más sólido */
+
     /* Si el fondo es el azul marino sólido de la imagen */
     section.bg-dark-blue {
         background-color: #002147; /* O el color exacto de tu imagen image_221943.png */

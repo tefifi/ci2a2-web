@@ -1,0 +1,239 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import PageHeader from '../components/common/PageHeader.astro';
+import { supabase }  from '../lib/supabase';
+
+// ── Datos ──────────────────────────────────────────────────────────────────
+let recursos: any[] = [];
+const { data, error } = await supabase
+  .from('biblioteca')
+  .select('*')
+  .order('created_at', { ascending: false });
+
+if (!error) recursos = data || [];
+
+// ── Agrupación por tipo ────────────────────────────────────────────────────
+const videos     = recursos.filter(r => r.tipo === 'video');
+const centros    = recursos.filter(r => r.tipo === 'centro');
+const documentos = recursos.filter(r => r.tipo !== 'video' && r.tipo !== 'centro');
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+const getYouTubeThumbnail = (url: any): string | null => {
+  if (!url) return null;
+  const match = url.match(/^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
+  return match && match[2].length === 11
+    ? `https://img.youtube.com/vi/${match[2]}/hqdefault.jpg`
+    : null;
+};
+
+type TypeConfig = { icon: string; color: string; bg: string; label: string };
+const getTypeConfig = (tipo: any): TypeConfig => {
+  switch (tipo) {
+    case 'paper':
+      return { icon: 'bi-file-earmark-pdf-fill', color: 'text-danger', bg: 'bg-danger-subtle', label: 'Paper / PDF' };
+    default:
+      return { icon: 'bi-link-45deg', color: 'text-success', bg: 'bg-success-subtle', label: 'Enlace Web' };
+  }
+};
+
+const FALLBACK_IMG = 'https://via.placeholder.com/600x400?text=Recurso+Digital';
+---
+
+<MainLayout title="Biblioteca Digital">
+
+  <PageHeader
+    eyebrow="Recursos"
+    title="Biblioteca Digital"
+    description="Repositorio de videos, investigaciones, centros I+D y enlaces de interés."
+  />
+
+  <div class="bg-light py-5">
+    <div class="container py-4">
+
+      <!-- CENTROS I+D -->
+      {centros.length > 0 && (
+        <div class="mb-5 animate-on-scroll">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <h3 class="fw-bold text-ufro mb-0">
+              <i class="bi bi-buildings me-2 text-pink"></i>Centros
+            </h3>
+            <div class="divider-pink"></div>
+          </div>
+
+          <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4 justify-content-center">
+            {centros.map((item) => (
+              <div class="col">
+                <a
+                  href={item.url} target="_blank" rel="noopener noreferrer"
+                  class="text-decoration-none d-flex flex-column align-items-center center-item h-100"
+                >
+                  <div class="logo-wrapper mb-3 d-flex align-items-center justify-content-center bg-white shadow-sm rounded-circle p-3">
+                    {item.imagen_url ? (
+                      <img src={item.imagen_url} alt={item.titulo} class="logo-img" />
+                    ) : (
+                      <i class="bi bi-building text-primary fs-1"></i>
+                    )}
+                  </div>
+                  <div class="text-center">
+                    <h6 class="fw-bold text-dark mb-0 lh-sm center-title">{item.titulo}</h6>
+                    {item.autor && (
+                      <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">{item.autor}</small>
+                    )}
+                  </div>
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- VIDEOS -->
+      {videos.length > 0 && (
+        <div class="mb-5 animate-on-scroll">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <h3 class="fw-bold text-ufro mb-0">
+              <i class="bi bi-play-circle me-2 text-pink"></i>Videos & Charlas
+            </h3>
+            <div class="divider-pink"></div>
+          </div>
+
+          <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {videos.map((item) => {
+              const thumb = item.imagen_url || getYouTubeThumbnail(item.url) || FALLBACK_IMG;
+              return (
+                <div class="col">
+                  <div class="card h-100 border-0 shadow-sm hover-up video-card overflow-hidden bg-white rounded-4">
+                    <a href={item.url} target="_blank" rel="noopener noreferrer"
+                       class="position-relative d-block overflow-hidden ratio ratio-16x9">
+                      <img src={thumb} class="w-100 h-100 object-fit-cover img-zoom" alt={item.titulo} loading="lazy" />
+                      <div class="video-overlay">
+                        <div class="play-button"><i class="bi bi-play-fill"></i></div>
+                      </div>
+                    </a>
+                    <div class="card-body p-4 d-flex flex-column">
+                      <small class="text-pink fw-bold text-uppercase mb-2" style="font-size: 0.7rem;">
+                        <i class="bi bi-person-fill me-1"></i>{item.autor || 'CI2A2'}
+                      </small>
+                      <h5 class="fw-bold text-dark mb-2 fs-6 line-clamp-2">
+                        <a href={item.url} target="_blank" class="text-decoration-none text-dark hover-title">
+                          {item.titulo}
+                        </a>
+                      </h5>
+                      <p class="text-muted small mb-0 line-clamp-3 flex-grow-1">{item.descripcion}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <!-- DOCUMENTOS Y ENLACES -->
+      {documentos.length > 0 && (
+        <div class="animate-on-scroll">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <h3 class="fw-bold text-ufro mb-0">
+              <i class="bi bi-file-earmark-text me-2 text-pink"></i>Documentos & Enlaces
+            </h3>
+            <div class="divider-pink"></div>
+          </div>
+
+          <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+            {documentos.map((item) => {
+              const tc = getTypeConfig(item.tipo);
+              return (
+                <div class="col">
+                  <div class="card h-100 border-0 shadow-sm hover-up bg-white rounded-3 overflow-hidden">
+                    <div class={tc.bg.replace('subtle', '')} style="height: 4px;"></div>
+                    <div class="card-body p-4 d-flex flex-column">
+                      <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class={`rounded-circle d-flex align-items-center justify-content-center ${tc.bg} ${tc.color}`}
+                             style="width: 32px; height: 32px;">
+                          <i class={`bi ${tc.icon}`}></i>
+                        </div>
+                        <span class={`badge ${tc.bg} ${tc.color} fw-normal text-uppercase`} style="font-size: 0.65rem;">
+                          {tc.label}
+                        </span>
+                      </div>
+                      <h5 class="fw-bold text-dark mb-2 fs-6 line-clamp-2">
+                        <a href={item.url} target="_blank" class="text-decoration-none text-dark hover-title">
+                          {item.titulo}
+                        </a>
+                      </h5>
+                      <p class="text-muted small mb-3 flex-grow-1 line-clamp-3">
+                        {item.descripcion || 'Recurso recomendado para lectura o consulta.'}
+                      </p>
+                      <div class="border-top pt-3 mt-auto d-flex justify-content-between align-items-center">
+                        <small class="text-muted text-truncate" style="font-size: 0.75rem; max-width: 75%;">
+                          {item.autor && <><i class="bi bi-pencil me-1"></i>{item.autor}</>}
+                        </small>
+                        <a href={item.url} target="_blank" rel="noopener noreferrer"
+                           class="btn btn-sm btn-light rounded-circle shadow-sm d-flex align-items-center justify-content-center text-primary"
+                           style="width: 32px; height: 32px;">
+                          <i class="bi bi-box-arrow-up-right" style="font-size: 0.8rem;"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {recursos.length === 0 && (
+        <div class="text-center py-5">
+          <div class="mb-3 text-muted opacity-50"><i class="bi bi-folder2-open display-1"></i></div>
+          <h4 class="text-muted">Próximamente</h4>
+          <p class="text-muted small">Estamos recopilando recursos valiosos para ti.</p>
+        </div>
+      )}
+
+    </div>
+  </div>
+</MainLayout>
+
+<style>
+  /* Centros */
+  .logo-wrapper {
+    width: 120px; height: 120px;
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .logo-img { max-width: 80%; max-height: 80%; object-fit: contain; }
+  .center-item:hover .logo-wrapper {
+    transform: scale(1.05);
+    border-color: var(--ufro-pink);
+    box-shadow: 0 5px 15px rgba(214, 51, 132, 0.15) !important;
+  }
+  .center-title { transition: color 0.3s; }
+  .center-item:hover .center-title { color: var(--ufro-pink) !important; }
+
+  /* Video */
+  .video-card:hover .img-zoom { transform: scale(1.1); }
+  .video-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0, 55, 103, 0.3);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.3s ease;
+  }
+  .video-card:hover .video-overlay { opacity: 1; }
+
+  .play-button {
+    width: 60px; height: 60px;
+    background: var(--ufro-pink); color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+    animation: pulse-pink 2s infinite;
+  }
+  @keyframes pulse-pink {
+    0%   { box-shadow: 0 0 0 0   rgba(214, 51, 132, 0.7); }
+    70%  { box-shadow: 0 0 0 10px rgba(214, 51, 132, 0);   }
+    100% { box-shadow: 0 0 0 0   rgba(214, 51, 132, 0);   }
+  }
+
+  .hover-title:hover { color: var(--ufro-pink) !important; transition: color 0.2s; }
+</style>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import './Navbar.css'; // Importamos el CSS que acabas de crear
+import './Navbar.css';
 
 const Navbar = () => {
-    const [isOpen, setIsOpen] = useState(false); // Menú hamburguesa
-    const [activeDropdown, setActiveDropdown] = useState(null); // Qué dropdown está abierto
+    const [isOpen, setIsOpen] = useState(false);
+    const [activeDropdown, setActiveDropdown] = useState(null);
     const [currentPath, setCurrentPath] = useState('');
     const [isMobile, setIsMobile] = useState(false);
 
@@ -12,7 +12,7 @@ const Navbar = () => {
         setCurrentPath(window.location.pathname);
 
         const handleResize = () => setIsMobile(window.innerWidth < 1200);
-        handleResize(); // Ejecutar al inicio
+        handleResize();
         window.addEventListener('resize', handleResize);
 
         return () => window.removeEventListener('resize', handleResize);
@@ -21,7 +21,7 @@ const Navbar = () => {
     // Helper para saber si un link está activo
     const isActive = (path) => currentPath === path || (path !== '/' && currentPath.startsWith(path));
 
-    // 2. Lógica del Mouse (Hover para PC, Click para Móvil)
+    // 2. Lógica del Mouse
     const handleMouseEnter = (menuName) => {
         if (!isMobile) setActiveDropdown(menuName);
     };
@@ -31,7 +31,6 @@ const Navbar = () => {
     };
 
     const handleClickDropdown = (menuName, e) => {
-        // En móvil, el click abre/cierra. En PC, el click navega (si el link tuviera href)
         if (isMobile) {
             e.preventDefault();
             setActiveDropdown(activeDropdown === menuName ? null : menuName);
@@ -48,7 +47,6 @@ const Navbar = () => {
                     <div className="vr mx-3 bg-light opacity-50 d-none d-sm-block" style={{ height: '50px', width: '1px' }}></div>
                     <img src="/img/logo-ci2a2.png" alt="Logo CI2A2" height="70" className="d-inline-block" />
                 </a>
-
 
                 {/* BOTÓN HAMBURGUESA */}
                 <button
@@ -111,14 +109,15 @@ const Navbar = () => {
                             <a className={`nav-link-react ${isActive('/agenda') ? 'active' : ''}`} href="/agenda">Agenda</a>
                         </li>
 
-                        {/* 5. DIFUSIÓN (Dropdown) */}
+                        {/* 5. DIFUSIÓN (Dropdown + BIBLIOTECA) */}
                         <li
                             className="nav-item dropdown-wrapper"
                             onMouseEnter={() => handleMouseEnter('difusion')}
                             onMouseLeave={handleMouseLeave}
                         >
                             <div
-                                className={`nav-link-react ${['/noticias', '/publicaciones'].some(p => isActive(p)) ? 'active' : ''}`}
+                                // AQUI AGREGAMOS '/biblioteca' PARA QUE SE MARQUE ACTIVO
+                                className={`nav-link-react ${['/noticias', '/publicaciones', '/biblioteca'].some(p => isActive(p)) ? 'active' : ''}`}
                                 onClick={(e) => handleClickDropdown('difusion', e)}
                                 role="button"
                             >
@@ -131,8 +130,12 @@ const Navbar = () => {
                                         <i className="bi bi-newspaper"></i> Noticias
                                     </a>
                                     <a className="dropdown-item-react" href="/publicaciones">
-                                        {/* Icono de texto que pediste */}
                                         <i className="bi bi-file-earmark-text-fill"></i> Publicaciones
+                                    </a>
+                                    {/* NUEVO ITEM: BIBLIOTECA */}
+                                    <div className="dropdown-divider"></div>
+                                    <a className="dropdown-item-react" href="/biblioteca">
+                                        <i className="bi bi-collection-play-fill"></i> Biblioteca Digital
                                     </a>
                                 </div>
                             )}

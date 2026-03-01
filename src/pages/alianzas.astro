@@ -1,241 +1,185 @@
 ---
-import MainLayout from "../layouts/MainLayout.astro";
-import { supabase } from "../lib/supabase";
+import MainLayout  from '../layouts/MainLayout.astro';
+import PageHeader  from '../components/common/PageHeader.astro';
+import { supabase } from '../lib/supabase';
 
-// 1. OBTENCIÓN DE DATOS
-let alianzas = [];
+// ── Datos ──────────────────────────────────────────────────────────────────
+let alianzas: any[] = [];
 const { data, error } = await supabase
-  .from("alianzas")
-  .select("*")
-  .order("nombre", { ascending: true });
+  .from('alianzas')
+  .select('*')
+  .order('nombre', { ascending: true });
 
 if (!error) alianzas = data || [];
 
-// 2. LÓGICA DE AGRUPACIÓN (LOGOS)
-const ordenSecciones = [
-  "Clientes",
-  "Alianzas",
-  "Universidades Socias",
-  "Ecosistema",
-];
+// ── Agrupación dinámica ────────────────────────────────────────────────────
+const ORDEN_PRIORIDAD = ['Clientes', 'Alianzas', 'Universidades Socias', 'Ecosistema'];
 
-const normalizarCategoria = (valor: any) => {
-  if (!valor) return "Otras";
+const normalizarCategoria = (valor: any): string => {
+  if (!valor) return 'General';
   const v = valor.trim();
-  if (v === "Cliente") return "Clientes";
-  if (v === "Alianza") return "Alianzas";
-  if (v === "Universidad Socia") return "Universidades Socias";
-  return v;
+  if (v === 'Cliente')           return 'Clientes';
+  if (v === 'Alianza')           return 'Alianzas';
+  if (v === 'Universidad Socia') return 'Universidades Socias';
+  return v.charAt(0).toUpperCase() + v.slice(1);
 };
 
-const alianzasPorCategoria = alianzas.reduce((acc, item) => {
-  const rawCategoria = item.tipo_entidad || item.categoria || "Otras";
-  const categoria = normalizarCategoria(rawCategoria);
-
-  if (!acc[categoria]) acc[categoria] = [];
-  acc[categoria].push(item);
+const alianzasPorCategoria: Record<string, any[]> = alianzas.reduce((acc, item) => {
+  const cat = normalizarCategoria(item.tipo_entidad || item.categoria);
+  if (!acc[cat]) acc[cat] = [];
+  acc[cat].push(item);
   return acc;
 }, {});
 
+const encontradas   = Object.keys(alianzasPorCategoria);
 const categoriasAmostrar = [
-  ...ordenSecciones.filter((cat) => alianzasPorCategoria[cat]),
-  ...Object.keys(alianzasPorCategoria).filter(
-    (cat) => !ordenSecciones.includes(cat),
-  ),
+  ...ORDEN_PRIORIDAD.filter(c => encontradas.includes(c)),
+  ...encontradas.filter(c => !ORDEN_PRIORIDAD.includes(c)).sort(),
 ];
 
-// 3. LÓGICA PARA LA TABLA DE CONVENIOS (CORREGIDA)
-// Filtramos si tiene 'estado_convenio' (el tipo de convenio)
-const conveniosHistoricos = alianzas.filter(
-  (item) => item.estado_convenio && item.estado_convenio.trim() !== "",
-);
-
-// Ordenar por fecha de firma (descendente: más nuevo arriba)
-conveniosHistoricos.sort((a, b) => {
-  if (!a.fecha_firma) return 1;
-  if (!b.fecha_firma) return -1;
-  if (a.fecha_firma > b.fecha_firma) return -1;
-  if (a.fecha_firma < b.fecha_firma) return 1;
-  return 0;
-});
+const FALLBACK_LOGO = 'https://via.placeholder.com/400x300?text=Sin+Logo';
 ---
 
-<MainLayout title="Nuestras Alianzas">
-  {/* HEADER ... (Igual que antes) */}
-  <section
-    class="py-5 text-white position-relative overflow-hidden shadow-sm"
-    style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);"
-  >
-    <div class="container position-relative z-2">
-      <div class="col-lg-8">
-        <h6 class="text-pink-light fw-bold text-uppercase ls-2 mb-2">
-          Red Global
-        </h6>
-        <h1 class="display-5 fw-bold mb-2">Nuestras Alianzas</h1>
-      </div>
-    </div>
-  </section>
+<MainLayout title="Alianzas y Convenios">
 
-  {/* CONTENIDO PRINCIPAL */}
-  <section class="py-5 bg-white min-vh-100">
-    <div class="container py-2">
-      {/* 1. SECCIÓN DE LOGOS (Igual que antes) ... */}
-      {
-        alianzas.length === 0 ? (
-          <div class="text-center py-5">
-            <p>Cargando...</p>
+  <PageHeader
+    eyebrow="Vinculación"
+    title="Nuestra Red"
+    description="Conectando la academia con la industria y el mundo."
+  />
+
+  <section class="py-5 bg-light">
+    <div class="container py-4">
+
+      {categoriasAmostrar.map((categoria) => (
+        <div class="mb-5 animate-on-scroll">
+
+          <!-- Título de sección -->
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <h3 class="fw-bold text-ufro mb-0">{categoria}</h3>
+            <div class="divider-pink"></div>
           </div>
-        ) : (
-          categoriasAmostrar.map((categoria) => (
-            <div class="mb-5 section-group">
-              <div class="mb-4">
-                <h2
-                  class="text-uppercase fw-bold text-ufro mb-1"
-                  style="font-size: 1.5rem;"
-                >
-                  {categoria}
-                </h2>
-                <div class="divider-pink" />
-              </div>
-              <div class="row row-cols-2 row-cols-md-8 row-cols-lg-5 g-4 align-items-center">
-                {alianzasPorCategoria[categoria].map((item: any) => (
-                  <div class="col">
-                    <a
-                      href={item.link_web || "#"}
-                      target={item.link_web ? "_blank" : "_self"}
-                      class="d-block p-1 partner-container h-100 d-flex align-items-center justify-content-center"
-                    >
-                      {item.logo_url ? (
+
+          <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+            {alianzasPorCategoria[categoria].map((item: any) => {
+              const linkUrl = item.link_web;
+              return (
+                <div class="col">
+                  <div class="card h-100 border-0 shadow-sm hover-up team-card overflow-hidden bg-white">
+
+                    <!-- Contenedor de logo -->
+                    {linkUrl ? (
+                      <a
+                        href={linkUrl} target="_blank" rel="noopener noreferrer"
+                        class="position-relative overflow-hidden d-block logo-container"
+                        style="height: 220px; border-bottom: 1px solid #f0f0f0;"
+                      >
                         <img
-                          src={item.logo_url}
+                          src={item.logo_url || FALLBACK_LOGO}
                           alt={item.nombre}
-                          class="img-fluid logo-img"
+                          class="w-100 h-100 object-fit-contain p-4 img-zoom"
                           loading="lazy"
+                          onerror={`this.src='${FALLBACK_LOGO}'`}
                         />
-                      ) : (
-                        <span class="text-muted fw-bold">{item.nombre}</span>
-                      )}
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))
-        )
-      }
-
-      {/* --- 2. SECCIÓN TABLA DINÁMICA (CORREGIDA) --- */}
-      {
-        conveniosHistoricos.length > 0 && (
-          <div class="mt-5 pt-4 border-top">
-            <div class="mb-4">
-              <h2
-                class="text-uppercase fw-bold text-ufro mb-1"
-                style="font-size: 1.5rem; letter-spacing: 1px;"
-              >
-                Acuerdos
-              </h2>
-              <div class="divider-pink" />
-            </div>
-
-            <div class="table-responsive shadow-sm rounded border">
-              <table class="table table-hover align-middle mb-0">
-                <thead style="background-color: #003767; color: white;">
-                  <tr>
-                    <th scope="col" class="py-3 ps-4">
-                      Tipo de Acuerdo
-                    </th>
-                    <th scope="col" class="py-3">
-                      Entidad
-                    </th>
-                    <th scope="col" class="py-3">
-                      País
-                    </th>{" "}
-                    {/* Columna Nueva */}
-                    <th scope="col" class="py-3 text-center">
-                      Año
-                    </th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white">
-                  {conveniosHistoricos.map((agreement) => (
-                    <tr>
-                      {/* Tipo de Convenio */}
-                      <td class="ps-4 fw-bold text-secondary">
-                        {agreement.estado_convenio}
-                      </td>
-                      {/* Nombre con Link */}
-                      <td>
-                        {agreement.link_web ? (
-                          <a
-                            href={agreement.link_web}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="text-dark fw-bold text-decoration-underline-hover"
-                          >
-                            {agreement.nombre}
-                          </a>
-                        ) : (
-                          <span class="text-dark fw-bold">
-                            {agreement.nombre}
-                          </span>
+                        {item.pais && (
+                          <div class="position-absolute top-0 end-0 m-3 z-2">
+                            <span class="badge bg-light text-dark shadow-sm border fw-normal" style="font-size: 0.7rem;">
+                              {item.pais}
+                            </span>
+                          </div>
                         )}
-                      </td>
-                      {/* País */}
-                      <td class="text-muted">{agreement.pais || "-"}</td>
-                      {/* Fecha */}
-                      <td class="text-center text-muted small">
-                        {agreement.fecha_firma
-                          ? agreement.fecha_firma.substring(0, 4)
-                          : "-"}
-                      </td>{" "}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </a>
+                    ) : (
+                      <div
+                        class="position-relative overflow-hidden d-block logo-container"
+                        style="height: 220px; border-bottom: 1px solid #f0f0f0;"
+                      >
+                        <img
+                          src={item.logo_url || FALLBACK_LOGO}
+                          alt={item.nombre}
+                          class="w-100 h-100 object-fit-contain p-4 img-zoom"
+                          loading="lazy"
+                          onerror={`this.src='${FALLBACK_LOGO}'`}
+                        />
+                        {item.pais && (
+                          <div class="position-absolute top-0 end-0 m-3 z-2">
+                            <span class="badge bg-light text-dark shadow-sm border fw-normal" style="font-size: 0.7rem;">
+                              {item.pais}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <!-- Cuerpo -->
+                    <div class="card-body text-center p-4 d-flex flex-column">
+                      <h5 class="fw-bold text-dark mb-1 fs-6 line-clamp-2">
+                        {item.nombre || item.nombre_contraparte}
+                      </h5>
+                      <p class="text-muted small mb-3 flex-grow-1">
+                        {item.descripcion || 'Convenio de colaboración'}
+                      </p>
+
+                      <!-- Pie -->
+                      <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                        <div>
+                          {item.fecha_firma ? (
+                            <small class="text-muted" style="font-size: 0.75rem;">
+                              <i class="bi bi-calendar3 me-1 opacity-50"></i>
+                              {new Date(item.fecha_firma).getFullYear()}
+                            </small>
+                          ) : (
+                            <small class="text-muted" style="font-size: 0.75rem;">-</small>
+                          )}
+                        </div>
+                        {linkUrl && (
+                          <a
+                            href={linkUrl} target="_blank" rel="noopener noreferrer"
+                            class="icon-link" title="Ir al sitio web"
+                          >
+                            <i class="bi bi-box-arrow-up-right"></i>
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        )
-      }
+        </div>
+      ))}
+
+      {categoriasAmostrar.length === 0 && (
+        <div class="text-center py-5">
+          <p class="text-muted">No hay alianzas registradas por el momento.</p>
+        </div>
+      )}
+
     </div>
   </section>
-
-  <style>
-    /* Estilos existentes... más este hover para links */
-    .text-decoration-underline-hover:hover {
-      text-decoration: underline !important;
-      color: var(--ufro-pink) !important;
-    }
-    /* ... el resto de tu CSS */
-    :root {
-      --ufro-blue: #003767;
-      --ufro-pink: #d63384;
-    }
-    .text-ufro {
-      color: var(--ufro-blue);
-    }
-    .text-pink-light {
-      color: #ff85c0;
-    }
-    .divider-pink {
-      height: 8px;
-      width: 50px;
-      background-color: var(--ufro-pink);
-      border-radius: 10px;
-    }
-    .logo-img {
-      max-height: 80px;
-      max-width: 100%;
-      object-fit: contain;
-      transition: transform 0.3s;
-    }
-    .partner-container:hover .logo-img {
-      transform: scale(1.15);
-    }
-    @media (max-width: 768px) {
-      .logo-img {
-        max-height: 60px;
-      }
-    }
-  </style>
 </MainLayout>
+
+<style>
+  /* Zoom al pasar sobre logo */
+  .team-card:hover .img-zoom { transform: scale(1.08); }
+
+  /* Color de nombre al hover */
+  .team-card:hover .fw-bold { color: var(--ufro-blue) !important; }
+
+  .logo-container {
+    text-decoration: none;
+    background: white;
+  }
+
+  .icon-link {
+    color: #adb5bd;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    display: inline-block;
+  }
+  .icon-link:hover       { color: var(--ufro-pink); transform: scale(1.2); }
+  .team-card:hover .icon-link { color: var(--ufro-blue); }
+  .team-card:hover .icon-link:hover { color: var(--ufro-pink); }
+</style>

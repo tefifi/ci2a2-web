@@ -1,3 +1,10 @@
+/**
+ * AgendaViewer.jsx
+ *
+ * Vista completa de agenda (próximos + historial).
+ * Migrado de Tailwind CSS a Bootstrap 5 para coherencia
+ * con el resto del proyecto.
+ */
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -6,159 +13,181 @@ export default function AgendaViewer() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAgenda();
-  }, []);
-
-  const fetchAgenda = async () => {
-    const { data, error } = await supabase
+    supabase
       .from('agenda')
       .select('*')
-      .order('fecha_evento', { ascending: true });
+      .order('fecha_evento', { ascending: true })
+      .then(({ data, error }) => {
+        if (!error) setEventos(data || []);
+        setLoading(false);
+      });
+  }, []);
 
-    if (error) console.error('Error cargando agenda:', error);
-    else setEventos(data);
-    setLoading(false);
-  };
+  if (loading) {
+    return (
+      <div className="text-center py-5">
+        <div className="spinner-border text-primary"></div>
+        <p className="text-muted mt-2 small">Cargando agenda...</p>
+      </div>
+    );
+  }
 
-  if (loading) return <p className="text-center py-10">Cargando agenda...</p>;
-
-  // --- NUEVA LÓGICA DE FILTRADO ---
   const hoy = new Date();
 
-  // Un evento es FUTURO si su fecha de fin es mayor a hoy.
-  // Si no tiene fecha fin, usamos la fecha de inicio.
   const futuros = eventos.filter(e => {
     const fin = e.fecha_fin ? new Date(e.fecha_fin) : new Date(e.fecha_evento);
     return fin >= hoy;
   });
 
-  // Un evento es PASADO si su fecha de fin (o inicio) ya ocurrió.
   const pasados = eventos.filter(e => {
     const fin = e.fecha_fin ? new Date(e.fecha_fin) : new Date(e.fecha_evento);
     return fin < hoy;
-  }).reverse(); // Mostramos el pasado más reciente primero
+  }).reverse();
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      
-      {/* SECCIÓN FUTUROS */}
-      <div className="mb-12">
-        <h2 className="text-3xl font-bold border-b-4 border-blue-500 inline-block mb-6">
-          Próximos Eventos
-        </h2>
+    <div className="container py-4">
+
+      {/* Próximos Eventos */}
+      <div className="mb-5">
+        <div className="d-flex align-items-center gap-3 mb-4">
+          <h2 className="fw-bold mb-0" style={{ color: 'var(--ufro-blue)' }}>Próximos Eventos</h2>
+          <div style={{ height: 3, background: 'var(--ufro-pink)', opacity: 0.3, borderRadius: 10, flexGrow: 1 }}></div>
+        </div>
+
         {futuros.length === 0 ? (
-          <p className="text-gray-500 italic">No hay actividades próximas.</p>
+          <p className="text-muted fst-italic">No hay actividades próximas.</p>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {futuros.map((evento) => (
-              <EventoCard key={evento.id} evento={evento} esFuturo={true} />
+          <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {futuros.map(evento => (
+              <div key={evento.id} className="col">
+                <EventoCard evento={evento} esFuturo={true} />
+              </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* SECCIÓN PASADOS */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-600 border-b-2 border-gray-300 inline-block mb-6">
-          Historial de Eventos
-        </h2>
-        <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6 opacity-75 hover:opacity-100 transition duration-300">
-          {pasados.map((evento) => (
-            <EventoCard key={evento.id} evento={evento} esFuturo={false} />
-          ))}
+      {/* Historial */}
+      {pasados.length > 0 && (
+        <div>
+          <div className="d-flex align-items-center gap-3 mb-4">
+            <h3 className="fw-bold text-secondary mb-0">Historial de Eventos</h3>
+            <div style={{ height: 2, background: '#dee2e6', borderRadius: 10, flexGrow: 1 }}></div>
+          </div>
+          <div className="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-3" style={{ opacity: 0.8 }}>
+            {pasados.map(evento => (
+              <div key={evento.id} className="col">
+                <EventoCard evento={evento} esFuturo={false} />
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-
+      )}
     </div>
   );
 }
 
-// --- COMPONENTE TARJETA ACTUALIZADO ---
+// ── Tarjeta de evento ──────────────────────────────────────────────────────
 function EventoCard({ evento, esFuturo }) {
-  
-  // Función para formatear rangos de fecha inteligentemente
   const formatearFecha = (inicioStr, finStr) => {
     const inicio = new Date(inicioStr);
-    const fin = finStr ? new Date(finStr) : null;
-    
-    // Opciones de formato base
+    const fin    = finStr ? new Date(finStr) : null;
+    const esSinHora = inicio.getHours() === 0 && inicio.getMinutes() === 0;
+    const textoPendiente = 'Horario por confirmar';
     const dateOpts = { weekday: 'long', day: 'numeric', month: 'long' };
     const timeOpts = { hour: '2-digit', minute: '2-digit' };
 
-    // Si no hay fecha fin, mostrar solo inicio
     if (!fin) {
-      return inicio.toLocaleDateString('es-CL', { ...dateOpts, ...timeOpts });
-    }
-
-    // Verificar si es el MISMO DÍA
-    const esMismoDia = inicio.toDateString() === fin.toDateString();
-
-    if (esMismoDia) {
-      // Ejemplo: Lunes 10 Enero | 10:00 - 12:00
       return (
         <>
-          <span className="capitalize">{inicio.toLocaleDateString('es-CL', dateOpts)}</span>
-          <br />
-          <span className="text-gray-600 font-normal">
-             {inicio.toLocaleTimeString('es-CL', timeOpts)} - {fin.toLocaleTimeString('es-CL', timeOpts)} hrs
+          <span className="text-capitalize">{inicio.toLocaleDateString('es-CL', dateOpts)}</span>
+          <span className="d-block text-muted fw-normal">
+            {esSinHora
+              ? <em className="opacity-75">{textoPendiente}</em>
+              : `${inicio.toLocaleTimeString('es-CL', timeOpts)} hrs`}
           </span>
         </>
       );
-    } else {
-      // Ejemplo: 10 Enero - 12 Enero
+    }
+
+    if (inicio.toDateString() === fin.toDateString()) {
       return (
-        <span className="capitalize">
-          {inicio.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })} 
-          {' -> '} 
-          {fin.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })}
-        </span>
+        <>
+          <span className="text-capitalize">{inicio.toLocaleDateString('es-CL', dateOpts)}</span>
+          <span className="d-block text-muted fw-normal">
+            {esSinHora
+              ? <em className="opacity-75">{textoPendiente}</em>
+              : `${inicio.toLocaleTimeString('es-CL', timeOpts)} – ${fin.toLocaleTimeString('es-CL', timeOpts)} hrs`}
+          </span>
+        </>
       );
     }
+
+    return (
+      <span className="text-capitalize">
+        {inicio.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })}
+        {' → '}
+        {fin.toLocaleDateString('es-CL',   { day: 'numeric', month: 'short' })}
+      </span>
+    );
   };
 
+  // Color de badge por tipo
+  const badgeColor = {
+    Seminario: 'bg-purple',
+    Taller:    'bg-warning text-dark',
+    Noticia:   'bg-success',
+  }[evento.tipo] || 'bg-primary';
+
   return (
-    <div className={`flex flex-col h-full bg-white shadow-md rounded-xl overflow-hidden border transition hover:shadow-xl
-      ${esFuturo ? 'border-blue-100' : 'border-gray-200 grayscale-[0.3] hover:grayscale-0'}`}>
-      
-      {/* Imagen Header */}
-      <div className="h-48 overflow-hidden bg-gray-100 relative">
+    <div className={`card h-100 border-0 shadow-sm rounded-4 overflow-hidden evento-card
+      ${esFuturo ? '' : 'grayscale-partial'}`}>
+
+      {/* Imagen */}
+      <div className="position-relative overflow-hidden bg-light" style={{ height: 180 }}>
         {evento.imagen_url ? (
-          <img src={evento.imagen_url} alt={evento.titulo} className="w-full h-full object-cover transition hover:scale-105 duration-500" />
+          <img
+            src={evento.imagen_url}
+            alt={evento.titulo}
+            className="w-100 h-100 object-fit-cover card-img-zoom"
+            style={{ transition: 'transform 0.5s ease' }}
+          />
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            <span>Sin Imagen</span>
+          <div className="w-100 h-100 d-flex align-items-center justify-content-center text-secondary">
+            <i className="bi bi-calendar-event fs-1 opacity-25"></i>
           </div>
         )}
-        <span className={`absolute top-3 right-3 text-xs font-bold px-3 py-1 rounded-full text-white shadow-sm
-          ${evento.tipo === 'Seminario' ? 'bg-purple-600' : 
-            evento.tipo === 'Taller' ? 'bg-orange-500' : 
-            evento.tipo === 'Noticia' ? 'bg-green-600' : 'bg-blue-600'}`}>
+        <span className={`position-absolute top-0 end-0 m-2 badge ${badgeColor} shadow-sm`}>
           {evento.tipo || 'Evento'}
         </span>
       </div>
 
-      <div className="p-5 flex-1 flex flex-col">
-        {/* Fecha destacada */}
-        <div className="text-sm text-blue-600 font-bold mb-2 uppercase tracking-wide">
+      {/* Cuerpo */}
+      <div className="card-body p-3 d-flex flex-column">
+        <div className="small fw-bold text-uppercase mb-2 lh-sm" style={{ color: 'var(--ufro-blue)', letterSpacing: '0.5px' }}>
           {formatearFecha(evento.fecha_evento, evento.fecha_fin)}
         </div>
 
-        <h3 className="text-xl font-bold text-gray-800 mb-2 leading-tight">{evento.titulo}</h3>
-        
+        <h6 className="fw-bold text-dark mb-2 lh-sm">{evento.titulo}</h6>
+
         {evento.lugar && (
-          <p className="text-sm text-gray-500 mb-3 flex items-center gap-1">
-            {evento.lugar}
+          <p className="small text-muted mb-2">
+            <i className="bi bi-geo-alt me-1"></i>{evento.lugar}
           </p>
         )}
 
-        <p className="text-gray-600 text-sm line-clamp-3 mb-4 flex-1">
-          {evento.descripcion}
-        </p>
-        
+        {evento.descripcion && (
+          <div
+            className="text-muted small line-clamp-3 mb-3 flex-grow-1"
+            dangerouslySetInnerHTML={{ __html: evento.descripcion }}
+          />
+        )}
+
         {evento.link_externo && (
-          <a href={evento.link_externo} target="_blank" rel="noopener noreferrer" 
-             className="mt-auto inline-block text-center w-full py-2 rounded-lg border border-blue-600 text-blue-600 font-semibold hover:bg-blue-600 hover:text-white transition">
-             {evento.tipo === 'Noticia' ? 'Leer más' : 'Inscribirse'}
+          <a href={evento.link_externo} target="_blank" rel="noopener noreferrer"
+             className="btn btn-sm btn-outline-primary rounded-pill w-100 mt-auto fw-semibold"
+             style={{ borderColor: 'var(--ufro-blue)', color: 'var(--ufro-blue)' }}>
+            {evento.tipo === 'Noticia' ? 'Leer más' : 'Inscribirse'}
           </a>
         )}
       </div>

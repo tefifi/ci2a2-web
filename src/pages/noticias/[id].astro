@@ -2,6 +2,8 @@
 import MainLayout from "../../layouts/MainLayout.astro";
 import { supabase } from "../../lib/supabase";
 
+export const prerender = false;
+
 const { id } = Astro.params;
 
 const { data: noticia, error } = await supabase
@@ -13,21 +15,13 @@ const { data: noticia, error } = await supabase
 if (error || !noticia) {
     return Astro.redirect("/noticias");
 }
-
-export const prerender = false;
 ---
 
-<MainLayout title={noticia.titulo}>
+<MainLayout title="Contacto" breadcrumbColor="ufro">
+    
     <article class="bg-white min-vh-100">
         <div class="container pt-5">
             <div class="col-lg-10 mx-auto">
-                <a
-                    href="/noticias"
-                    class="text-decoration-none small mb-3 d-inline-block back-link"
-                >
-                    <i class="bi bi-arrow-left me-1 transition-icon"></i> Volver a
-                    Noticias
-                </a>
                 <div>
                     <span
                         class="badge mb-3 px-3 py-2 fw-bold"
@@ -39,15 +33,18 @@ export const prerender = false;
                 <h1 class="display-5 fw-bold mb-3 text-dark">
                     {noticia.titulo}
                 </h1>
+
                 <div
                     class="d-flex align-items-center gap-3 text-muted small mb-4"
                 >
-                    <span
-                        ><i class="bi bi-calendar3 me-2"></i>{
+                    <span>
+                        <i class="bi bi-calendar3 me-2"></i>
+                        {
                             noticia.fecha
                                 ? new Date(noticia.fecha).toLocaleDateString(
                                       "es-CL",
                                       {
+                                          timeZone: "UTC",
                                           weekday: "long",
                                           year: "numeric",
                                           month: "long",
@@ -55,12 +52,13 @@ export const prerender = false;
                                       },
                                   )
                                 : ""
-                        }</span
-                    >
+                        }
+                    </span>
                 </div>
             </div>
         </div>
 
+        {/* Imagen Principal */}
         <div class="container mb-5">
             <div class="col-lg-10 mx-auto text-center">
                 <img
@@ -81,12 +79,17 @@ export const prerender = false;
         <div class="container pb-5">
             <div class="row">
                 <div class="col-lg-8 mx-auto">
+                    {/* --- AQUÍ ESTABA EL PROBLEMA --- */}
+                    {
+                        /* Se agregó 'white-space: pre-line' para respetar saltos de línea y 'text-break' para evitar desbordes */
+                    }
                     <div
-                        class="lead fw-bold text-secondary mb-5 fst-italic border-start border-4 ps-4"
-                        style="border-color: #d63384 !important;"
+                        class="lead fw-bold text-secondary mb-5 fst-italic border-start border-4 ps-4 text-break"
+                        style="border-color: #d63384 !important; white-space: pre-line;"
                     >
                         {noticia.bajada}
                     </div>
+                    {/* -------------------------------- */}
 
                     <div
                         class="content-body text-dark"
@@ -95,6 +98,7 @@ export const prerender = false;
 
                     <hr class="my-5 opacity-25" />
 
+                    {/* Autores / Colaboradores */}
                     {
                         noticia.colaboradores &&
                             Array.isArray(noticia.colaboradores) &&
@@ -136,41 +140,29 @@ export const prerender = false;
 
 <style>
     .back-link {
-        color: #6c757d; /* Gris secundario base */
+        color: #6c757d;
         transition: all 0.3s ease;
         font-weight: 500;
     }
-
-    /* Efecto al pasar el mouse */
     .back-link:hover {
-        color: #d63384; /* Cambia a rosado FICA */
-        transform: translateX(
-            -5px
-        ); /* Desplaza todo el bloque un poco a la izquierda */
+        color: #d63384;
+        transform: translateX(-5px);
     }
-
-    /* Efecto específico para la flecha */
     .back-link i {
         display: inline-block;
         transition: transform 0.3s ease;
     }
-
     .back-link:hover i {
-        transform: scale(1.2); /* Agranda un poquito la flecha */
+        transform: scale(1.2);
     }
 
-    .hover-opacity:hover {
-        opacity: 0.8;
-        text-decoration: underline;
-    }
-
+    /* Estilos del cuerpo del texto */
     .content-body :global(p) {
         margin-bottom: 1.5rem;
         line-height: 2;
         color: #333;
         font-size: 1.15rem;
     }
-
     .content-body :global(h2),
     .content-body :global(h3) {
         color: #003767;
@@ -179,19 +171,15 @@ export const prerender = false;
         margin-bottom: 1rem;
     }
 
+    /* Botón FICA */
     .custom-btn-fica {
         background-color: transparent;
         transition: all 0.3s ease;
     }
-
     .custom-btn-fica:hover {
         background-color: #d63384 !important;
         color: white !important;
         transform: translateY(-3px);
         box-shadow: 0 5px 15px rgba(214, 51, 132, 0.3);
-    }
-
-    .border-fica {
-        border-color: #d63384 !important;
     }
 </style>

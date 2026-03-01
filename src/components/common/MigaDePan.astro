@@ -1,0 +1,94 @@
+---
+// src/components/common/MigaDePan.astro
+
+const currentPath = Astro.url.pathname;
+const paths = currentPath.split('/').filter(p => p);
+
+const routeNames: Record<string, string> = {
+  'proyectos': 'Proyectos',
+  'noticias': 'Noticias',
+  'agenda': 'Agenda',
+  'transparencia': 'Transparencia',
+  'contacto': 'Contacto',
+  'nosotros': 'Sobre Nosotros',
+  'alianzas': 'Alianzas',
+  'publicaciones': 'Publicaciones',
+};
+
+// Props: Recibimos el color deseado
+interface Props {
+  currentTitle?: string;
+  color?: 'blanco' | 'ufro'; 
+}
+
+const { currentTitle, color = 'blanco' } = Astro.props;
+
+// Definimos si es modo UFRO (oscuro)
+const isUfro = color === 'ufro';
+
+// Lógica de colores
+// Si es 'ufro', usamos el azul institucional (#003767). Si es 'blanco', usamos white.
+const textColorClass = isUfro ? "text-ufro" : "text-white";
+const activeColorClass = isUfro ? "text-ufro fw-bold" : "text-white fw-bold";
+const opacityClass = isUfro ? "" : "opacity-75"; // El azul se ve mejor sólido (sin opacidad)
+
+// Color del separador (/)
+const separatorColor = isUfro ? "#003767" : "rgba(255, 255, 255, 0.5)";
+---
+
+{paths.length > 0 && (
+  <nav aria-label="breadcrumb" class="container pt-3 position-relative z-3" style="margin-bottom: -40px;">
+    <ol class="breadcrumb bg-transparent p-0 m-0 align-items-center">
+      
+      <li class="breadcrumb-item">
+        <a href="/" class={`text-decoration-none ${textColorClass} ${opacityClass} small`}>
+          Inicio
+        </a>
+      </li>
+
+      {paths.map((path, index) => {
+        const isLast = index === paths.length - 1;
+        const href = '/' + paths.slice(0, index + 1).join('/');
+        
+        let displayName = routeNames[path] || path;
+        
+        if (!routeNames[path]) {
+            displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+        }
+
+        if (isLast && currentTitle) {
+            displayName = currentTitle;
+        }
+
+        return (
+          <li class={`breadcrumb-item ${isLast ? activeColorClass : ''}`} aria-current={isLast ? 'page' : undefined}>
+            {isLast ? (
+              <span class="small">{displayName}</span>
+            ) : (
+              <a href={href} class={`text-decoration-none ${textColorClass} ${opacityClass} small`}>
+                {displayName}
+              </a>
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  </nav>
+)}
+
+<style define:vars={{ separatorColor }}>
+  /* Clase específica para el color UFRO Oscuro */
+  .text-ufro {
+    color: #003767 !important; /* Azul Institucional UFRO */
+  }
+
+  /* El separador '/' hereda el color dinámicamente */
+  .breadcrumb-item + .breadcrumb-item::before {
+    color: var(--separatorColor);
+  }
+  
+  .breadcrumb-item a:hover {
+    opacity: 1 !important;
+    text-decoration: underline !important;
+  }
+</style>

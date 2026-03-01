@@ -1,422 +1,402 @@
 ---
-import MainLayout from "../../layouts/MainLayout.astro";
-import { supabase } from "../../lib/supabase";
+import MainLayout from '../../layouts/MainLayout.astro';
+import PageHeader from '../../components/common/PageHeader.astro';
+import { supabase }  from '../../lib/supabase';
 
-// --- 1. CONFIGURACIÓN DE FECHAS ---
-const today = new Date();
-const currentMonth = parseInt(
-    Astro.url.searchParams.get("mes") || (today.getMonth() + 1).toString(),
-);
-const currentYear = parseInt(
-    Astro.url.searchParams.get("anio") || today.getFullYear().toString(),
-);
+// ── Configuración de fechas ────────────────────────────────────────────────
+const today        = new Date();
+const currentMonth = parseInt(Astro.url.searchParams.get('mes')  || (today.getMonth() + 1).toString());
+const currentYear  = parseInt(Astro.url.searchParams.get('anio') || today.getFullYear().toString());
 
-const monthNames = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+const MONTH_NAMES = [
+  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre',
 ];
 
 const startDate = new Date(currentYear, currentMonth - 1, 1).toISOString();
-const endDate = new Date(currentYear, currentMonth, 0, 23, 59, 59).toISOString();
+const endDate   = new Date(currentYear, currentMonth, 0, 23, 59, 59).toISOString();
 
-// --- 2. CONSULTA A SUPABASE ---
-let eventos = [];
+// ── Datos ──────────────────────────────────────────────────────────────────
+let eventos: any[] = [];
 try {
-    const { data, error } = await supabase
-        .from("agenda")
-        .select("*")
-        .gte("fecha_evento", startDate)
-        .lte("fecha_evento", endDate)
-        .order("fecha_evento", { ascending: true });
+  const { data, error } = await supabase
+    .from('agenda')
+    .select('*')
+    .gte('fecha_evento', startDate)
+    .lte('fecha_evento', endDate)
+    .order('fecha_evento', { ascending: true });
 
-    if (!error) eventos = data;
+  if (!error) eventos = data;
 } catch (err: any) {
-    console.error(err.message);
+  console.error(err.message);
 }
 
-// --- 3. HELPER PARA LAS TARJETAS ---
-const getEventDisplayData = (startStr: any, endStr: any) => {
-    const start = new Date(startStr);
-    const end = endStr ? new Date(endStr) : null;
-    const meses = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
-    
-    const diaBox = start.getDate();
-    const mesBox = meses[start.getMonth()];
-    
-    const timeOpts = { hour: "2-digit", minute: "2-digit" } as const;
-    const horaInicio = start.toLocaleTimeString("es-CL", timeOpts);
-    let textoHorario = "";
+// ── Helper de visualización de tarjeta ────────────────────────────────────
+type DisplayData = { diaBox: number; mesBox: string; textoHorario: string };
 
+const getEventDisplayData = (startStr: any, endStr: any): DisplayData => {
+  const start = new Date(startStr);
+  const end   = endStr ? new Date(endStr) : null;
+  const meses = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  const timeOpts = { hour: '2-digit', minute: '2-digit' } as const;
+
+  const isMidnight = start.getHours() === 0 && start.getMinutes() === 0;
+  let textoHorario = '';
+
+  if (!isMidnight) {
+    const horaInicio = start.toLocaleTimeString('es-CL', timeOpts);
     if (end) {
-        if (start.toDateString() === end.toDateString()) {
-            const horaFin = end.toLocaleTimeString("es-CL", timeOpts);
-            textoHorario = `${horaInicio} - ${horaFin}`;
-        } else {
-            textoHorario = "Varios días";
-        }
+      const endMidnight = end.getHours() === 0 && end.getMinutes() === 0;
+      if (start.toDateString() === end.toDateString() && !endMidnight) {
+        textoHorario = `${horaInicio} - ${end.toLocaleTimeString('es-CL', timeOpts)}`;
+      } else if (!endMidnight) {
+        textoHorario = horaInicio;
+      } else {
+        textoHorario = horaInicio;
+      }
     } else {
-        textoHorario = `${horaInicio}`;
+      textoHorario = horaInicio;
     }
-    return { diaBox, mesBox, textoHorario };
+  }
+
+  return { diaBox: start.getDate(), mesBox: meses[start.getMonth()], textoHorario };
 };
 ---
 
 <MainLayout title="Agenda de Actividades">
-    
-    {/* HEADER INTOCABLE (Degradado original) */}
-    <section
-        class="py-5 text-white shadow-sm"
-        style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);"
-    >
-        <div class="container">
-            <h1 class="display-5 fw-bold">Agenda de Actividades</h1>
-            <p class="opacity-90 lead small">
-                Eventos, seminarios y fechas importantes.
-            </p>
+
+  <PageHeader
+    title="Agenda de Actividades"
+    description="Eventos, seminarios y fechas importantes."
+  />
+
+  <section class="py-5 bg-white min-vh-100">
+    <div class="container">
+
+      <!-- Navegación de mes -->
+      <div class="d-flex align-items-center mb-5 gap-3">
+        <h2 class="display-6 fw-bold text-dark mb-0 text-capitalize">
+          {MONTH_NAMES[currentMonth - 1]} {currentYear}
+        </h2>
+        <div class="d-flex gap-1">
+          <a href={`?mes=${currentMonth === 1  ? 12 : currentMonth - 1}&anio=${currentMonth === 1  ? currentYear - 1 : currentYear}`}
+             class="btn btn-outline-secondary rounded-circle btn-sm d-flex align-items-center justify-content-center"
+             style="width: 32px; height: 32px;">
+            <i class="bi bi-chevron-left"></i>
+          </a>
+          <a href={`?mes=${currentMonth === 12 ? 1  : currentMonth + 1}&anio=${currentMonth === 12 ? currentYear + 1 : currentYear}`}
+             class="btn btn-outline-secondary rounded-circle btn-sm d-flex align-items-center justify-content-center"
+             style="width: 32px; height: 32px;">
+            <i class="bi bi-chevron-right"></i>
+          </a>
         </div>
-    </section>
+      </div>
 
-    <section class="py-5 bg-white min-vh-100 position-relative">
-        <div class="container">
-            {/* Navegación */}
-            <div class="d-flex align-items-center mb-5 gap-3">
-                <h2 class="display-6 fw-bold text-dark mb-0 text-capitalize">
-                    {monthNames[currentMonth - 1]} {currentYear}
-                </h2>
-                <div class="d-flex gap-1">
-                    <a
-                        href={`?mes=${currentMonth === 1 ? 12 : currentMonth - 1}&anio=${currentMonth === 1 ? currentYear - 1 : currentYear}`}
-                        class="btn btn-outline-secondary rounded-circle btn-sm d-flex align-items-center justify-content-center interactive-btn"
-                        style="width: 32px; height: 32px;"
-                    ><i class="bi bi-chevron-left"></i></a>
-                    <a
-                        href={`?mes=${currentMonth === 12 ? 1 : currentMonth + 1}&anio=${currentMonth === 12 ? currentYear + 1 : currentYear}`}
-                        class="btn btn-outline-secondary rounded-circle btn-sm d-flex align-items-center justify-content-center interactive-btn"
-                        style="width: 32px; height: 32px;"
-                    ><i class="bi bi-chevron-right"></i></a>
-                </div>
+      <!-- Grid de tarjetas -->
+      <div class="row g-4">
+        {eventos.map((evento) => {
+          const { diaBox, mesBox, textoHorario } = getEventDisplayData(evento.fecha_evento, evento.fecha_fin);
+          return (
+            <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
+              <div class="w-100 card-hover-wrapper" onclick={`openModal(${evento.id})`} role="button" style="cursor: pointer;">
+                <article class="h-100 d-flex flex-column border rounded-3 overflow-hidden shadow-sm event-card">
+                  <!-- Imagen -->
+                  <div class="overflow-hidden position-relative bg-light" style="aspect-ratio: 16/9;">
+                    {evento.imagen_url ? (
+                      <img src={evento.imagen_url} class="w-100 h-100 object-fit-cover img-zoom" alt={evento.titulo} />
+                    ) : (
+                      <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary">
+                        <i class="bi bi-calendar-event fs-1 opacity-25" />
+                      </div>
+                    )}
+                    {evento.tipo && (
+                      <span class="position-absolute top-0 end-0 m-2 badge bg-white text-dark shadow-sm rounded-pill border">
+                        {evento.tipo}
+                      </span>
+                    )}
+                  </div>
+
+                  <!-- Info -->
+                  <div class="p-3 d-flex gap-3 bg-white flex-grow-1">
+                    <div class="text-center pt-1" style="min-width: 50px;">
+                      <span class="d-block display-6 fw-bold text-dark lh-1">{diaBox}</span>
+                      <span class="d-block text-uppercase small fw-bold text-secondary">{mesBox}</span>
+                    </div>
+                    <div class="flex-grow-1 border-start ps-3 border-2 border-light">
+                      <h5 class="fw-bold mb-2 lh-sm line-clamp-2 text-ufro event-title">{evento.titulo}</h5>
+                      <div class="text-muted small">
+                        {textoHorario ? (
+                          <><i class="bi bi-clock text-danger me-1" />{textoHorario}</>
+                        ) : (
+                          <span class="text-secondary"><i class="bi bi-calendar3 me-1" />Día completo / Por confirmar</span>
+                        )}
+                      </div>
+                      {evento.lugar && (
+                        <div class="text-muted small mt-1"><i class="bi bi-geo-alt me-1" />{evento.lugar}</div>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              </div>
             </div>
+          );
+        })}
 
-            {/* Grid de Tarjetas */}
-            <div class="row g-4">
-                {eventos.map((evento) => {
-                    const { diaBox, mesBox, textoHorario } = getEventDisplayData(evento.fecha_evento, evento.fecha_fin);
-                    return (
-                        <div class="col-md-6 col-lg-4 d-flex align-items-stretch">
-                            <div
-                                class="text-decoration-none w-100 card-hover-wrapper cursor-pointer"
-                                onclick={`openModal(${evento.id})`}
-                                role="button"
-                            >
-                                <article class="h-100 d-flex flex-column border rounded-3 overflow-hidden shadow-sm hover-shadow transition-all interactive-card">
-                                    <div class="overflow-hidden position-relative bg-light" style="aspect-ratio: 16/9;">
-                                        {evento.imagen_url ? (
-                                            <img
-                                                src={evento.imagen_url}
-                                                class="w-100 h-100 object-fit-cover transition-img interactive-img"
-                                                alt={evento.titulo}
-                                            />
-                                        ) : (
-                                            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary">
-                                                <i class="bi bi-calendar-event fs-1 opacity-25" />
-                                            </div>
-                                        )}
-                                        {evento.tipo && (
-                                            <span class="position-absolute top-0 end-0 m-2 badge bg-white text-dark shadow-sm rounded-pill fw-bold border">
-                                                {evento.tipo}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div class="p-3 d-flex gap-3 bg-white flex-grow-1">
-                                        <div class="text-center pt-1" style="min-width: 50px;">
-                                            <span class="d-block display-6 fw-bold text-dark lh-1">{diaBox}</span>
-                                            <span class="d-block text-uppercase small fw-bold text-secondary">{mesBox}</span>
-                                        </div>
-                                        <div class="flex-grow-1 border-start ps-3 border-2 border-light">
-                                            {/* Título AZUL UFRO */}
-                                            <h5 class="fw-bold mb-2 lh-sm title-hover line-clamp-2 interactive-title text-ufro-blue">
-                                                {evento.titulo}
-                                            </h5>
-                                            <div class="text-muted small">
-                                                <i class="bi bi-clock text-danger me-1" /> {textoHorario}
-                                            </div>
-                                            {evento.lugar && (
-                                                <div class="text-muted small mt-1">
-                                                    <i class="bi bi-geo-alt me-1" /> {evento.lugar}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </article>
-                            </div>
-                        </div>
-                    );
-                })}
-                {eventos.length === 0 && (
-                    <div class="col-12 text-center py-5 text-muted">
-                        <i class="bi bi-calendar-x display-4 mb-3 d-block opacity-50" />
-                        <p>No hay eventos programados para este mes.</p>
-                    </div>
-                )}
-            </div>
-        </div>
-    </section>
-
-    {/* --- MODAL --- */}
-    <div id="eventModal" class="modal-overlay d-none">
-        <div class="modal-container bg-white rounded-4 shadow-lg overflow-hidden">
-            {/* Header ROSA UFRO (Si prefieres azul cambia background-color a #003767) */}
-            <div class="modal-header-custom p-4 text-white position-relative d-flex align-items-center" style="background-color: #d63384;">
-                <div class="pe-5 w-100">
-                    <h2 id="mTitle" class="fw-bold mb-0 fs-4 lh-sm">Titulo del Evento</h2>
-                </div>
-                <button
-                    onclick="closeModal()"
-                    class="btn-close-custom position-absolute top-0 end-0 m-3 text-white d-flex align-items-center justify-content-center interactive-close"
-                    style="width: 32px; height: 32px; cursor: pointer; border:none; background: rgba(255,255,255,0.2); border-radius:50%;"
-                >
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-
-            <div class="modal-body-scroll bg-white">
-                <div id="mImageContainer" class="w-100 p-0 m-0 bg-light position-relative">
-                    <img id="mImage" src="" class="d-block w-100" style="height: 350px; object-fit: cover;" alt="Evento" />
-                    <div id="mImagePlaceholder" class="d-flex flex-column align-items-center justify-content-center bg-light text-muted" style="height: 350px; width: 100%; display: none;">
-                        <i class="bi bi-image opacity-25" style="font-size: 3rem;"></i>
-                    </div>
-                </div>
-
-                <div class="container-fluid py-4 border-bottom bg-white">
-                    <div class="row text-center g-3">
-                        <div class="col-4 border-end">
-                            <div class="mb-2"><i class="bi bi-calendar-check text-ufro-blue fs-4"></i></div>
-                            <div class="small text-uppercase fw-bold text-secondary ls-1">Fecha</div>
-                            <div id="mDateBox" class="fw-bold text-dark small-text-md" style="white-space: pre-line;">...</div>
-                        </div>
-                        <div class="col-4 border-end">
-                            <div class="mb-2"><i class="bi bi-clock text-ufro-blue fs-4"></i></div>
-                            <div class="small text-uppercase fw-bold text-secondary ls-1">Horario</div>
-                            <div id="mTimeBox" class="fw-bold text-dark small-text-md">...</div>
-                        </div>
-                        <div class="col-4">
-                            <div class="mb-2"><i class="bi bi-geo-alt-fill text-ufro-blue fs-4"></i></div>
-                            <div class="small text-uppercase fw-bold text-secondary ls-1">Ubicación</div>
-                            <div id="mPlaceBox" class="fw-bold text-dark small-text-md">...</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-4 pb-5">
-                    <div id="mDescSection" class="mb-4 d-none">
-                        <h6 class="fw-bold mb-3 text-dark border-start border-4 border-ufro-blue ps-2">Información Detallada</h6>
-                        <div id="mDesc" class="text-secondary lh-lg" style="white-space: pre-wrap;">...</div>
-                    </div>
-
-                    <div id="mLinkSection" class="text-center mt-5 d-none">
-                        <a id="mLink" href="#" target="_blank" class="btn btn-ufro-blue rounded-pill px-5 py-3 fw-bold shadow hover-transform interactive-grow">
-                            Más Información <i class="bi bi-arrow-right ms-2"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {eventos.length === 0 && (
+          <div class="col-12 text-center py-5 text-muted">
+            <i class="bi bi-calendar-x display-4 mb-3 d-block opacity-50" />
+            <p>No hay eventos programados para este mes.</p>
+          </div>
+        )}
+      </div>
     </div>
+  </section>
 
-    <style>
-        /* --- DEFINICIÓN DE TUS COLORES --- */
-        :root {
-            --ufro-blue: #003767;
-            --ufro-pink: #d63384;
+  <!-- Modal de evento -->
+  <div id="eventModal" class="modal-overlay d-none">
+    <div class="modal-container bg-white rounded-4 shadow-lg overflow-hidden">
+      <div class="modal-header-custom p-4 text-white position-relative d-flex align-items-center"
+           style="background-color: var(--ufro-pink);">
+        <div class="pe-5 w-100">
+          <h2 id="mTitle" class="fw-bold mb-0 fs-4 lh-sm">Titulo del Evento</h2>
+        </div>
+        <button onclick="closeModal()"
+                class="position-absolute top-0 end-0 m-3 text-white d-flex align-items-center justify-content-center btn-close-modal"
+                style="width: 32px; height: 32px;">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body-scroll bg-white">
+        <div id="mImageContainer" class="w-100 bg-light position-relative">
+          <img id="mImage" src="" class="d-block w-100"
+               style="height: 350px; object-fit: cover; cursor: zoom-in;"
+               onclick="openLightbox()" title="Click para ver pantalla completa" alt="Evento" />
+          <div class="position-absolute bottom-0 end-0 m-3 text-white bg-dark bg-opacity-50 px-2 py-1 rounded small"
+               style="pointer-events: none;">
+            <i class="bi bi-arrows-angle-expand me-1"></i> Ver completa
+          </div>
+          <div id="mImagePlaceholder"
+               class="d-flex flex-column align-items-center justify-content-center bg-light text-muted"
+               style="height: 350px; display: none !important;">
+            <i class="bi bi-image opacity-25" style="font-size: 3rem;"></i>
+          </div>
+        </div>
+
+        <div class="container-fluid py-4 border-bottom bg-white">
+          <div class="row text-center g-3">
+            {[
+              { id: 'mDateBox',  icon: 'bi-calendar-check', label: 'Fecha'     },
+              { id: 'mTimeBox',  icon: 'bi-clock',          label: 'Horario'   },
+              { id: 'mPlaceBox', icon: 'bi-geo-alt-fill',   label: 'Ubicación' },
+            ].map((col, i) => (
+              <div class={`col-4 ${i < 2 ? 'border-end' : ''}`}>
+                <div class="mb-2"><i class={`bi ${col.icon} text-ufro fs-4`}></i></div>
+                <div class="small text-uppercase fw-bold text-secondary" style="letter-spacing: 1px; font-size: 0.75rem;">{col.label}</div>
+                <div id={col.id} class="fw-bold text-dark" style="font-size: 0.9rem; white-space: pre-line;">...</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="p-4 pb-5">
+          <div id="mDescSection" class="mb-4 d-none">
+            <h6 class="fw-bold mb-3 text-dark border-start border-4 ps-2" style="border-color: var(--ufro-blue) !important;">
+              Información Detallada
+            </h6>
+            <div id="mDesc" class="text-secondary lh-lg" style="white-space: pre-wrap;">...</div>
+          </div>
+          <div id="mLinkSection" class="text-center mt-5 d-none">
+            <a id="mLink" href="#" target="_blank"
+               class="btn rounded-pill px-5 py-3 fw-bold shadow text-white"
+               style="background-color: var(--ufro-blue);">
+              Más Información <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div id="imageLightbox" class="lightbox-overlay d-none" onclick="closeLightbox()">
+    <button class="btn-close-lightbox" onclick="closeLightbox()"><i class="bi bi-x-lg"></i></button>
+    <img id="lightboxImg" src="" alt="Pantalla Completa" onclick="event.stopPropagation()" />
+  </div>
+
+  <script define:vars={{ eventos }}>
+    const eventsData = eventos;
+
+    window.openModal = (id) => {
+      const evento = eventsData.find(e => e.id === id);
+      if (!evento) return;
+
+      document.getElementById('mTitle').textContent   = evento.titulo;
+
+      const placeEl = document.getElementById('mPlaceBox');
+      if (evento.lugar) {
+        placeEl.textContent  = evento.lugar;
+        placeEl.style.fontStyle = 'normal';
+        placeEl.style.opacity   = '1';
+      } else {
+        placeEl.textContent     = 'Por confirmar';
+        placeEl.style.fontStyle = 'italic';
+        placeEl.style.opacity   = '0.75';
+      }
+
+      const start       = new Date(evento.fecha_evento);
+      const end         = evento.fecha_fin ? new Date(evento.fecha_fin) : null;
+      const timeOpts    = { hour: '2-digit', minute: '2-digit' };
+      const dateOpts    = { day: 'numeric', month: 'long' };
+      const isMidnight  = start.getHours() === 0 && start.getMinutes() === 0;
+      const textoPendiente = 'Por confirmar';
+
+      let dateText = '', timeText = '';
+
+      if (!isNaN(start.getTime())) {
+        const horaInicioStr = start.toLocaleTimeString('es-CL', timeOpts);
+        if (end && !isNaN(end.getTime())) {
+          if (start.toDateString() === end.toDateString()) {
+            dateText = start.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+            timeText = isMidnight ? textoPendiente : `${horaInicioStr} - ${end.toLocaleTimeString('es-CL', timeOpts)}`;
+          } else {
+            dateText = `${start.toLocaleDateString('es-CL', dateOpts)} \nal\n${end.toLocaleDateString('es-CL', dateOpts)}`;
+            timeText = `Inicio: ${isMidnight ? textoPendiente : horaInicioStr} \nFin: ${end.toLocaleTimeString('es-CL', timeOpts)}`;
+          }
+        } else {
+          dateText = start.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+          timeText = isMidnight ? textoPendiente : horaInicioStr;
         }
+      }
 
-        /* --- CLASES UTILITARIAS --- */
-        .text-ufro-blue { color: var(--ufro-blue) !important; }
-        .border-ufro-blue { border-color: var(--ufro-blue) !important; }
-        .btn-ufro-blue {
-            background-color: var(--ufro-blue);
-            border-color: var(--ufro-blue);
-            color: white;
-            transition: all 0.3s ease;
-        }
-        .btn-ufro-blue:hover {
-            opacity: 0.9;
-            transform: scale(1.02);
-            color: white;
-        }
+      document.getElementById('mDateBox').innerText = dateText.charAt(0).toUpperCase() + dateText.slice(1);
+      const timeBox = document.getElementById('mTimeBox');
+      timeBox.innerText       = timeText;
+      timeBox.style.fontStyle = timeText === textoPendiente ? 'italic' : 'normal';
+      timeBox.style.opacity   = timeText === textoPendiente ? '0.8' : '1';
 
-        /* --- ESTILOS MODAL Y SCROLL --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
-            z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 15px;
-        }
-        .modal-container {
-            width: 100%; max-width: 800px; max-height: 85vh;
-            display: flex; flex-direction: column; background: white;
-            animation: zoomIn 0.25s ease-out;
-        }
-        .modal-header-custom { flex-shrink: 0; }
-        .modal-body-scroll { flex: 1 1 auto; overflow-y: auto; min-height: 0; scrollbar-width: thin; }
-        
-        /* Utilitarios */
-        .cursor-pointer { cursor: pointer; }
-        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .ls-1 { letter-spacing: 1px; font-size: 0.75rem; }
-        .small-text-md { font-size: 0.9rem; }
-        .hover-transform:hover { transform: translateY(-2px); }
+      const imgEl     = document.getElementById('mImage');
+      const phEl      = document.getElementById('mImagePlaceholder');
+      imgEl.src = '';
+      if (evento.imagen_url) {
+        imgEl.src           = evento.imagen_url;
+        imgEl.style.display = 'block';
+        phEl.style.display  = 'none';
+      } else {
+        imgEl.style.display = 'none';
+        phEl.style.display  = 'flex';
+      }
 
-        @keyframes zoomIn {
-            from { transform: scale(0.95); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        @media (max-width: 576px) { .small-text-md { font-size: 0.8rem; } }
+      const descSection = document.getElementById('mDescSection');
+      const descText    = document.getElementById('mDesc');
+      if (evento.descripcion?.replace(/<[^>]*>?/gm, '').trim().length > 0) {
+        descText.innerHTML = evento.descripcion;
+        descSection.classList.remove('d-none');
+      } else {
+        descSection.classList.add('d-none');
+      }
 
-        /* --- INTERACCIONES --- */
-        .interactive-card, .interactive-img, .interactive-title, .interactive-btn, .interactive-close, .interactive-grow {
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-        .card-hover-wrapper:hover .interactive-card {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15) !important;
-            border-color: var(--ufro-pink) !important;
-        }
-        .card-hover-wrapper:hover .interactive-img { transform: scale(1.1); }
-        .card-hover-wrapper:hover .interactive-title {
-            color: var(--ufro-blue) !important; text-decoration: underline;
-        }
-        .interactive-btn:hover {
-            transform: scale(1.2); background-color: var(--ufro-pink) !important;
-            border-color: var(--ufro-pink) !important; color: white !important;
-        }
-        .interactive-close:hover {
-            transform: rotate(90deg) scale(1.1); background-color: rgba(255, 255, 255, 0.3) !important;
-        }
-        .interactive-grow:hover { transform: scale(1.05) translateY(-3px); }
-    </style>
+      const linkSection = document.getElementById('mLinkSection');
+      const linkBtn     = document.getElementById('mLink');
+      if (evento.link_externo?.trim().length > 0) {
+        linkBtn.href = evento.link_externo;
+        linkSection.classList.remove('d-none');
+      } else {
+        linkSection.classList.add('d-none');
+      }
 
-    <script define:vars={{ eventos }}>
-        const eventsData = eventos;
+      document.getElementById('eventModal').classList.remove('d-none');
+      document.body.style.overflow = 'hidden';
+    };
 
-        window.openModal = (id) => {
-            const evento = eventsData.find((e) => e.id === id);
-            if (!evento) return;
+    window.closeModal = () => {
+      document.getElementById('eventModal').classList.add('d-none');
+      document.body.style.overflow = '';
+    };
 
-            // --- 1. Titulo y Lugar ---
-            const titleEl = document.getElementById("mTitle");
-            const placeEl = document.getElementById("mPlaceBox");
-            if (titleEl) titleEl.textContent = evento.titulo;
-            if (placeEl) placeEl.textContent = evento.lugar || "Online / Por confirmar";
+    window.openLightbox = () => {
+      const src = document.getElementById('mImage').src;
+      if (!src) return;
+      document.getElementById('lightboxImg').src = src;
+      document.getElementById('imageLightbox').classList.remove('d-none');
+    };
 
-            // --- 2. LÓGICA DE FECHAS CORREGIDA ---
-            const start = new Date(evento.fecha_evento);
-            const end = evento.fecha_fin ? new Date(evento.fecha_fin) : null;
-            const timeOpts = { hour: "2-digit", minute: "2-digit" };
-            const dateOpts = { day: "numeric", month: "long" };
+    window.closeLightbox = () => {
+      document.getElementById('imageLightbox').classList.add('d-none');
+    };
 
-            let dateText = "";
-            let timeText = "";
-            
-            // Verificamos que las fechas sean validas
-            if (!isNaN(start.getTime())) {
-                const horaInicioStr = start.toLocaleTimeString("es-CL", timeOpts);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const lb = document.getElementById('imageLightbox');
+        if (!lb.classList.contains('d-none')) { window.closeLightbox(); }
+        else { window.closeModal(); }
+      }
+    });
 
-                if (end && !isNaN(end.getTime())) {
-                    if (start.toDateString() === end.toDateString()) {
-                        // Mismo día
-                        const horaFin = end.toLocaleTimeString("es-CL", timeOpts);
-                        dateText = start.toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long" });
-                        timeText = `${horaInicioStr} - ${horaFin}`;
-                    } else {
-                        // Días distintos
-                        dateText = `${start.toLocaleDateString("es-CL", dateOpts)} \nal\n${end.toLocaleDateString("es-CL", dateOpts)}`;
-                        const horaFin = end.toLocaleTimeString("es-CL", timeOpts);
-                        timeText = `Inicio: ${horaInicioStr} \nFin: ${horaFin}`;
-                    }
-                } else {
-                    // Solo fecha de inicio
-                    dateText = start.toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long" });
-                    timeText = `${horaInicioStr}`;
-                }
-            } else {
-                dateText = "Fecha inválida";
-                timeText = "--:--";
-            }
-
-            // Capitalizar primera letra
-            const dateTextCapitalized = dateText.charAt(0).toUpperCase() + dateText.slice(1);
-            
-            // Asignar al HTML
-            const dateBox = document.getElementById("mDateBox");
-            const timeBox = document.getElementById("mTimeBox");
-            if (dateBox) dateBox.innerText = dateTextCapitalized;
-            if (timeBox) timeBox.innerText = timeText;
-
-
-            // --- 3. LÓGICA DE IMAGEN (Ahora sí se ejecuta) ---
-            const imgEl = document.getElementById("mImage");
-            const phEl = document.getElementById("mImagePlaceholder");
-            const imgContainer = document.getElementById("mImageContainer");
-
-            // PRIMERO LIMPIAMOS LA IMAGEN ANTERIOR para evitar el "fantasma"
-            if (imgEl) imgEl.src = ""; 
-
-            if (evento.imagen_url) {
-                if (imgEl) {
-                    imgEl.src = evento.imagen_url;
-                    imgEl.style.display = "block";
-                }
-                if (phEl) {
-                    phEl.style.display = "none";
-                    phEl.classList.remove("d-flex");
-                }
-                if (imgContainer) imgContainer.classList.remove("d-none");
-            } else {
-                // Si NO hay imagen, ocultamos la etiqueta img y mostramos el placeholder
-                if (imgEl) imgEl.style.display = "none";
-                if (phEl) {
-                    phEl.style.display = "flex";
-                    phEl.classList.add("d-flex");
-                }
-                if (imgContainer) imgContainer.classList.remove("d-none");
-            }
-
-            // --- 4. Descripción ---
-            const descSection = document.getElementById("mDescSection");
-            const descText = document.getElementById("mDesc");
-            if (evento.descripcion && evento.descripcion.replace(/<[^>]*>?/gm, "").trim().length > 0) {
-                if (descText) descText.innerHTML = evento.descripcion;
-                if (descSection) descSection.classList.remove("d-none");
-            } else {
-                if (descSection) descSection.classList.add("d-none");
-            }
-
-            // --- 5. Link ---
-            const linkSection = document.getElementById("mLinkSection");
-            const linkBtn = document.getElementById("mLink");
-            if (evento.link_externo && evento.link_externo.trim().length > 0) {
-                if (linkBtn) linkBtn.href = evento.link_externo;
-                if (linkSection) linkSection.classList.remove("d-none");
-            } else {
-                if (linkSection) linkSection.classList.add("d-none");
-            }
-
-            const modal = document.getElementById("eventModal");
-            if (modal) modal.classList.remove("d-none");
-            document.body.style.overflow = "hidden";
-        };
-
-        window.closeModal = () => {
-            const modal = document.getElementById("eventModal");
-            if (modal) modal.classList.add("d-none");
-            document.body.style.overflow = "";
-        };
-
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") window.closeModal();
-        });
-        document.getElementById("eventModal").addEventListener("click", (e) => {
-            if (e.target.id === "eventModal") window.closeModal();
-        });
-    </script>
+    document.getElementById('eventModal').addEventListener('click', (e) => {
+      if (e.target.id === 'eventModal') window.closeModal();
+    });
+  </script>
 </MainLayout>
+
+<style>
+  /* Tarjeta hover */
+  .card-hover-wrapper:hover .event-card {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.12) !important;
+    border-color: var(--ufro-pink) !important;
+    transition: all 0.3s ease;
+  }
+  .card-hover-wrapper:hover .img-zoom { transform: scale(1.1); }
+  .event-title { transition: color 0.3s; }
+  .card-hover-wrapper:hover .event-title { color: var(--ufro-blue) !important; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+    z-index: 9000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 15px;
+  }
+  .modal-container {
+    width: 100%; max-width: 800px; max-height: 85vh;
+    display: flex; flex-direction: column;
+    animation: zoomIn 0.25s ease-out;
+  }
+  .modal-body-scroll { flex: 1 1 auto; overflow-y: auto; min-height: 0; scrollbar-width: thin; }
+  .btn-close-modal {
+    cursor: pointer; border: none;
+    background: rgba(255,255,255,0.2); border-radius: 50%;
+    transition: background 0.2s;
+  }
+  .btn-close-modal:hover { background: rgba(255,255,255,0.35); }
+
+  /* Lightbox */
+  .lightbox-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 10000;
+    display: flex; align-items: center; justify-content: center;
+    cursor: zoom-out;
+    animation: fadeIn 0.3s forwards;
+    opacity: 0;
+  }
+  .lightbox-overlay img {
+    max-width: 95%; max-height: 95vh;
+    object-fit: contain;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    transform: scale(0.9);
+    animation: popIn 0.3s forwards;
+    cursor: default;
+  }
+  .btn-close-lightbox {
+    position: absolute; top: 20px; right: 30px;
+    background: transparent; border: none; color: white;
+    font-size: 2rem; cursor: pointer; opacity: 0.7; transition: 0.2s;
+  }
+  .btn-close-lightbox:hover { opacity: 1; transform: scale(1.1); }
+
+  @keyframes popIn  { to { transform: scale(1); } }
+</style>
