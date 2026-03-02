@@ -39,5 +39,14 @@ const { title, description, eyebrow } = Astro.props;
 <style>
   .page-header {
     background: var(--gradient-main);
+    /* Compensa la altura del navbar fijo (logo 70px + padding ~32px = ~102px)
+       Mismo valor que el padding-top del body definido en Navbar.astro */
+    padding-top: calc(102px + 2rem);
+  }
+
+  @media (max-width: 1199.98px) {
+    .page-header {
+      padding-top: calc(90px + 2rem);
+    }
   }
 </style>

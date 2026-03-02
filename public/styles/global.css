@@ -24,8 +24,18 @@
   --gradient-main: linear-gradient(135deg, var(--ufro-blue) 40%, var(--ufro-pink) 100%);
 }
 
-/* ─── 2. FUENTE Y BASE ────────────────────────────────────────────────────── */
+/* ─── 2. BASE ──────────────────────────────────────────────────────────────── */
 
+
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+footer {
+  overflow-x: hidden;
+}
 
 body {
   font-family: 'Roboto', sans-serif;
@@ -134,3 +144,4 @@ main {
 .bg-ufro-footer {
   background-color: var(--ufro-blue);
 }
+
