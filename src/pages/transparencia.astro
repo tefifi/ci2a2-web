@@ -8,6 +8,24 @@ const { data: proyectos } = await supabase
   .from('proyectos_adjudicados')
   .select('*')
   .order('anio', { ascending: false });
+
+const documentos = [
+  {
+    titulo: 'Resolución Exenta N°0722/2025',
+    desc:   'Aprueba el Reglamento de Creación y Cierre de Centros de Facultad de la Universidad de La Frontera. Firmada el 01 de abril de 2025 por el Rector Subrogante Juan Manuel Fierro Bustos.',
+    href:   '/docs/resolucion-exenta-0722-2025.pdf',
+  },
+  {
+    titulo: 'Ficha Técnica CI²A²',
+    desc:   'Documento de presentación del Centro: misión, visión, objetivos estratégicos, áreas de especialización y hoja de ruta 2025–2030. Director: Prof. Dr. Julio Fenner.',
+    href:   '/docs/ficha-tecnica-ci2a2.pdf',
+  },
+  {
+    titulo: 'Declaración de Principios: IA e Interculturalidad',
+    desc:   'Declaración institucional del CI²A² sobre el enfoque intercultural en el desarrollo de inteligencia artificial aplicada, con énfasis en el patrimonio cultural mapuche y el contexto regional.',
+    href:   '/docs/declaracion-principios-ia-interculturalidad.pdf',
+  },
+];
 ---
 
 <MainLayout title="Transparencia">
@@ -43,30 +61,30 @@ const { data: proyectos } = await supabase
           <h2 class="fw-bold text-dark mb-2">Resoluciones y Normativa</h2>
           <div style="width: 50px; height: 4px; background: var(--ufro-pink); border-radius: 2px;"></div>
           <p class="text-muted mt-3">
-            Documentos oficiales que establecen la creación y el reglamento de funcionamiento del centro.
+            Documentos oficiales que establecen la creación, el reglamento de funcionamiento
+            y los principios institucionales del centro.
           </p>
         </div>
       </div>
 
       <div class="row g-4">
-        {[
-          { titulo: 'Resolución de Creación', desc: 'Documento fundacional que formaliza la existencia del centro y sus objetivos institucionales.' },
-          { titulo: 'Normativa Interna',      desc: 'Reglamento que rige el funcionamiento, estructura y deberes de los integrantes del centro.' },
-        ].map(doc => (
-          <div class="col-md-6">
+        {documentos.map(doc => (
+          <div class="col-md-6 col-lg-4">
             <div class="card h-100 border-0 shadow-sm hover-up rounded-4">
-              <div class="card-body p-4 d-flex align-items-start gap-3">
-                <div class="flex-shrink-0 rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center"
-                     style="width: 60px; height: 60px;">
-                  <i class="bi bi-file-earmark-pdf-fill text-danger fs-3"></i>
+              <div class="card-body p-4 d-flex flex-column">
+                <div class="d-flex align-items-start gap-3 mb-3">
+                  <div class="flex-shrink-0 rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center"
+                       style="width: 52px; height: 52px; min-width: 52px;">
+                    <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
+                  </div>
+                  <h5 class="fw-bold text-dark mb-0 lh-sm fs-6">{doc.titulo}</h5>
                 </div>
-                <div class="flex-grow-1">
-                  <h5 class="fw-bold text-dark mb-1">{doc.titulo}</h5>
-                  <p class="text-muted small mb-3">{doc.desc}</p>
-                  <a href="#" class="btn btn-sm btn-outline-danger rounded-pill fw-medium px-3" target="_blank">
-                    <i class="bi bi-download me-2"></i>Descargar PDF
-                  </a>
-                </div>
+                <p class="text-muted small mb-4 flex-grow-1">{doc.desc}</p>
+                <a href={doc.href}
+                   class="btn btn-sm btn-outline-danger rounded-pill fw-medium px-3 align-self-start"
+                   target="_blank" rel="noopener noreferrer">
+                  <i class="bi bi-download me-2"></i>Descargar PDF
+                </a>
               </div>
             </div>
           </div>
