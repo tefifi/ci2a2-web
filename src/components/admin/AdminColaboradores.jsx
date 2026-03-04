@@ -62,6 +62,7 @@ export default function AdminColaboradores() {
                       subiendo={subiendo}
                       variante="avatar"
                       label="Foto de perfil"
+                      mostrarBotonX={false}   
                     />
                   </div>
 

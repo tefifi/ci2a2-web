@@ -91,7 +91,7 @@ export default function AgendaViewer() {
 function EventoCard({ evento, esFuturo }) {
   const formatearFecha = (inicioStr, finStr) => {
     const inicio = new Date(inicioStr);
-    const fin    = finStr ? new Date(finStr) : null;
+    const fin = finStr ? new Date(finStr) : null;
     const esSinHora = inicio.getHours() === 0 && inicio.getMinutes() === 0;
     const textoPendiente = 'Horario por confirmar';
     const dateOpts = { weekday: 'long', day: 'numeric', month: 'long' };
@@ -127,7 +127,7 @@ function EventoCard({ evento, esFuturo }) {
       <span className="text-capitalize">
         {inicio.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })}
         {' → '}
-        {fin.toLocaleDateString('es-CL',   { day: 'numeric', month: 'short' })}
+        {fin.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })}
       </span>
     );
   };
@@ -135,8 +135,8 @@ function EventoCard({ evento, esFuturo }) {
   // Color de badge por tipo
   const badgeColor = {
     Seminario: 'bg-purple',
-    Taller:    'bg-warning text-dark',
-    Noticia:   'bg-success',
+    Taller: 'bg-warning text-dark',
+    Noticia: 'bg-success',
   }[evento.tipo] || 'bg-primary';
 
   return (
@@ -144,21 +144,24 @@ function EventoCard({ evento, esFuturo }) {
       ${esFuturo ? '' : 'grayscale-partial'}`}>
 
       {/* Imagen */}
-      <div className="position-relative overflow-hidden bg-light" style={{ height: 180 }}>
-        {evento.imagen_url ? (
+      <div className="position-relative bg-light border-bottom" style={{ height: '300px' }}>
+        {eventoSeleccionado.imagen_url ? (
+          // Si hay imagen, solo se muestra la imagen
           <img
-            src={evento.imagen_url}
-            alt={evento.titulo}
-            className="w-100 h-100 object-fit-cover card-img-zoom"
-            style={{ transition: 'transform 0.5s ease' }}
+            src={eventoSeleccionado.imagen_url}
+            className="w-100 h-100 object-fit-cover"
+            alt={eventoSeleccionado.titulo}
           />
         ) : (
+          // Si NO hay imagen, se muestra el placeholder
           <div className="w-100 h-100 d-flex align-items-center justify-content-center text-secondary">
             <i className="bi bi-calendar-event fs-1 opacity-25"></i>
           </div>
         )}
-        <span className={`position-absolute top-0 end-0 m-2 badge ${badgeColor} shadow-sm`}>
-          {evento.tipo || 'Evento'}
+
+        {/* El badge se mantiene sobre cualquiera de los dos estados */}
+        <span className={`position-absolute top-0 end-0 m-3 badge ${getBadgeColor(eventoSeleccionado.tipo)} shadow-sm`}>
+          {eventoSeleccionado.tipo || 'Evento'}
         </span>
       </div>
 
@@ -185,8 +188,8 @@ function EventoCard({ evento, esFuturo }) {
 
         {evento.link_externo && (
           <a href={evento.link_externo} target="_blank" rel="noopener noreferrer"
-             className="btn btn-sm btn-outline-primary rounded-pill w-100 mt-auto fw-semibold"
-             style={{ borderColor: 'var(--ufro-blue)', color: 'var(--ufro-blue)' }}>
+            className="btn btn-sm btn-outline-primary rounded-pill w-100 mt-auto fw-semibold"
+            style={{ borderColor: 'var(--ufro-blue)', color: 'var(--ufro-blue)' }}>
             {evento.tipo === 'Noticia' ? 'Leer más' : 'Inscribirse'}
           </a>
         )}

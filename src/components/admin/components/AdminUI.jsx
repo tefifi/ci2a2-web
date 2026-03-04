@@ -1,4 +1,125 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// useConfirmar — hook para modal de confirmación
+// Uso: const { confirmar, modalProps } = useConfirmar();
+//      <ModalConfirmar {...modalProps} />
+//      const ok = await confirmar({ titulo, descripcion });
+// ─────────────────────────────────────────────────────────────────────────────
+export function useConfirmar() {
+  const [estado, setEstado] = useState(null);
+
+  const confirmar = useCallback((opciones = {}) => {
+    return new Promise((resolve) => {
+      setEstado({
+        titulo:         opciones.titulo         ?? '¿Eliminar registro?',
+        descripcion:    opciones.descripcion    ?? 'Esta acción no se puede deshacer.',
+        labelConfirmar: opciones.labelConfirmar ?? 'Sí, eliminar',
+        resolve,
+      });
+    });
+  }, []);
+
+  const responder = (valor) => {
+    estado?.resolve(valor);
+    setEstado(null);
+  };
+
+  return {
+    confirmar,
+    modalProps: {
+      estado,
+      onConfirmar: () => responder(true),
+      onCancelar:  () => responder(false),
+    },
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ModalConfirmar — ventana de confirmación antes de eliminar
+// ─────────────────────────────────────────────────────────────────────────────
+export function ModalConfirmar({ estado, onConfirmar, onCancelar }) {
+  useEffect(() => {
+    if (!estado) return;
+    const handler = (e) => { if (e.key === 'Escape') onCancelar(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [estado, onCancelar]);
+
+  if (!estado) return null;
+
+  return (
+    <>
+      <div
+        onClick={onCancelar}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 1055,
+          backgroundColor: 'rgba(0,0,0,0.45)',
+          backdropFilter: 'blur(2px)',
+          animation: 'fadeInBackdrop 0.18s ease',
+        }}
+      />
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 1056,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '1rem',
+      }}>
+        <div style={{
+          background: '#fff', borderRadius: '16px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+          maxWidth: '420px', width: '100%',
+          animation: 'slideUpModal 0.2s ease', overflow: 'hidden',
+        }}>
+          <div style={{ height: '5px', background: 'linear-gradient(90deg, #dc3545, #e85d6a)' }} />
+          <div style={{ padding: '2rem' }}>
+            <div style={{
+              width: '56px', height: '56px', borderRadius: '50%',
+              background: '#fff0f0', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', marginBottom: '1.25rem',
+            }}>
+              <i className="bi bi-trash3-fill" style={{ fontSize: '1.5rem', color: '#dc3545' }}></i>
+            </div>
+            <h5 style={{ fontWeight: 700, color: '#212529', marginBottom: '0.5rem' }}>
+              {estado.titulo}
+            </h5>
+            <p style={{ color: '#6c757d', fontSize: '0.92rem', marginBottom: '1.75rem', lineHeight: 1.5 }}>
+              {estado.descripcion}
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button
+                onClick={onCancelar}
+                style={{
+                  flex: 1, padding: '0.6rem 1rem', borderRadius: '8px',
+                  border: '1.5px solid #dee2e6', background: '#fff',
+                  fontWeight: 600, color: '#495057', cursor: 'pointer', fontSize: '0.9rem',
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={onConfirmar}
+                style={{
+                  flex: 1, padding: '0.6rem 1rem', borderRadius: '8px',
+                  border: 'none', background: 'linear-gradient(135deg, #dc3545, #c82333)',
+                  fontWeight: 600, color: '#fff', cursor: 'pointer',
+                  fontSize: '0.9rem', boxShadow: '0 4px 12px rgba(220,53,69,0.35)',
+                }}
+              >
+                <i className="bi bi-trash3 me-2"></i>
+                {estado.labelConfirmar}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <style>{`
+        @keyframes fadeInBackdrop { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes slideUpModal   { from { opacity: 0; transform: translateY(20px) scale(0.97) } to { opacity: 1; transform: translateY(0) scale(1) } }
+      `}</style>
+    </>
+  );
+}
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AdminAlert
@@ -11,8 +132,8 @@ export function AdminAlert({ mensaje, onClose }) {
 
   const icono =
     mensaje.tipo === 'success' ? 'bi-check-circle-fill' :
-    mensaje.tipo === 'info'    ? 'bi-info-circle-fill'  :
-    'bi-exclamation-triangle-fill';
+      mensaje.tipo === 'info' ? 'bi-info-circle-fill' :
+        'bi-exclamation-triangle-fill';
 
   return (
     <div className={`alert alert-${mensaje.tipo} alert-dismissible fade show shadow-sm border-0 mb-4`}>
@@ -92,7 +213,7 @@ export function FormActions({
   loading = false,
   onCancel,
   labelGuardar = 'Crear Registro',
-  labelEditar  = 'Guardar Cambios',
+  labelEditar = 'Guardar Cambios',
 }) {
   return (
     <div className="d-flex gap-2 mt-4 pt-3 border-top">
@@ -172,7 +293,7 @@ export function ListaVacia({ texto = 'No hay registros.' }) {
 //   </SidebarCard>
 // ─────────────────────────────────────────────────────────────────────────────
 export function SidebarCard({
-  titulo    = 'Historial',
+  titulo = 'Historial',
   count,
   maxHeight = '600px',
   children,
@@ -226,15 +347,18 @@ export function ImageUploadZone({
   image,
   onUpload,
   onRemove,
-  subiendo  = false,
-  variante  = 'banner',
-  label     = 'Imagen',
-  required  = false,
-  hint      = '',
+  subiendo = false,
+  variante = 'banner',
+  label = 'Imagen',
+  required = false,
+  hint = '',
+  mostrarBotonX = true,
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
   const esAvatar = variante === 'avatar';
+
+
 
   // Soporte para pegar imagen desde portapapeles (Ctrl+V)
   useEffect(() => {
@@ -256,14 +380,16 @@ export function ImageUploadZone({
     return () => window.removeEventListener('paste', handlePaste);
   }, [onUpload]);
 
+
+
   const estiloContenedor = esAvatar
     ? { width: '160px', height: '160px', borderRadius: '50%' }
     : {
-        width: '100%',
-        aspectRatio: variante === 'cuadrado' ? '1/1' : '21/9',
-        maxHeight: '300px',
-        borderRadius: '12px',
-      };
+      width: '100%',
+      aspectRatio: variante === 'cuadrado' ? '1/1' : '21/9',
+      maxHeight: '300px',
+      borderRadius: '12px',
+    };
 
   const estiloBorde = {
     ...estiloContenedor,
@@ -273,7 +399,7 @@ export function ImageUploadZone({
     borderColor: isDragging ? '#0d6efd' : '#dee2e6',
   };
 
-  return (
+return (
     <div className={`d-flex flex-column ${esAvatar ? 'align-items-center' : ''} mb-3`}>
       {label && (
         <label className="form-label fw-bold small text-secondary">
@@ -316,35 +442,44 @@ export function ImageUploadZone({
               alt="Preview"
               style={esAvatar ? { borderRadius: '50%' } : {}}
             />
-            <button
-              type="button"
-              className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 border-0"
-              style={{ width: '28px', height: '28px', padding: 0 }}
-              onClick={(e) => { e.stopPropagation(); onRemove(); }}
-              title="Eliminar imagen"
-            >
-              <i className="bi bi-trash" style={{ fontSize: '0.8rem' }}></i>
-            </button>
+
+            {/* El botón ahora está DENTRO del condicional de 'image' y usa position-absolute */}
+            {mostrarBotonX && (
+              <button
+                type="button"
+                className="btn btn-danger btn-sm position-absolute border-0 shadow-sm"
+                style={{ 
+                  top: '10px', 
+                  right: '10px', 
+                  width: '32px', 
+                  height: '32px', 
+                  zIndex: 10,
+                  borderRadius: esAvatar ? '50%' : '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  onRemove(); 
+                }}
+                title="Eliminar imagen"
+              >
+                <i className="bi bi-trash" style={{ fontSize: '0.9rem' }}></i>
+              </button>
+            )}
           </>
         ) : (
           <div className="d-flex flex-column align-items-center text-muted text-center p-3">
-            <i
-              className={`bi ${
-                isDragging
-                  ? 'bi-cloud-upload-fill text-primary'
-                  : esAvatar ? 'bi-camera-fill' : 'bi-card-image'
-              } display-4 mb-2 opacity-50`}
-            ></i>
-            <p className="small mb-0 fw-bold">
-              {isDragging ? 'Suelta aquí' : 'Arrastra, pega o haz clic'}
-            </p>
+            <i className={`bi ${isDragging ? 'bi-cloud-upload-fill text-primary' : esAvatar ? 'bi-camera-fill' : 'bi-card-image'} display-4 mb-2 opacity-50`}></i>
+            <p className="small mb-0 fw-bold">{isDragging ? 'Suelta aquí' : 'Arrastra, pega o haz clic'}</p>
             {hint && <p className="small mb-0 opacity-75">{hint}</p>}
           </div>
         )}
       </div>
 
-      {/* Botón eliminar debajo del avatar */}
-      {esAvatar && image && (
+      {/* Botón de texto inferior (Solo si es avatar y no quieres la X encima) */}
+      {esAvatar && image && !mostrarBotonX && (
         <button
           type="button"
           className="btn btn-link text-danger text-decoration-none btn-sm fw-bold p-0 mt-2"

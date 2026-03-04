@@ -1,258 +1,499 @@
 ---
-// 1. IMPORTS DE ASTRO Y LIBRERÍAS
 import AdminLayout from "../layouts/AdminLayout.astro";
 import { supabase } from "../lib/supabase";
 
-// 2. IMPORTS DE COMPONENTES
-import AdminNoticias from "../components/admin/AdminNoticias.jsx";
-import AdminProyectos from "../components/admin/AdminProyectos.jsx";
-import AdminColaboradores from "../components/admin/AdminColaboradores.jsx";
-import AdminPublicaciones from "../components/admin/AdminPublicaciones.jsx";
-import AdminAgenda from "../components/admin/AdminAgenda.jsx";
-import AdminBanners from "../components/admin/AdminBanners.jsx";
-import AdminAlianzas from "../components/admin/AdminAlianzas.jsx";
-import AdminGraficos from "../components/admin/adminGraficos";
-import AdminTransparencia from "../components/admin/AdminTransparencia";
-import AdminBiblioteca from "../components/admin/AdminBiblioteca.jsx"; // <--- 1. NUEVO IMPORT
+import AdminNoticias       from "../components/admin/AdminNoticias.jsx";
+import AdminProyectos      from "../components/admin/AdminProyectos.jsx";
+import AdminColaboradores  from "../components/admin/AdminColaboradores.jsx";
+import AdminPublicaciones  from "../components/admin/AdminPublicaciones.jsx";
+import AdminAgenda         from "../components/admin/AdminAgenda.jsx";
+import AdminBanners        from "../components/admin/AdminBanners.jsx";
+import AdminAlianzas       from "../components/admin/AdminAlianzas.jsx";
+import AdminGraficos       from "../components/admin/adminGraficos";
+import AdminTransparencia  from "../components/admin/AdminTransparencia";
+import AdminBiblioteca     from "../components/admin/AdminBiblioteca.jsx";
+import AdminManuales       from "../components/admin/AdminManuales.jsx";
+import TiempoSesion        from "../components/admin/TiempoSesion";
 
-import TiempoSesion from "../components/admin/TiempoSesion";
-
-// 3. LÓGICA DE SERVIDOR
-const accessToken = Astro.cookies.get("sb-access-token")?.value;
+const accessToken  = Astro.cookies.get("sb-access-token")?.value;
 const refreshToken = Astro.cookies.get("sb-refresh-token")?.value;
 
-if (!accessToken || !refreshToken) {
-    return Astro.redirect("/login");
-}
+if (!accessToken || !refreshToken) return Astro.redirect("/login");
 
-const {
-    data: { user },
-    error,
-} = await supabase.auth.getUser(accessToken);
-
+const { data: { user }, error } = await supabase.auth.getUser(accessToken);
 if (error || !user) {
-    return Astro.redirect("/api/auth/logout");
+    Astro.cookies.delete("sb-access-token",  { path: "/" });
+    Astro.cookies.delete("sb-refresh-token", { path: "/" });
+    return Astro.redirect("/login");
 }
 ---
 
 <AdminLayout title="Panel de Administración">
     <TiempoSesion client:only="react" minutes={20} />
 
-    <div class="container py-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="fw-bold text-ufro">Panel de Control</h1>
-        </div>
+    <div class="admin-wrapper">
 
-        <h2 class="mb-4">Administración CI2A2</h2>
-
-        <ul class="nav nav-pills mb-4 gap-2" id="adminTabs" role="tablist">
-            {/* 1. PESTAÑA MÉTRICAS */}
-            <li class="nav-item" role="presentation">
-                <button
-                    class="nav-link active fw-bold rounded-pill px-4"
-                    id="graficos-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#graficos"
-                    type="button"
-                    role="tab"
-                >
-                    <i class="bi bi-speedometer2 me-2"></i>Métricas
-                </button>
-            </li>
-
-            {/* 2. PESTAÑA BANNERS */}
-            <li class="nav-item" role="presentation">
-                <button
-                    class="nav-link fw-bold rounded-pill px-4"
-                    id="banners-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#banners"
-                    type="button"
-                    role="tab"
-                >
-                    <i class="bi bi-images me-2"></i>Banners
-                </button>
-            </li>
-
-            {/* 3. PROYECTOS */}
-            <li class="nav-item" role="presentation">
-                <button
-                    class="nav-link fw-bold rounded-pill px-4"
-                    id="proyectos-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#proyectos"
-                    type="button"
-                    role="tab"
-                >
-                    <i class="bi bi-briefcase me-2"></i>Proyectos
-                </button>
-            </li>
-
-            {/* 4. NOTICIAS */}
-            <li class="nav-item" role="presentation">
-                <button
-                    class="nav-link fw-bold rounded-pill px-4"
-                    id="noticias-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#noticias"
-                    type="button"
-                    role="tab"
-                >
-                    <i class="bi bi-newspaper me-2"></i>Noticias
-                </button>
-            </li>
-
-            {/* 5. AGENDA */}
-            <li class="nav-item" role="presentation">
-                <button
-                    class="nav-link fw-bold rounded-pill px-4"
-                    id="agenda-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#agenda"
-                    type="button"
-                    role="tab"
-                >
-                    <i class="bi bi-calendar-event me-2"></i>Agenda
-                </button>
-            </li>
-
-            {/* 6. ALIANZAS */}
-            <li class="nav-item" role="presentation">
-                <button
-                    class="nav-link fw-bold rounded-pill px-4"
-                    id="alianzas-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#alianzas"
-                    type="button"
-                    role="tab"
-                >
-                    <i class="bi bi-diagram-3 me-2"></i>Alianzas
-                </button>
-            </li>
-
-            {/* 7. COLABORADORES */}
-            <li class="nav-item" role="presentation">
-                <button
-                    class="nav-link fw-bold rounded-pill px-4"
-                    id="colaboradores-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#colaboradores"
-                    type="button"
-                    role="tab"
-                >
-                    <i class="bi bi-people me-2"></i>Colaboradores
-                </button>
-            </li>
-
-            {/* 8. PUBLICACIONES */}
-            <li class="nav-item" role="presentation">
-                <button
-                    class="nav-link fw-bold rounded-pill px-4"
-                    id="publicaciones-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#publicaciones"
-                    type="button"
-                    role="tab"
-                >
-                    <i class="bi bi-book me-2"></i>Publicaciones
-                </button>
-            </li>
-
-            {/* 9. NUEVO: BIBLIOTECA DIGITAL */}
-            <li class="nav-item" role="presentation">
-                <button
-                    class="nav-link fw-bold rounded-pill px-4"
-                    id="biblioteca-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#biblioteca"
-                    type="button"
-                    role="tab"
-                >
-                    <i class="bi bi-collection-play me-2"></i>Biblioteca {
-                        /* <--- 2. NUEVA PESTAÑA */
-                    }
-                </button>
-            </li>
-
-            {/* 10. TRANSPARENCIA */}
-            <li class="nav-item" role="presentation">
-                <button
-                    class="nav-link fw-bold rounded-pill px-4"
-                    id="transparencia-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#transparencia"
-                    type="button"
-                    role="tab"
-                >
-                    <i class="bi bi-shield-check me-2"></i>Transparencia
-                </button>
-            </li>
-        </ul>
-
-        <div
-            class="tab-content bg-white p-4 rounded shadow-sm border"
-            id="adminTabContent"
-        >
-            <div
-                class="tab-pane fade show active"
-                id="graficos"
-                role="tabpanel"
-            >
-                <AdminGraficos client:only="react" />
+        <!-- ══ SIDEBAR NAVEGACIÓN ══ -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                </div>
+                <div>
+                    <div class="sidebar-title">CI2A2</div>
+                    <div class="sidebar-subtitle">Panel de Control</div>
+                </div>
             </div>
 
-            <div class="tab-pane fade" id="banners" role="tabpanel">
-                <AdminBanners client:only="react" />
+            <nav class="sidebar-nav">
+
+                <!-- GRUPO: DASHBOARD -->
+                <div class="nav-group">
+                    <div class="nav-group-label">Dashboard</div>
+                    <button class="nav-item active" data-tab="graficos">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Métricas</span>
+                    </button>
+                </div>
+
+                <!-- GRUPO: CONTENIDO WEB -->
+                <div class="nav-group">
+                    <div class="nav-group-label">Contenido Web</div>
+                    <button class="nav-item" data-tab="banners">
+                        <i class="bi bi-images"></i>
+                        <span>Banners</span>
+                    </button>
+                    <button class="nav-item" data-tab="noticias">
+                        <i class="bi bi-newspaper"></i>
+                        <span>Noticias</span>
+                    </button>
+                    <button class="nav-item" data-tab="agenda">
+                        <i class="bi bi-calendar-event"></i>
+                        <span>Agenda</span>
+                    </button>
+                </div>
+
+                <!-- GRUPO: INVESTIGACIÓN -->
+                <div class="nav-group">
+                    <div class="nav-group-label">Investigación</div>
+                    <button class="nav-item" data-tab="proyectos">
+                        <i class="bi bi-briefcase"></i>
+                        <span>Proyectos</span>
+                    </button>
+                    <button class="nav-item" data-tab="publicaciones">
+                        <i class="bi bi-book"></i>
+                        <span>Publicaciones</span>
+                    </button>
+                    <button class="nav-item" data-tab="biblioteca">
+                        <i class="bi bi-collection-play"></i>
+                        <span>Biblioteca</span>
+                    </button>
+                </div>
+
+                <!-- GRUPO: ORGANIZACIÓN -->
+                <div class="nav-group">
+                    <div class="nav-group-label">Organización</div>
+                    <button class="nav-item" data-tab="colaboradores">
+                        <i class="bi bi-people"></i>
+                        <span>Colaboradores</span>
+                    </button>
+                    <button class="nav-item" data-tab="alianzas">
+                        <i class="bi bi-diagram-3"></i>
+                        <span>Alianzas</span>
+                    </button>
+                    <button class="nav-item" data-tab="transparencia">
+                        <i class="bi bi-shield-check"></i>
+                        <span>Transparencia</span>
+                    </button>
+                </div>
+
+                <!-- GRUPO: SISTEMA -->
+                <div class="nav-group">
+                    <div class="nav-group-label">Sistema</div>
+                    <button class="nav-item" data-tab="manuales">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>Manuales</span>
+                    </button>
+                    <a href="/api/auth/logout" class="nav-item nav-item-danger">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Cerrar Sesión</span>
+                    </a>
+                </div>
+
+            </nav>
+        </aside>
+
+        <!-- ══ CONTENIDO PRINCIPAL ══ -->
+        <main class="admin-main">
+
+            <!-- Topbar móvil -->
+            <div class="admin-topbar">
+                <button class="topbar-toggle" id="sidebarToggle">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+                <span class="topbar-title" id="topbarTitle">Métricas</span>
+                <span class="topbar-user">
+                    <i class="bi bi-person-circle me-1"></i>
+                    {user.email?.split('@')[0]}
+                </span>
             </div>
 
-            <div class="tab-pane fade" id="proyectos" role="tabpanel">
-                <AdminProyectos client:only="react" />
-            </div>
+            <!-- Tabs content -->
+            <div class="tab-content-wrapper">
 
-            <div class="tab-pane fade" id="noticias" role="tabpanel">
-                <AdminNoticias client:only="react" />
-            </div>
+                <div class="tab-pane active" id="tab-graficos">
+                    <div class="tab-header">
+                        <h3 class="tab-title"><i class="bi bi-speedometer2 me-2"></i>Métricas y Gráficos</h3>
+                    </div>
+                    <AdminGraficos client:only="react" />
+                </div>
 
-            <div class="tab-pane fade" id="colaboradores" role="tabpanel">
-                <AdminColaboradores client:only="react" />
-            </div>
+                <div class="tab-pane" id="tab-banners">
+                    <div class="tab-header">
+                        <h3 class="tab-title"><i class="bi bi-images me-2"></i>Banners</h3>
+                    </div>
+                    <AdminBanners client:only="react" />
+                </div>
 
-            <div class="tab-pane fade" id="agenda" role="tabpanel">
-                <AdminAgenda client:only="react" />
-            </div>
+                <div class="tab-pane" id="tab-noticias">
+                    <div class="tab-header">
+                        <h3 class="tab-title"><i class="bi bi-newspaper me-2"></i>Noticias</h3>
+                    </div>
+                    <AdminNoticias client:only="react" />
+                </div>
 
-            <div class="tab-pane fade" id="alianzas" role="tabpanel">
-                <AdminAlianzas client:only="react" />
-            </div>
+                <div class="tab-pane" id="tab-agenda">
+                    <div class="tab-header">
+                        <h3 class="tab-title"><i class="bi bi-calendar-event me-2"></i>Agenda</h3>
+                    </div>
+                    <AdminAgenda client:only="react" />
+                </div>
 
-            <div class="tab-pane fade" id="publicaciones" role="tabpanel">
-                <AdminPublicaciones client:only="react" />
-            </div>
+                <div class="tab-pane" id="tab-proyectos">
+                    <div class="tab-header">
+                        <h3 class="tab-title"><i class="bi bi-briefcase me-2"></i>Proyectos</h3>
+                    </div>
+                    <AdminProyectos client:only="react" />
+                </div>
 
-            {/* NUEVO: CONTENIDO BIBLIOTECA */}
-            <div class="tab-pane fade" id="biblioteca" role="tabpanel">
-                <AdminBiblioteca client:only="react" token={accessToken} />
-            </div>
+                <div class="tab-pane" id="tab-publicaciones">
+                    <div class="tab-header">
+                        <h3 class="tab-title"><i class="bi bi-book me-2"></i>Publicaciones</h3>
+                    </div>
+                    <AdminPublicaciones client:only="react" />
+                </div>
 
-            <div class="tab-pane fade" id="transparencia" role="tabpanel">
-                <AdminTransparencia client:only="react" />
+                <div class="tab-pane" id="tab-biblioteca">
+                    <div class="tab-header">
+                        <h3 class="tab-title"><i class="bi bi-collection-play me-2"></i>Biblioteca Digital</h3>
+                    </div>
+                    <AdminBiblioteca client:only="react" token={accessToken} />
+                </div>
+
+                <div class="tab-pane" id="tab-colaboradores">
+                    <div class="tab-header">
+                        <h3 class="tab-title"><i class="bi bi-people me-2"></i>Colaboradores</h3>
+                    </div>
+                    <AdminColaboradores client:only="react" />
+                </div>
+
+                <div class="tab-pane" id="tab-alianzas">
+                    <div class="tab-header">
+                        <h3 class="tab-title"><i class="bi bi-diagram-3 me-2"></i>Alianzas y Clientes</h3>
+                    </div>
+                    <AdminAlianzas client:only="react" />
+                </div>
+
+                <div class="tab-pane" id="tab-transparencia">
+                    <div class="tab-header">
+                        <h3 class="tab-title"><i class="bi bi-shield-check me-2"></i>Transparencia</h3>
+                    </div>
+                    <AdminTransparencia client:only="react" />
+                </div>
+
+                <div class="tab-pane" id="tab-manuales">
+                    <div class="tab-header">
+                        <h3 class="tab-title"><i class="bi bi-file-earmark-text me-2"></i>Manuales de Usuario</h3>
+                        <p class="tab-subtitle">Administra los documentos de ayuda para los usuarios del sistema.</p>
+                    </div>
+                    <AdminManuales client:only="react" />
+                </div>
+
             </div>
-        </div>
+        </main>
     </div>
 </AdminLayout>
 
-<style>
-    .text-ufro {
-        color: #003767;
+<script>
+    const navItems    = document.querySelectorAll<HTMLElement>('.nav-item[data-tab]');
+    const tabPanes    = document.querySelectorAll<HTMLElement>('.tab-pane');
+    const topbarTitle = document.getElementById('topbarTitle');
+    const sidebar     = document.getElementById('adminSidebar') as HTMLElement | null;
+    const toggleBtn   = document.getElementById('sidebarToggle') as HTMLElement | null;
+
+    // Activar tab
+    function activarTab(tabId: string) {
+        navItems.forEach(b => b.classList.remove('active'));
+        tabPanes.forEach(p => p.classList.remove('active'));
+
+        const btn  = document.querySelector<HTMLElement>(`.nav-item[data-tab="${tabId}"]`);
+        const pane = document.getElementById(`tab-${tabId}`);
+        if (btn)  btn.classList.add('active');
+        if (pane) pane.classList.add('active');
+        if (topbarTitle && btn) topbarTitle.textContent = btn.querySelector('span')?.textContent || '';
+
+        // Cerrar sidebar en móvil al navegar
+        if (window.innerWidth < 992) sidebar?.classList.remove('open');
+
+        // Guardar estado
+        sessionStorage.setItem('adminTab', tabId);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    .nav-pills .nav-link.active {
-        background-color: #003767;
+    navItems.forEach(btn => {
+        btn.addEventListener('click', () => activarTab(btn.dataset['tab'] ?? ''));
+    });
+
+    // Toggle móvil
+    toggleBtn?.addEventListener('click', () => sidebar?.classList.toggle('open'));
+
+    // Cerrar sidebar al hacer clic fuera (móvil)
+    document.addEventListener('click', (e) => {
+        const target = e.target as Node | null;
+        if (window.innerWidth < 992 &&
+            sidebar && !sidebar.contains(target) &&
+            toggleBtn && !toggleBtn.contains(target)) {
+            sidebar.classList.remove('open');
+        }
+    });
+
+    // Restaurar tab guardado
+    const tabGuardado = sessionStorage.getItem('adminTab') || 'graficos';
+    activarTab(tabGuardado);
+</script>
+
+<style>
+    /* ── Layout general ── */
+    .admin-wrapper {
+        display: flex;
+        min-height: 100vh;
+        background: #f4f6f9;
+    }
+
+    /* ── Sidebar ── */
+    .admin-sidebar {
+        width: 240px;
+        min-height: 100vh;
+        background: #003767;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 100;
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 1.5rem 1.25rem 1rem;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar-logo {
+        width: 40px;
+        height: 40px;
+        background: rgba(255,255,255,0.15);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .sidebar-title {
+        color: white;
+        font-weight: 800;
+        font-size: 1rem;
+        line-height: 1.2;
+    }
+
+    .sidebar-subtitle {
+        color: rgba(255,255,255,0.5);
+        font-size: 0.72rem;
+    }
+
+    .sidebar-nav {
+        padding: 1rem 0.75rem;
+        flex: 1;
+    }
+
+    .nav-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .nav-group-label {
+        color: rgba(255,255,255,0.4);
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 0 0.75rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 0.6rem 0.75rem;
+        border-radius: 8px;
+        border: none;
+        background: transparent;
+        color: rgba(255,255,255,0.65);
+        font-size: 0.88rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        text-align: left;
+        margin-bottom: 2px;
+    }
+
+    .nav-item:hover {
+        background: rgba(255,255,255,0.1);
         color: white;
     }
-    .nav-pills .nav-link {
-        color: #555;
-        background-color: #f8f9fa;
-        border: 1px solid #eee;
+
+    .nav-item.active {
+        background: rgba(255,255,255,0.18);
+        color: white;
+        font-weight: 700;
+    }
+
+    .nav-item i {
+        font-size: 1rem;
+        width: 18px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .nav-item-danger {
+        color: rgba(255, 120, 120, 0.75) !important;
+    }
+
+    .nav-item-danger:hover {
+        background: rgba(220, 53, 69, 0.2) !important;
+        color: #ff8080 !important;
+    }
+
+    /* ── Topbar móvil ── */
+    .admin-topbar {
+        display: none;
+        align-items: center;
+        gap: 12px;
+        padding: 0.75rem 1.25rem;
+        background: white;
+        border-bottom: 1px solid #e9ecef;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+    }
+
+    .topbar-toggle {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #003767;
+        padding: 0;
+        display: flex;
+    }
+
+    .topbar-title {
+        font-weight: 700;
+        color: #003767;
+        font-size: 1rem;
+        flex: 1;
+    }
+
+    .topbar-user {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    /* ── Contenido principal ── */
+    .admin-main {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .tab-content-wrapper {
+        flex: 1;
+        padding: 2rem;
+    }
+
+    .tab-pane {
+        display: none;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+
+    .tab-header {
+        margin-bottom: 1.75rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .tab-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #003767;
+        margin: 0;
+    }
+
+    .tab-subtitle {
+        color: #6c757d;
+        margin: 0.35rem 0 0;
+        font-size: 0.9rem;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 991px) {
+        .admin-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            transform: translateX(-100%);
+        }
+
+        .admin-sidebar.open {
+            transform: translateX(0);
+            box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+        }
+
+        .admin-topbar {
+            display: flex;
+        }
+
+        .tab-content-wrapper {
+            padding: 1.25rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .tab-content-wrapper {
+            padding: 1rem 0.75rem;
+        }
     }
 </style>

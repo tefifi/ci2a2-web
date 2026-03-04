@@ -177,11 +177,11 @@ const getEventDisplayData = (startStr: any, endStr: any): DisplayData => {
                style="pointer-events: none;">
             <i class="bi bi-arrows-angle-expand me-1"></i> Ver completa
           </div>
-          <div id="mImagePlaceholder"
-               class="d-flex flex-column align-items-center justify-content-center bg-light text-muted"
-               style="height: 350px; display: none !important;">
-            <i class="bi bi-image opacity-25" style="font-size: 3rem;"></i>
-          </div>
+<div id="mImagePlaceholder"
+     class="flex-column align-items-center justify-content-center bg-light text-muted d-none"
+     style="height: 350px;">
+  <i class="bi bi-image opacity-25" style="font-size: 3rem;"></i>
+</div>
         </div>
 
         <div class="container-fluid py-4 border-bottom bg-white">
@@ -276,16 +276,26 @@ const getEventDisplayData = (startStr: any, endStr: any): DisplayData => {
       timeBox.style.fontStyle = timeText === textoPendiente ? 'italic' : 'normal';
       timeBox.style.opacity   = timeText === textoPendiente ? '0.8' : '1';
 
-      const imgEl     = document.getElementById('mImage');
+const imgEl     = document.getElementById('mImage');
       const phEl      = document.getElementById('mImagePlaceholder');
+      
       imgEl.src = '';
+      
       if (evento.imagen_url) {
-        imgEl.src           = evento.imagen_url;
-        imgEl.style.display = 'block';
-        phEl.style.display  = 'none';
+        // Si hay imagen, la mostramos y ocultamos el placeholder
+        imgEl.src = evento.imagen_url;
+        imgEl.classList.remove('d-none');
+        imgEl.classList.add('d-block');
+        
+        phEl.classList.remove('d-flex');
+        phEl.classList.add('d-none');
       } else {
-        imgEl.style.display = 'none';
-        phEl.style.display  = 'flex';
+        // Si no hay imagen, ocultamos la etiqueta img y mostramos el placeholder
+        imgEl.classList.remove('d-block');
+        imgEl.classList.add('d-none');
+        
+        phEl.classList.remove('d-none');
+        phEl.classList.add('d-flex');
       }
 
       const descSection = document.getElementById('mDescSection');

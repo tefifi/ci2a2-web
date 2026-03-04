@@ -1,10 +1,10 @@
 ---
-import MainLayout from "../layouts/MainLayout.astro";
+import AdminLayout from "../layouts/AdminLayout.astro";
 import AuthForm from "../components/AuthForm.jsx";
 
 ---
 
-<MainLayout title="Acceso Usuarios | CI2A2">
+<AdminLayout title="Acceso | CI2A2" mostrarLogout={false}>
     <section class="min-vh-100 d-flex align-items-center justify-content-center py-5" style="background-color: #f8f9fa;">
         <div class="container">
             <div class="row justify-content-center">
@@ -20,4 +20,4 @@ import AuthForm from "../components/AuthForm.jsx";
             </div>
         </div>
     </section>
-</MainLayout>
+</AdminLayout>
