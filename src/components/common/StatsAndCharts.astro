@@ -84,8 +84,9 @@ const proyAreaLabels = Object.keys(proyAreaMap);
 const proyAreaValues = Object.values(proyAreaMap);
 ---
 
-<section class="py-5 bg-light position-relative" id="stats-section">
-    <div class="container">
+{(config.stat_colaboradores || config.stat_proyectos || config.stat_alianzas || config.stat_papers ||
+  config.chart_roles || config.chart_carreras || config.chart_proyectos_anio || config.chart_areas) && (
+<section class="py-5 bg-light position-relative" id="stats-section">    <div class="container">
         
         <div class="text-center mb-5">
             <h2 class="fw-bold text-dark">Radiografía del Centro</h2>
@@ -174,6 +175,7 @@ const proyAreaValues = Object.values(proyAreaMap);
         </div>
     </div>
 </section>
+)}
 
 <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
