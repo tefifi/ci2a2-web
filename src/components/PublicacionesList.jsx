@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabasePublic as supabase } from '../lib/supabase';
 
 export default function PublicacionesList() {
     const [papers, setPapers] = useState([]);
