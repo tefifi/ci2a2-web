@@ -6,7 +6,7 @@ import {
 } from './components/AdminUI';
 import { RichEditor } from './components/RichEditor';
 
-const FORM_INICIAL = { titulo: '', bajada: '', cuerpo: '', fecha: '', image_url: '' };
+const FORM_INICIAL = { titulo: '', bajada: '', cuerpo: '', fecha: '', image_url: '', destacada: false };
 
 export default function AdminNoticias() {
   const crud = useAdminCRUD('noticias', FORM_INICIAL, {
@@ -88,6 +88,16 @@ export default function AdminNoticias() {
               onMensaje={crud.mostrarMensaje}
             />
 
+            {/* Toggle destacada */}
+            <div className="form-check form-switch mb-2">
+              <input className="form-check-input" type="checkbox" id="destacada"
+                checked={!!crud.form.destacada}
+                onChange={(e) => crud.setField('destacada', e.target.checked)} />
+              <label className="form-check-label small fw-bold text-secondary" htmlFor="destacada">
+                Marcar como destacada en inicio
+              </label>
+            </div>
+
             <FormActions
               idEdicion={crud.idEdicion}
               loading={crud.loading || subiendo}
@@ -115,7 +125,10 @@ export default function AdminNoticias() {
                   <h6 className={`mb-0 fw-bold text-truncate small ${crud.idEdicion === n.id ? 'text-primary' : ''}`}>
                     {n.titulo}
                   </h6>
-                  <small className="text-muted">{n.fecha}</small>
+                  <div className="d-flex align-items-center gap-2">
+                    <small className="text-muted">{n.fecha}</small>
+                    {n.destacada && <i className="bi bi-star-fill text-warning small" title="Destacada en inicio"></i>}
+                  </div>
                 </div>
                 <ListaAcciones
                   onEdit={() => crud.handleEdit(n)}

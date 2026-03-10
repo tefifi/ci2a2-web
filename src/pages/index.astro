@@ -5,13 +5,22 @@ import Carrusel from "../components/Carrusel";
 
 // --- 1. CARGA DE CONTENIDOS ---
 
-// Noticias
-const { data: noticiasData } = await supabase
+// Noticias — primero intenta traer las destacadas, si no hay usa las últimas 6
+const { data: noticiasDestacadas } = await supabase
+    .from("noticias")
+    .select("*")
+    .eq("destacada", true)
+    .order("fecha", { ascending: false });
+
+const { data: noticiasRecientes } = await supabase
     .from("noticias")
     .select("*")
     .order("created_at", { ascending: false })
     .limit(6);
-const noticiasSeguras = noticiasData || [];
+
+const noticiasSeguras = (noticiasDestacadas && noticiasDestacadas.length > 0)
+    ? noticiasDestacadas
+    : (noticiasRecientes || []);
 
 // Proyectos
 const { data: proyectosData } = await supabase
@@ -85,6 +94,11 @@ const categoriasAmostrar = [
 
 // Líneas de Investigación
 const lineasInvestigacion = [
+    {
+        titulo: "IA e Interculturalidad",
+        desc: "Desarrollo de IA con enfoque intercultural: preservación de lenguas originarias, saberes ancestrales y gobernanza de datos indígenas.",
+        icon: "bi-cpu",
+    },
     {
         titulo: "Smart Agro",
         desc: "IA para la gestión hídrica y optimización de cultivos.",
@@ -407,10 +421,10 @@ function formatAuthorsHome(autoresStr: any) {
                 </div>
             </div>
 
-            <div class="row g-4">
+            <div class="row g-4 justify-content-center">
                 {
-                    lineasInvestigacion.map((linea) => (
-                        <div class="col-md-6 col-lg-3">
+                    lineasInvestigacion.map((linea, i) => (
+                        <div class={`col-md-6 ${i < 3 ? 'col-lg-4' : 'col-lg-4'}`}>
                             <div class="card h-100 border-0 shadow-sm p-4 hover-lift card-research position-relative overflow-hidden bg-white">
                                 <div
                                     class="position-absolute top-0 start-0 h-100 bg-pink"

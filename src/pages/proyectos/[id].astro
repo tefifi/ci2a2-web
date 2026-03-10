@@ -1,5 +1,6 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
+import MigaDePan from "../../components/common/MigaDePan.astro";
 import { supabase } from "../../lib/supabase";
 
 export const prerender = false;
@@ -36,19 +37,34 @@ const getStatusStyle = (status: string) => {
 };
 ---
 
-<MainLayout title={proyecto?.title}>
+<MainLayout title={proyecto?.title} showBreadcrumb={false}>
     {
         /* --- CAMBIO: py-5 a py-4 para reducir altura, y d-flex para control vertical --- */
     }
     <section
-        class="text-white py-4 position-relative overflow-hidden d-flex align-items-center"
-        style="background: linear-gradient(to right, #003767 0%, #3e2b69 50%, #d63384 100%); min-height: 250px;"
+        class="text-white position-relative overflow-hidden"
+        style="background: linear-gradient(to right, #003767 0%, #3e2b69 50%, #d63384 100%); min-height: 280px;"
     >
-        <div class="container position-relative z-2">
+        <div class="container position-relative z-2 pt-3 pb-4">
             <div class="row">
                 <div class="col-lg-10">
 
+                    <!-- Miga de pan -->
+                    <nav aria-label="breadcrumb" class="mb-3">
+                        <ol class="breadcrumb bg-transparent p-0 m-0 align-items-center">
+                            <li class="breadcrumb-item">
+                                <a href="/" class="text-white text-decoration-none opacity-75 small">Inicio</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="/proyectos" class="text-white text-decoration-none opacity-75 small">Proyectos</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">
+                                <span class="text-white fw-bold small">{proyecto?.title}</span>
+                            </li>
+                        </ol>
+                    </nav>
 
+                    <!-- Badges área y estado -->
                     <div class="d-flex align-items-center gap-2 mb-2">
                         <span
                             class="badge bg-pink text-white fw-bold px-3 py-1 shadow-sm rounded-pill small"
@@ -373,6 +389,15 @@ const getStatusStyle = (status: string) => {
 </MainLayout>
 
 <style>
+    /* --- BREADCRUMB EN HERO --- */
+    .breadcrumb-item + .breadcrumb-item::before {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    .breadcrumb-item a:hover {
+        opacity: 1 !important;
+        text-decoration: underline !important;
+    }
+
     /* --- COLORES --- */
     :root {
         --ufro-blue: #003767;
