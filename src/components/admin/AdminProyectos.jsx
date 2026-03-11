@@ -4,6 +4,7 @@ import { useImageUpload } from './hooks/useImageUpload';
 import {
   AdminPageHeader, FormHeader, FormActions,
   ListaAcciones, ListaVacia, SidebarCard, ImageUploadZone,
+  ModalConfirmar,
 } from './components/AdminUI';
 import { RichEditor } from './components/RichEditor';
 
@@ -118,7 +119,8 @@ export default function AdminProyectos() {
   );
 
   return (
-    <div>
+    <>
+      <ModalConfirmar {...crud.modalProps} />
       <AdminPageHeader
         titulo="Gestión de Proyectos"
         mensaje={crud.mensaje}
@@ -278,6 +280,6 @@ export default function AdminProyectos() {
           </SidebarCard>
         </div>
       </div>
-    </div>
+    </>
   );
 }

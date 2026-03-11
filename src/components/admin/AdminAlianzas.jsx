@@ -4,6 +4,7 @@ import { useImageUpload } from './hooks/useImageUpload';
 import {
   AdminPageHeader, FormHeader, FormActions,
   ListaAcciones, ListaVacia, SidebarCard, ImageUploadZone,
+  ModalConfirmar,
 } from './components/AdminUI';
 
 const FORM_INICIAL = {
@@ -41,7 +42,9 @@ export default function AdminAlianzas() {
   }, [crud.lista]);
 
   return (
-    <div className="container-fluid p-0">
+    <>
+      <ModalConfirmar {...crud.modalProps} />
+      <div className="container-fluid p-0">
       <AdminPageHeader
         titulo="Gestión de Alianzas y Clientes"
         mensaje={crud.mensaje}
@@ -179,6 +182,7 @@ export default function AdminAlianzas() {
           </SidebarCard>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

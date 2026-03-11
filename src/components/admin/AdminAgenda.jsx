@@ -4,7 +4,7 @@ import { useImageUpload } from './hooks/useImageUpload'; // src/components/admin
 import {
   AdminPageHeader, FormHeader, FormActions,
   ListaAcciones, ListaVacia, SidebarCard,
-  AdminSpinner, ImageUploadZone,
+  AdminSpinner, ImageUploadZone, ModalConfirmar,
 } from './components/AdminUI';                           // src/components/admin/components/
 
 const Editor = lazy(() =>
@@ -24,7 +24,13 @@ const extractTime = (iso) => {
 };
 const combineDateTime = (fecha, hora) => {
   if (!fecha) return null;
-  return new Date(`${fecha}T${hora || '00:00'}`).toISOString();
+  // Si no hay hora ingresada, guardamos sin hora (00:00 UTC) para que AgendaViewer
+  // lo detecte como "Horario por confirmar"
+  if (!hora) return new Date(`${fecha}T00:00:00.000Z`).toISOString();
+  // Si hay hora, la interpretamos como hora local de Chile (UTC-3 o UTC-4)
+  // Usamos Date con zona horaria local del navegador
+  const dt = new Date(`${fecha}T${hora}:00`);
+  return dt.toISOString();
 };
 
 // ─── Form inicial ─────────────────────────────────────────────────────────────
@@ -90,7 +96,8 @@ export default function AdminAgenda() {
   };
 
   return (
-    <div>
+    <>
+      <ModalConfirmar {...crud.modalProps} />
       <AdminPageHeader
         titulo="Gestión de Agenda"
         mensaje={crud.mensaje}
@@ -294,6 +301,6 @@ export default function AdminAgenda() {
         </div>
 
       </div>
-    </div>
+    </>
   );
 }

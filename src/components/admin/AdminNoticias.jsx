@@ -3,6 +3,7 @@ import { useImageUpload } from './hooks/useImageUpload';
 import {
   AdminPageHeader, FormHeader, FormActions,
   ListaAcciones, ListaVacia, SidebarCard, ImageUploadZone,
+  ModalConfirmar,
 } from './components/AdminUI';
 import { RichEditor } from './components/RichEditor';
 
@@ -25,7 +26,8 @@ export default function AdminNoticias() {
   };
 
   return (
-    <div>
+    <>
+      <ModalConfirmar {...crud.modalProps} />
       <AdminPageHeader
         titulo="Gestión de Noticias"
         mensaje={crud.mensaje}
@@ -140,6 +142,6 @@ export default function AdminNoticias() {
           </SidebarCard>
         </div>
       </div>
-    </div>
+    </>
   );
 }

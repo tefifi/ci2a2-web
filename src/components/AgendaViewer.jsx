@@ -90,34 +90,51 @@ export default function AgendaViewer() {
 // ── Tarjeta de evento ──────────────────────────────────────────────────────
 function EventoCard({ evento, esFuturo }) {
   const formatearFecha = (inicioStr, finStr) => {
-    const inicio = new Date(inicioStr);
-    const fin = finStr ? new Date(finStr) : null;
-    const esSinHora = inicio.getHours() === 0 && inicio.getMinutes() === 0;
-    const textoPendiente = 'Horario por confirmar';
-    const dateOpts = { weekday: 'long', day: 'numeric', month: 'long' };
-    const timeOpts = { hour: '2-digit', minute: '2-digit' };
+    // Parsear como fecha local (sin conversión UTC) si es solo fecha sin hora
+    const parsearFecha = (str) => {
+      if (!str) return null;
+      // Si viene como "2025-01-15T00:00:00..." tratar la parte de fecha como local
+      return new Date(str);
+    };
+
+    const inicio = parsearFecha(inicioStr);
+    const fin = finStr ? parsearFecha(finStr) : null;
+
+    // Detectar si la hora fue ingresada o si es medianoche UTC (00:00 UTC = hora local distinta)
+    // Consideramos "sin hora" si los minutos/horas en UTC son 0 (el admin no puso hora)
+    const sinHora = inicio.getUTCHours() === 0 && inicio.getUTCMinutes() === 0;
+
+    const dateOpts = { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Santiago' };
+    const timeOpts = { hour: '2-digit', minute: '2-digit', timeZone: 'America/Santiago' };
 
     if (!fin) {
       return (
         <>
           <span className="text-capitalize">{inicio.toLocaleDateString('es-CL', dateOpts)}</span>
           <span className="d-block text-muted fw-normal">
-            {esSinHora
-              ? <em className="opacity-75">{textoPendiente}</em>
+            {sinHora
+              ? <em className="opacity-75">Horario por confirmar</em>
               : `${inicio.toLocaleTimeString('es-CL', timeOpts)} hrs`}
           </span>
         </>
       );
     }
 
-    if (inicio.toDateString() === fin.toDateString()) {
+    const mismodia = inicio.toLocaleDateString('es-CL', { timeZone: 'America/Santiago' }) ===
+                     fin.toLocaleDateString('es-CL', { timeZone: 'America/Santiago' });
+
+    const sinHoraFin = fin.getUTCHours() === 0 && fin.getUTCMinutes() === 0;
+
+    if (mismodia) {
       return (
         <>
           <span className="text-capitalize">{inicio.toLocaleDateString('es-CL', dateOpts)}</span>
           <span className="d-block text-muted fw-normal">
-            {esSinHora
-              ? <em className="opacity-75">{textoPendiente}</em>
-              : `${inicio.toLocaleTimeString('es-CL', timeOpts)} – ${fin.toLocaleTimeString('es-CL', timeOpts)} hrs`}
+            {sinHora
+              ? <em className="opacity-75">Horario por confirmar</em>
+              : sinHoraFin
+                ? `Desde las ${inicio.toLocaleTimeString('es-CL', timeOpts)} hrs`
+                : `${inicio.toLocaleTimeString('es-CL', timeOpts)} – ${fin.toLocaleTimeString('es-CL', timeOpts)} hrs`}
           </span>
         </>
       );
@@ -125,9 +142,9 @@ function EventoCard({ evento, esFuturo }) {
 
     return (
       <span className="text-capitalize">
-        {inicio.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })}
+        {inicio.toLocaleDateString('es-CL', { day: 'numeric', month: 'short', timeZone: 'America/Santiago' })}
         {' → '}
-        {fin.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })}
+        {fin.toLocaleDateString('es-CL', { day: 'numeric', month: 'short', timeZone: 'America/Santiago' })}
       </span>
     );
   };
@@ -145,12 +162,12 @@ function EventoCard({ evento, esFuturo }) {
 
       {/* Imagen */}
       <div className="position-relative bg-light border-bottom" style={{ height: '300px' }}>
-        {eventoSeleccionado.imagen_url ? (
+        {evento.imagen_url ? (
           // Si hay imagen, solo se muestra la imagen
           <img
-            src={eventoSeleccionado.imagen_url}
+            src={evento.imagen_url}
             className="w-100 h-100 object-fit-cover"
-            alt={eventoSeleccionado.titulo}
+            alt={evento.titulo}
           />
         ) : (
           // Si NO hay imagen, se muestra el placeholder
@@ -160,8 +177,8 @@ function EventoCard({ evento, esFuturo }) {
         )}
 
         {/* El badge se mantiene sobre cualquiera de los dos estados */}
-        <span className={`position-absolute top-0 end-0 m-3 badge ${getBadgeColor(eventoSeleccionado.tipo)} shadow-sm`}>
-          {eventoSeleccionado.tipo || 'Evento'}
+        <span className={`position-absolute top-0 end-0 m-3 badge ${badgeColor} shadow-sm`}>
+          {evento.tipo || 'Evento'}
         </span>
       </div>
 

@@ -1,33 +1,7 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../../../lib/supabase'; // src/lib/supabase.js
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { supabase } from '../../../lib/supabase';
 import { useMensaje } from './useMensaje';
 
-/**
- * Hook genérico para operaciones CRUD con Supabase.
- * Elimina la duplicación de fetchDatos/handleSubmit/handleDelete en cada Admin.
- *
- * @param {string} tabla          - Nombre de la tabla en Supabase (ej: 'agenda')
- * @param {object} formInicial    - Objeto con los campos vacíos del formulario
- * @param {object} opciones       - Configuración adicional:
- *   ordenarPor       - Campo para ordenar (default: 'created_at')
- *   ordenAscendente  - Dirección del orden (default: false)
- *   campoId          - Nombre del campo ID (default: 'id')
- *   mensajeCreado    - Texto al crear exitosamente
- *   mensajeEditado   - Texto al editar exitosamente
- *   mensajeEliminado - Texto al eliminar exitosamente
- *   transformarAntes - Función para transformar datos antes de enviar a Supabase
- *
- * Uso básico:
- *   const crud = useAdminCRUD('agenda', { titulo: '', descripcion: '' });
- *
- * Con transformación (ej: fechas):
- *   const crud = useAdminCRUD('agenda', formInicial, {
- *     transformarAntes: (datos) => ({
- *       ...datos,
- *       fecha_evento: combineDateTime(datos.fecha_inicio, datos.hora_inicio),
- *     })
- *   });
- */
 export function useAdminCRUD(tabla, formInicial, opciones = {}) {
   const {
     ordenarPor = 'created_at',
@@ -39,19 +13,32 @@ export function useAdminCRUD(tabla, formInicial, opciones = {}) {
     transformarAntes = null,
   } = opciones;
 
-  const [lista, setLista] = useState([]);
-  const [form, setForm] = useState(formInicial);
+  const [lista, setLista]       = useState([]);
+  const [form, setForm]         = useState(formInicial);
   const [idEdicion, setIdEdicion] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]   = useState(false);
   const [subiendo, setSubiendo] = useState(false);
+
+  // ── Modal de confirmación (estado interno, sin useConfirmar externo) ────────
+  const [modalEstado, setModalEstado] = useState(null);
+  const callbackRef = useRef(null);
+
+  const modalProps = {
+    estado: modalEstado,
+    onConfirmar: () => {
+      setModalEstado(null);
+      callbackRef.current?.();
+      callbackRef.current = null;
+    },
+    onCancelar: () => {
+      setModalEstado(null);
+      callbackRef.current = null;
+    },
+  };
+
   const { mensaje, mostrarMensaje, limpiarMensaje } = useMensaje();
 
-  useEffect(() => {
-    fetchDatos();
-  }, []);
-
-  // ─── FETCH ────────────────────────────────────────────────────────────────
-  const fetchDatos = async () => {
+  const fetchDatos = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -66,24 +53,22 @@ export function useAdminCRUD(tabla, formInicial, opciones = {}) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tabla, ordenarPor, ordenAscendente]);
 
-  // ─── FORM HANDLERS ────────────────────────────────────────────────────────
+  useEffect(() => { fetchDatos(); }, []);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  // Para actualizar un campo directamente (rich text, dropzone, selects custom, etc.)
   const setField = (campo, valor) => {
     setForm((prev) => ({ ...prev, [campo]: valor }));
   };
 
-  // ─── SUBMIT (CREATE / UPDATE) ─────────────────────────────────────────────
   const handleSubmit = async (e, datosExtra = {}) => {
     if (e?.preventDefault) e.preventDefault();
     setLoading(true);
-
     try {
       let datos = { ...form, ...datosExtra };
       if (transformarAntes) datos = transformarAntes(datos);
@@ -93,11 +78,12 @@ export function useAdminCRUD(tabla, formInicial, opciones = {}) {
         if (error) throw error;
         mostrarMensaje('success', mensajeEditado);
       } else {
-        const { error } = await supabase.from(tabla).insert([datos]);
+        // Limpiar id y created_at antes de insertar
+        const { id, created_at, ...sinMeta } = datos;
+        const { error } = await supabase.from(tabla).insert([sinMeta]);
         if (error) throw error;
         mostrarMensaje('success', mensajeCreado);
       }
-
       resetForm();
       await fetchDatos();
     } catch (error) {
@@ -108,28 +94,32 @@ export function useAdminCRUD(tabla, formInicial, opciones = {}) {
     }
   };
 
-  // ─── EDIT ─────────────────────────────────────────────────────────────────
   const handleEdit = (item) => {
     setForm({ ...formInicial, ...item });
     setIdEdicion(item[campoId]);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // ─── DELETE ───────────────────────────────────────────────────────────────
-  const handleDelete = async (id, confirmMsg = '¿Estás seguro de eliminar este registro?') => {
-    if (!window.confirm(confirmMsg)) return;
-    try {
-      const { error } = await supabase.from(tabla).delete().eq(campoId, id);
-      if (error) throw error;
-      mostrarMensaje('success', mensajeEliminado);
-      await fetchDatos();
-    } catch (error) {
-      console.error(`[useAdminCRUD] Error al eliminar en ${tabla}:`, error);
-      mostrarMensaje('danger', 'Error al eliminar.');
-    }
+  // ── handleDelete abre el modal y ejecuta el callback al confirmar ───────────
+  const handleDelete = (id, mensaje = '¿Eliminar este registro?') => {
+    callbackRef.current = async () => {
+      try {
+        const { error } = await supabase.from(tabla).delete().eq(campoId, id);
+        if (error) throw error;
+        mostrarMensaje('success', mensajeEliminado);
+        await fetchDatos();
+      } catch (error) {
+        console.error(`[useAdminCRUD] Error al eliminar en ${tabla}:`, error);
+        mostrarMensaje('danger', 'Error al eliminar.');
+      }
+    };
+    setModalEstado({
+      titulo: mensaje,
+      descripcion: 'Esta acción no se puede deshacer.',
+      labelConfirmar: 'Sí, eliminar',
+    });
   };
 
-  // ─── RESET ────────────────────────────────────────────────────────────────
   const resetForm = () => {
     setForm(formInicial);
     setIdEdicion(null);
@@ -137,9 +127,10 @@ export function useAdminCRUD(tabla, formInicial, opciones = {}) {
 
   return {
     lista, form, idEdicion, loading, subiendo,
-    setSubiendo, mensaje, limpiarMensaje,
+    setSubiendo, mensaje, limpiarMensaje, mostrarMensaje,
     fetchDatos, handleChange, setField,
     handleSubmit, handleEdit, handleDelete,
     resetForm, setForm, setIdEdicion,
+    modalProps,
   };
 }

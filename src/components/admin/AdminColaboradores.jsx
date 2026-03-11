@@ -3,6 +3,7 @@ import { useImageUpload } from './hooks/useImageUpload';
 import {
   AdminPageHeader, FormHeader, FormActions,
   ListaAcciones, ListaVacia, SidebarCard, ImageUploadZone,
+  ModalConfirmar,
 } from './components/AdminUI';
 
 const FORM_INICIAL = {
@@ -33,7 +34,9 @@ export default function AdminColaboradores() {
   };
 
   return (
-    <div className="container py-4">
+    <>
+      <ModalConfirmar {...crud.modalProps} />
+      <div className="container py-4">
       <AdminPageHeader
         titulo="Gestión de Colaboradores"
         mensaje={crud.mensaje}
@@ -177,6 +180,7 @@ export default function AdminColaboradores() {
           </SidebarCard>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
