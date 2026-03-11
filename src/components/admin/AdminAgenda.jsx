@@ -1,4 +1,4 @@
-import { Suspense, lazy, useMemo } from 'react';
+import { Suspense, lazy, useMemo, useState } from 'react';
 import { useAdminCRUD }   from './hooks/useAdminCRUD';   // src/components/admin/hooks/
 import { useImageUpload } from './hooks/useImageUpload'; // src/components/admin/hooks/
 import {
@@ -60,6 +60,9 @@ export default function AdminAgenda() {
 
   const { subiendo, uploadImage } = useImageUpload('agenda', 'agenda_');
 
+  const [sinHoraInicio, setSinHoraInicio] = useState(false);
+  const [sinHoraFin, setSinHoraFin]       = useState(false);
+
   // Sugerencias dinámicas desde los datos existentes
   const sugerencias = useMemo(() => {
     const lugares = new Set();
@@ -86,6 +89,16 @@ export default function AdminAgenda() {
       hora_fin:     extractTime(evento.fecha_fin),
     });
     crud.setIdEdicion(evento.id);
+    // Detectar si tenía hora guardada
+    const d = new Date(evento.fecha_evento);
+    const noTeniaHora = d.getUTCHours() === 0 && d.getUTCMinutes() === 0;
+    setSinHoraInicio(noTeniaHora);
+    if (evento.fecha_fin) {
+      const df = new Date(evento.fecha_fin);
+      setSinHoraFin(df.getUTCHours() === 0 && df.getUTCMinutes() === 0);
+    } else {
+      setSinHoraFin(false);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -160,7 +173,21 @@ export default function AdminAgenda() {
                     <div className="col-5">
                       <input type="time" className="form-control form-control-sm"
                         name="hora_inicio" value={crud.form.hora_inicio}
-                        onChange={crud.handleChange} />
+                        onChange={crud.handleChange}
+                        disabled={sinHoraInicio} />
+                    </div>
+                    <div className="col-12">
+                      <div className="form-check form-switch mt-1">
+                        <input className="form-check-input" type="checkbox" id="sinHoraInicio"
+                          checked={sinHoraInicio}
+                          onChange={(e) => {
+                            setSinHoraInicio(e.target.checked);
+                            if (e.target.checked) crud.setField('hora_inicio', '');
+                          }} />
+                        <label className="form-check-label small text-secondary" htmlFor="sinHoraInicio">
+                          Horario por confirmar
+                        </label>
+                      </div>
                     </div>
                   </div>
                   <div className="row g-2">
@@ -175,7 +202,21 @@ export default function AdminAgenda() {
                     <div className="col-5">
                       <input type="time" className="form-control form-control-sm"
                         name="hora_fin" value={crud.form.hora_fin}
-                        onChange={crud.handleChange} />
+                        onChange={crud.handleChange}
+                        disabled={sinHoraFin} />
+                    </div>
+                    <div className="col-12">
+                      <div className="form-check form-switch mt-1">
+                        <input className="form-check-input" type="checkbox" id="sinHoraFin"
+                          checked={sinHoraFin}
+                          onChange={(e) => {
+                            setSinHoraFin(e.target.checked);
+                            if (e.target.checked) crud.setField('hora_fin', '');
+                          }} />
+                        <label className="form-check-label small text-secondary" htmlFor="sinHoraFin">
+                          Hora fin por confirmar
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -237,7 +278,7 @@ export default function AdminAgenda() {
             <FormActions
               idEdicion={crud.idEdicion}
               loading={crud.loading}
-              onCancel={crud.resetForm}
+              onCancel={() => { crud.resetForm(); setSinHoraInicio(false); setSinHoraFin(false); }}
               labelGuardar="Agendar Evento"
               labelEditar="Guardar Cambios"
             />

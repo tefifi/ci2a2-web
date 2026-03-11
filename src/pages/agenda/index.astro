@@ -40,13 +40,13 @@ const getEventDisplayData = (startStr: any, endStr: any): DisplayData => {
   const meses = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
   const timeOpts = { hour: '2-digit', minute: '2-digit' } as const;
 
-  const isMidnight = start.getHours() === 0 && start.getMinutes() === 0;
+  const isMidnight = (start.getUTCHours() === 0 && start.getUTCMinutes() === 0) || (start.getHours() === 0 && start.getMinutes() === 0);
   let textoHorario = '';
 
   if (!isMidnight) {
     const horaInicio = start.toLocaleTimeString('es-CL', timeOpts);
     if (end) {
-      const endMidnight = end.getHours() === 0 && end.getMinutes() === 0;
+      const endMidnight = (end.getUTCHours() === 0 && end.getUTCMinutes() === 0) || (end.getHours() === 0 && end.getMinutes() === 0);
       if (start.toDateString() === end.toDateString() && !endMidnight) {
         textoHorario = `${horaInicio} - ${end.toLocaleTimeString('es-CL', timeOpts)}`;
       } else if (!endMidnight) {
@@ -59,7 +59,7 @@ const getEventDisplayData = (startStr: any, endStr: any): DisplayData => {
     }
   }
 
-  return { diaBox: start.getDate(), mesBox: meses[start.getMonth()], textoHorario };
+  return { diaBox: start.getUTCDate(), mesBox: meses[start.getUTCMonth()], textoHorario };
 };
 ---
 
@@ -125,13 +125,11 @@ const getEventDisplayData = (startStr: any, endStr: any): DisplayData => {
                     </div>
                     <div class="flex-grow-1 border-start ps-3 border-2 border-light">
                       <h5 class="fw-bold mb-2 lh-sm line-clamp-2 text-ufro event-title">{evento.titulo}</h5>
-                      <div class="text-muted small">
-                        {textoHorario ? (
-                          <><i class="bi bi-clock text-danger me-1" />{textoHorario}</>
-                        ) : (
-                          <span class="text-secondary"><i class="bi bi-calendar3 me-1" />Día completo / Por confirmar</span>
-                        )}
-                      </div>
+                      {textoHorario && (
+                        <div class="text-muted small">
+                          <i class="bi bi-clock text-danger me-1" />{textoHorario}
+                        </div>
+                      )}
                       {evento.lugar && (
                         <div class="text-muted small mt-1"><i class="bi bi-geo-alt me-1" />{evento.lugar}</div>
                       )}
@@ -187,11 +185,11 @@ const getEventDisplayData = (startStr: any, endStr: any): DisplayData => {
         <div class="container-fluid py-4 border-bottom bg-white">
           <div class="row text-center g-3">
             {[
-              { id: 'mDateBox',  icon: 'bi-calendar-check', label: 'Fecha'     },
-              { id: 'mTimeBox',  icon: 'bi-clock',          label: 'Horario'   },
-              { id: 'mPlaceBox', icon: 'bi-geo-alt-fill',   label: 'Ubicación' },
+              { id: 'mDateBox',  icon: 'bi-calendar-check', label: 'Fecha',     rowId: ''          },
+              { id: 'mTimeBox',  icon: 'bi-clock',          label: 'Horario',   rowId: 'mTimeRow'  },
+              { id: 'mPlaceBox', icon: 'bi-geo-alt-fill',   label: 'Ubicación', rowId: 'mPlaceRow' },
             ].map((col, i) => (
-              <div class={`col-4 ${i < 2 ? 'border-end' : ''}`}>
+              <div id={col.rowId || undefined} class={`col-4 ${i < 2 ? 'border-end' : ''}`}>
                 <div class="mb-2"><i class={`bi ${col.icon} text-ufro fs-4`}></i></div>
                 <div class="small text-uppercase fw-bold text-secondary" style="letter-spacing: 1px; font-size: 0.75rem;">{col.label}</div>
                 <div id={col.id} class="fw-bold text-dark" style="font-size: 0.9rem; white-space: pre-line;">...</div>
@@ -234,22 +232,13 @@ const getEventDisplayData = (startStr: any, endStr: any): DisplayData => {
 
       document.getElementById('mTitle').textContent   = evento.titulo;
 
-      const placeEl = document.getElementById('mPlaceBox');
-      if (evento.lugar) {
-        placeEl.textContent  = evento.lugar;
-        placeEl.style.fontStyle = 'normal';
-        placeEl.style.opacity   = '1';
-      } else {
-        placeEl.textContent     = 'Por confirmar';
-        placeEl.style.fontStyle = 'italic';
-        placeEl.style.opacity   = '0.75';
-      }
+      document.getElementById('mPlaceBox').textContent = evento.lugar || '';
 
       const start       = new Date(evento.fecha_evento);
       const end         = evento.fecha_fin ? new Date(evento.fecha_fin) : null;
       const timeOpts    = { hour: '2-digit', minute: '2-digit' };
       const dateOpts    = { day: 'numeric', month: 'long' };
-      const isMidnight  = start.getHours() === 0 && start.getMinutes() === 0;
+      const isMidnight  = (start.getUTCHours() === 0 && start.getUTCMinutes() === 0) || (start.getHours() === 0 && start.getMinutes() === 0);
       const textoPendiente = 'Por confirmar';
 
       let dateText = '', timeText = '';
@@ -259,10 +248,17 @@ const getEventDisplayData = (startStr: any, endStr: any): DisplayData => {
         if (end && !isNaN(end.getTime())) {
           if (start.toDateString() === end.toDateString()) {
             dateText = start.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
-            timeText = isMidnight ? textoPendiente : `${horaInicioStr} - ${end.toLocaleTimeString('es-CL', timeOpts)}`;
+            const endMidnightSameDay = (end.getUTCHours() === 0 && end.getUTCMinutes() === 0) || (end.getHours() === 0 && end.getMinutes() === 0);
+            timeText = isMidnight ? textoPendiente : endMidnightSameDay ? horaInicioStr : `${horaInicioStr} - ${end.toLocaleTimeString('es-CL', timeOpts)}`;
           } else {
             dateText = `${start.toLocaleDateString('es-CL', dateOpts)} \nal\n${end.toLocaleDateString('es-CL', dateOpts)}`;
-            timeText = `Inicio: ${isMidnight ? textoPendiente : horaInicioStr} \nFin: ${end.toLocaleTimeString('es-CL', timeOpts)}`;
+            const endMidnight = (end.getUTCHours() === 0 && end.getUTCMinutes() === 0) || (end.getHours() === 0 && end.getMinutes() === 0);
+            // Si ambos son medianoche, no hay horario que mostrar
+            if (isMidnight && endMidnight) {
+              timeText = '';
+            } else {
+              timeText = `Inicio: ${isMidnight ? textoPendiente : horaInicioStr} \nFin: ${endMidnight ? textoPendiente : end.toLocaleTimeString('es-CL', timeOpts)}`;
+            }
           }
         } else {
           dateText = start.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -271,10 +267,37 @@ const getEventDisplayData = (startStr: any, endStr: any): DisplayData => {
       }
 
       document.getElementById('mDateBox').innerText = dateText.charAt(0).toUpperCase() + dateText.slice(1);
+
       const timeBox = document.getElementById('mTimeBox');
-      timeBox.innerText       = timeText;
-      timeBox.style.fontStyle = timeText === textoPendiente ? 'italic' : 'normal';
-      timeBox.style.opacity   = timeText === textoPendiente ? '0.8' : '1';
+      timeBox.innerText = timeText;
+      timeBox.style.fontStyle = 'normal';
+
+      // Ocultar columnas sin datos y redistribuir
+      const timeRow  = document.getElementById('mTimeRow');
+      const placeRow = document.getElementById('mPlaceRow');
+      const sinHorario  = !timeText || timeText === textoPendiente;
+      const sinUbicacion = !evento.lugar;
+
+      if (timeRow)  timeRow.style.display  = sinHorario   ? 'none' : '';
+      if (placeRow) placeRow.style.display = sinUbicacion ? 'none' : '';
+
+      // Redistribuir columnas visibles: 1→col-12, 2→col-6, 3→col-4
+      const visibles = [!true, !sinHorario, !sinUbicacion].filter(Boolean).length + 1; // Fecha siempre visible
+      const colClass = visibles === 1 ? 'col-12' : visibles === 2 ? 'col-6' : 'col-4';
+      const allCols = document.querySelectorAll('#mTimeRow, #mPlaceRow, #eventModal .row.text-center > div:first-child');
+      // Simpler: recalcular clases de todos los divs col del row
+      const rowEl = document.querySelector('#eventModal .row.text-center');
+      if (rowEl) {
+        rowEl.querySelectorAll(':scope > div').forEach(div => {
+          div.className = div.className.replace(/\bcol-\d+\b/g, colClass);
+          // Quitar border-end de la última columna visible
+        });
+        // Restaurar border-end entre columnas visibles
+        const visibleCols = [...rowEl.querySelectorAll(':scope > div')].filter(d => d.style.display !== 'none');
+        visibleCols.forEach((div, idx) => {
+          div.classList.toggle('border-end', idx < visibleCols.length - 1);
+        });
+      }
 
 const imgEl     = document.getElementById('mImage');
       const phEl      = document.getElementById('mImagePlaceholder');
