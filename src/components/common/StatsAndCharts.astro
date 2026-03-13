@@ -31,25 +31,20 @@ const listProyectos = proyectos || [];
 const totalEquipo = colaboradores.length;
 const totalProyectos = listProyectos.length;
 
-// A. ROLES
+// A. ROLES — usa tipo_rol (nuevo esquema)
 const rolesMap = colaboradores.reduce((acc: any, curr) => {
-    let rol = (curr.cargo || "Sin definir").trim();
-    rol = rol.charAt(0).toUpperCase() + rol.slice(1).toLowerCase();
+    let rol = (curr.tipo_rol || curr.cargo || "Sin definir").trim();
+    rol = rol.charAt(0).toUpperCase() + rol.slice(1);
     acc[rol] = (acc[rol] || 0) + 1;
     return acc;
 }, {});
 
-// B. CARRERAS / PROFESIONES (MODIFICADO: Datos Reales)
+// B. ÁREAS de investigación (nuevo esquema usa area_investigacion)
 const carreraMap = colaboradores.reduce((acc: any, curr) => {
-    // Tomamos el valor directo de la base de datos
-    let carrera = (curr.profesion || "Sin definir").trim();
-    
-    // Normalizamos (Primera mayúscula, resto minúscula) para evitar duplicados visuales
-    // Ej: "INGENIERÍA" y "ingeniería" se contarán juntos.
+    let carrera = (curr.area_investigacion || curr.profesion || "Sin definir").trim();
     if (carrera !== "Sin definir") {
         carrera = carrera.charAt(0).toUpperCase() + carrera.slice(1);
     }
-
     acc[carrera] = (acc[carrera] || 0) + 1;
     return acc;
 }, {});
@@ -84,9 +79,8 @@ const proyAreaLabels = Object.keys(proyAreaMap);
 const proyAreaValues = Object.values(proyAreaMap);
 ---
 
-{(config.stat_colaboradores || config.stat_proyectos || config.stat_alianzas || config.stat_papers ||
-  config.chart_roles || config.chart_carreras || config.chart_proyectos_anio || config.chart_areas) && (
-<section class="py-5 bg-light position-relative" id="stats-section">    <div class="container">
+<section class="py-5 bg-light position-relative" id="stats-section">
+    <div class="container">
         
         <div class="text-center mb-5">
             <h2 class="fw-bold text-dark">Radiografía del Centro</h2>
@@ -142,16 +136,6 @@ const proyAreaValues = Object.values(proyAreaMap);
                 </div>
             )}
 
-            {/* Disciplinas / Carreras */}
-            {config.chart_carreras && (
-                <div class="col-lg-6">
-                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-                        <h6 class="fw-bold text-secondary text-uppercase small mb-3">Multidiciplinario</h6>
-                        <div class="chart-container d-flex justify-content-center"><canvas id="chartCarreras"></canvas></div>
-                    </div>
-                </div>
-            )}
-
             {/* Proyectos Año */}
             {config.chart_proyectos_anio && (
                 <div class="col-lg-6">
@@ -175,7 +159,6 @@ const proyAreaValues = Object.values(proyAreaMap);
         </div>
     </div>
 </section>
-)}
 
 <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

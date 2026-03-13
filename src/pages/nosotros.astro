@@ -1,23 +1,20 @@
 ---
 import MainLayout    from '../layouts/MainLayout.astro';
-import PageHeader    from '../components/common/PageHeader.astro';
 import StatsAndCharts from '../components/common/StatsAndCharts.astro';
-import { supabase }  from '../lib/supabase';
-
-const { data: equipo } = await supabase
-  .from('colaboradores')
-  .select('*')
-  .order('orden', { ascending: true })
-  .order('id',    { ascending: true });
 ---
 
 <MainLayout title="Nosotros">
 
-  <PageHeader
-    eyebrow="Sobre nosotros"
-    title="Nuestro Centro"
-    description="Ciencia de Datos e Inteligencia Artificial desde La Araucanía"
-  />
+  <section class="py-5 text-white position-relative overflow-hidden shadow-sm"
+           style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);">
+    <div class="container position-relative z-2">
+      <div class="col-lg-8">
+        <h6 class="fw-bold text-uppercase mb-2" style="color:#ff85c0; letter-spacing:2px;">Sobre nosotros</h6>
+        <h1 class="display-5 fw-bold mb-2">Nuestro Centro</h1>
+        <p class="opacity-90 mb-0 lead small">Ciencia de Datos e Inteligencia Artificial desde La Araucanía</p>
+      </div>
+    </div>
+  </section>
 
   <!-- MISIÓN / VISIÓN / PROPÓSITO -->
   <section class="py-5 bg-white">
@@ -62,98 +59,29 @@ const { data: equipo } = await supabase
 
   <StatsAndCharts />
 
-  <!-- EQUIPO -->
-  <section class="py-5 team-section-bg">
-    <div class="container pt-3">
-      <div class="text-center mb-5">
-        <h2 class="fw-bold text-dark">Nuestro Equipo</h2>
-        <div class="mx-auto mt-2 mb-3" style="width: 60px; height: 4px; background: var(--gradient-main); border-radius: 4px;"></div>
-        <p class="text-muted">Investigadores y profesionales detrás del CI²A²</p>
-      </div>
-
-      <div class="row g-4">
-        {equipo && equipo.length > 0 ? equipo.map((c: any) => (
-          <div class="col-sm-6 col-lg-3">
-            <div class="card h-100 border-0 shadow-sm text-center p-4 hover-up-pink team-card bg-white rounded-4 border-top-blue">
-
-              <!-- Avatar -->
-              <div class="mx-auto mb-3 overflow-hidden rounded-circle shadow-sm" style="width: 140px; height: 140px;">
-                <img
-                  src={c.foto_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.nombre)}&background=random`}
-                  class="w-100 h-100 object-fit-cover img-zoom"
-                  alt={c.nombre}
-                />
-              </div>
-
-              <h5 class="fw-bold mb-1 text-dark name-text">{c.nombre}</h5>
-              <span class="badge badge-role mb-3 rounded-pill px-3 mt-2 fw-normal">{c.cargo}</span>
-              <span class="small text-muted d-block mb-2 fst-italic">{c.facultad}</span>
-
-              {c.bio && (
-                <p class="small text-muted mb-3 line-clamp-3 opacity-75">{c.bio}</p>
-              )}
-
-              <div class="d-flex justify-content-center gap-2 mt-auto">
-                <a
-                  href={`/contacto?para=${encodeURIComponent(c.nombre)}`}
-                  class="btn btn-sm btn-light rounded-circle social-btn"
-                  title={`Contactar a ${c.nombre}`}
-                >
-                  <i class="bi bi-chat-text-fill text-muted"></i>
-                </a>
-                {c.linkedin && (
-                  <a href={c.linkedin} target="_blank" class="btn btn-sm btn-light rounded-circle social-btn" title="LinkedIn">
-                    <i class="bi bi-linkedin text-muted"></i>
-                  </a>
-                )}
-              </div>
-
-            </div>
-          </div>
-        )) : (
-          <div class="col-12 text-center py-5">
-            <p class="text-muted">Cargando equipo...</p>
-          </div>
-        )}
-      </div>
-    </div>
-  </section>
 
 </MainLayout>
 
 <style>
-  .team-section-bg {
-    background: linear-gradient(to bottom, #ffffff 0%, var(--ufro-blue-soft) 100%);
+  .ls-1 { letter-spacing: 1px; }
+  .text-ufro { color: var(--ufro-blue); }
+  .text-gradient {
+    background: var(--gradient-main);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
-  .border-top-blue { border-top: 4px solid var(--ufro-blue); }
-
-  .badge-role {
-    background-color: var(--ufro-blue);
-    color: #fff !important;
-    box-shadow: 0 4px 6px rgba(0, 55, 103, 0.2);
-    letter-spacing: 0.5px;
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
+  .btn-equipo {
+    background: var(--ufro-blue);
+    color: #fff;
+    border: 2px solid var(--ufro-blue);
+    transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
   }
-
-  /* Zoom avatar */
-  .team-card:hover .img-zoom { transform: scale(1.15); }
-
-  /* Subrayado nombre al hover */
-  .name-text { transition: color 0.3s; }
-  .team-card:hover .name-text {
-    color: var(--ufro-blue) !important;
-    text-decoration: underline;
-    text-underline-offset: 4px;
+  .btn-equipo:hover {
+    background: var(--ufro-pink);
+    border-color: var(--ufro-pink);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(214,51,132,.3);
+    transform: translateY(-2px);
   }
-
-  .social-btn {
-    width: 38px; height: 38px;
-    display: flex; align-items: center; justify-content: center;
-    border: 1px solid #eee;
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  .social-btn:hover { transform: scale(1.2); background-color: var(--ufro-pink); border-color: var(--ufro-pink); }
-  .social-btn:hover i { color: white !important; }
 </style>

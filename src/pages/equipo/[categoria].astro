@@ -1,0 +1,118 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { supabase } from '../../lib/supabase';
+
+export const prerender = false;
+
+const { categoria } = Astro.params;
+
+const CATEGORIAS: Record<string, { label: string; tipo_rol: string; desc: string }> = {
+  'investigadores':            { label: 'Investigadores',               tipo_rol: 'Investigador',          desc: 'Investigadores principales de la Universidad de La Frontera.' },
+  'investigadores-asociados':  { label: 'Investigadores Asociados',     tipo_rol: 'Investigador Asociado', desc: 'Investigadores asociados al centro desde otras instituciones.' },
+  'cientificos':               { label: 'Científicos',                  tipo_rol: 'Científico',            desc: 'Científicos e investigadores postdoctorales permanentes.' },
+  'profesionales':             { label: 'Ingenieros y Profesionales',   tipo_rol: 'Profesional',           desc: 'Ingenieros de proyectos y profesionales de apoyo.' },
+  'postdocs':                  { label: 'Postdoctorados',               tipo_rol: 'Postdoc',               desc: 'Investigadores en etapa postdoctoral.' },
+  'profesores-distinguidos':   { label: 'Profesores Distinguidos',      tipo_rol: 'Profesor Distinguido',  desc: 'Profesores internacionales distinguidos vinculados al centro.' },
+  'investigadores-visitantes': { label: 'Investigadores Visitantes',    tipo_rol: 'Investigador Visitante',desc: 'Investigadores externos en colaboración temporal.' },
+  'staff':                     { label: 'Staff',                        tipo_rol: 'Staff',                 desc: 'Personal de administración y apoyo al centro.' },
+};
+
+const meta = categoria ? CATEGORIAS[categoria] : null;
+if (!meta) return Astro.redirect('/equipo');
+
+const { data: personas } = await supabase
+  .from('colaboradores')
+  .select('id, nombre, cargo, foto_url, facultad, institucion')
+  .eq('tipo_rol', meta.tipo_rol)
+  .order('orden', { ascending: true })
+  .order('nombre', { ascending: true });
+
+if (!personas || personas.length === 0) return Astro.redirect('/equipo');
+---
+
+<MainLayout title={meta.label}>
+
+  <section class="py-5 text-white position-relative overflow-hidden shadow-sm"
+           style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);">
+    <div class="container position-relative z-2">
+      <div class="col-lg-8">
+        <h6 class="fw-bold text-uppercase mb-2" style="color:#ff85c0; letter-spacing:2px;">
+          <a href="/equipo" class="text-decoration-none" style="color:#ff85c0;">Equipo</a>
+        </h6>
+        <h1 class="display-5 fw-bold mb-2">{meta.label}</h1>
+        <p class="opacity-90 mb-0 lead small">{meta.desc}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-5" style="background: linear-gradient(to bottom, #fff 0%, var(--ufro-blue-soft) 100%);">
+    <div class="container py-3">
+      <div class="row g-4">
+        {personas.map((p: any) => (
+          <div class="col-sm-6 col-md-4 col-lg-3">
+            <a href={`/equipo/${categoria}/${p.id}`} class="text-decoration-none person-link">
+              <div class="person-card h-100 bg-white rounded-4 shadow-sm overflow-hidden d-flex flex-column">
+
+                <!-- Foto con aspect ratio fijo -->
+                <div class="position-relative overflow-hidden" style="height:220px; background:#e8eef5;">
+                  <img
+                    src={p.foto_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nombre)}&background=003767&color=fff&size=400`}
+                    class="w-100 h-100 object-fit-cover photo-img"
+                    alt={p.nombre}
+                  />
+                  <!-- Barra inferior con gradiente al hover -->
+                  <div class="hover-bar position-absolute bottom-0 start-0 w-100"></div>
+                </div>
+
+                <!-- Info -->
+                <div class="p-3 d-flex flex-column gap-1 flex-grow-1">
+                  <h6 class="fw-bold text-dark mb-0 lh-sm person-name">{p.nombre}</h6>
+                  {p.cargo && (
+                    <span class="small fw-semibold" style="color: var(--ufro-blue);">{p.cargo}</span>
+                  )}
+                  {(p.facultad || p.institucion) && (
+                    <span class="small text-muted fst-italic lh-sm">
+                      {p.facultad || p.institucion}
+                    </span>
+                  )}
+                </div>
+
+              </div>
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+</MainLayout>
+
+<style>
+  .person-card {
+    border: 2px solid transparent;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.2s;
+  }
+  .person-link:hover .person-card {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 36px rgba(0,55,103,.14) !important;
+    border-color: var(--ufro-pink);
+  }
+
+  /* Zoom sutil en foto */
+  .photo-img { transition: transform 0.45s ease; }
+  .person-link:hover .photo-img { transform: scale(1.06); }
+
+  /* Barra de color inferior que aparece al hover */
+  .hover-bar {
+    height: 4px;
+    background: linear-gradient(to right, var(--ufro-blue), var(--ufro-pink));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .person-link:hover .hover-bar { transform: scaleX(1); }
+
+  /* Nombre se pone azul al hover */
+  .person-name { transition: color 0.2s; }
+  .person-link:hover .person-name { color: var(--ufro-blue) !important; }
+</style>

@@ -76,7 +76,7 @@ const Navbar = () => {
                             onMouseLeave={handleMouseLeave}
                         >
                             <div
-                                className={`nav-link-react ${['/nosotros', '/alianzas', '/transparencia'].some(p => isActive(p)) ? 'active' : ''}`}
+                                className={`nav-link-react ${['/nosotros', '/alianzas', '/transparencia', '/equipo'].some(p => isActive(p)) ? 'active' : ''}`}
                                 onClick={(e) => handleClickDropdown('institucion', e)}
                                 role="button"
                             >
@@ -87,6 +87,9 @@ const Navbar = () => {
                                 <div className="dropdown-menu-react">
                                     <a className="dropdown-item-react" href="/nosotros">
                                         <i className="bi bi-people-fill"></i> Nosotros
+                                    </a>
+                                    <a className="dropdown-item-react" href="/equipo">
+                                        <i className="bi bi-person-badge-fill"></i> Equipo
                                     </a>
                                     <a className="dropdown-item-react" href="/alianzas">
                                         <i className="bi bi-diagram-3-fill"></i> Alianzas

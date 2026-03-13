@@ -1,0 +1,249 @@
+---
+import MainLayout from '../../../layouts/MainLayout.astro';
+import { supabase } from '../../../lib/supabase';
+
+export const prerender = false;
+
+const { categoria, id } = Astro.params;
+
+const CATEGORIAS: Record<string, { label: string }> = {
+  'investigadores':            { label: 'Investigadores' },
+  'investigadores-asociados':  { label: 'Investigadores Asociados' },
+  'cientificos':               { label: 'Científicos' },
+  'profesionales':             { label: 'Ingenieros y Profesionales' },
+  'postdocs':                  { label: 'Postdoctorados' },
+  'profesores-distinguidos':   { label: 'Profesores Distinguidos' },
+  'investigadores-visitantes': { label: 'Investigadores Visitantes' },
+  'staff':                     { label: 'Staff' },
+};
+
+const meta = categoria ? CATEGORIAS[categoria] : null;
+if (!meta) return Astro.redirect('/equipo');
+
+const { data: p, error } = await supabase
+  .from('colaboradores')
+  .select('*')
+  .eq('id', id)
+  .single();
+
+if (error || !p) return Astro.redirect(`/equipo/${categoria}`);
+
+const fotoSrc = p.foto_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nombre)}&background=003767&color=fff&size=400`;
+
+// Construir líneas de formación
+const lineasFormacion: string[] = p.titulo_academico
+  ? p.titulo_academico.split('\n').filter((l: string) => l.trim())
+  : [];
+---
+
+<MainLayout title={p.nombre}>
+
+  <section class="py-5 text-white position-relative overflow-hidden shadow-sm"
+           style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);">
+    <div class="container position-relative z-2">
+      <div class="col-lg-8">
+        <h6 class="fw-bold text-uppercase mb-2" style="color:#ff85c0; letter-spacing:2px;">
+          <a href={`/equipo/${categoria}`} class="text-decoration-none" style="color:#ff85c0;">{meta.label}</a>
+        </h6>
+        <h1 class="display-5 fw-bold mb-2">{p.nombre}</h1>
+        {p.cargo && <p class="opacity-90 mb-0 lead small">{p.cargo}</p>}
+      </div>
+    </div>
+  </section>
+
+  <!-- Contenido -->
+  <section class="py-5 bg-white">
+    <div class="container">
+
+      <!-- FILA 1: foto + ficha técnica lado a lado -->
+      <div class="d-flex gap-4 flex-wrap flex-md-nowrap mb-4">
+
+        <!-- Foto -->
+        <div class="flex-shrink-0">
+          <div class="overflow-hidden rounded-4 shadow-sm"
+               style="width: 200px; height: 240px;">
+            <img src={fotoSrc} class="w-100 h-100 object-fit-cover" alt={p.nombre} />
+          </div>
+        </div>
+
+        <!-- Ficha -->
+        <div class="flex-grow-1">
+          <div class="row g-3">
+
+            {p.institucion && (
+              <div class="col-sm-6 col-lg-4">
+                <span class="ficha-label d-block">Institución</span>
+                <span class="ficha-value">{p.institucion}</span>
+              </div>
+            )}
+            {p.facultad && (
+              <div class="col-sm-6 col-lg-4">
+                <span class="ficha-label d-block">Facultad</span>
+                <span class="ficha-value">{p.facultad}</span>
+              </div>
+            )}
+            {p.jerarquia && (
+              <div class="col-sm-6 col-lg-4">
+                <span class="ficha-label d-block">Jerarquía</span>
+                <span class="ficha-value">{p.jerarquia}</span>
+              </div>
+            )}
+            {p.area_investigacion && (
+              <div class="col-sm-6 col-lg-4">
+                <span class="ficha-label d-block">Área de Investigación</span>
+                <span class="ficha-value" style="color:var(--ufro-blue);">{p.area_investigacion}</span>
+              </div>
+            )}
+            {p.grupos_trabajo && (
+              <div class="col-sm-6 col-lg-4">
+                <span class="ficha-label d-block">Grupos de Trabajo</span>
+                <span class="ficha-value">{p.grupos_trabajo}</span>
+              </div>
+            )}
+
+            <!-- Contacto -->
+            {(p.telefono || p.oficina) && (
+              <div class="col-12">
+                <div class="d-flex flex-wrap gap-3 mt-1">
+                  {p.telefono && (
+                    <span class="contact-chip">
+                      <i class="bi bi-telephone"></i>{p.telefono}
+                    </span>
+                  )}
+                  {p.oficina && (
+                    <span class="contact-chip">
+                      <i class="bi bi-door-open"></i>Oficina {p.oficina}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <!-- Links académicos -->
+            {(p.linkedin || p.github || p.google_scholar || p.orcid || p.researchgate) && (
+              <div class="col-12">
+                <div class="d-flex flex-wrap gap-2">
+                  <a href={`/contacto?para=${encodeURIComponent(p.nombre)}`} class="link-btn contactar">
+                    <i class="bi bi-envelope"></i>Contactar
+                  </a>
+                  {p.linkedin && (
+                    <a href={p.linkedin} target="_blank" rel="noopener" class="link-btn linkedin">
+                      <i class="bi bi-linkedin"></i>LinkedIn
+                    </a>
+                  )}
+                  {p.github && (
+                    <a href={p.github} target="_blank" rel="noopener" class="link-btn">
+                      <i class="bi bi-github"></i>GitHub
+                    </a>
+                  )}
+                  {p.google_scholar && (
+                    <a href={p.google_scholar} target="_blank" rel="noopener" class="link-btn">
+                      <i class="bi bi-mortarboard"></i>Google Scholar
+                    </a>
+                  )}
+                  {p.orcid && (
+                    <a href={`https://orcid.org/${p.orcid}`} target="_blank" rel="noopener" class="link-btn">
+                      <i class="bi bi-person-badge"></i>ORCID
+                    </a>
+                  )}
+                  {p.researchgate && (
+                    <a href={p.researchgate} target="_blank" rel="noopener" class="link-btn">
+                      <i class="bi bi-graph-up"></i>ResearchGate
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+            <!-- Si no hay links pero sí queremos mostrar contactar -->
+            {!(p.linkedin || p.github || p.google_scholar || p.orcid || p.researchgate) && (
+              <div class="col-12">
+                <a href={`/contacto?para=${encodeURIComponent(p.nombre)}`} class="link-btn contactar">
+                  <i class="bi bi-envelope"></i>Contactar
+                </a>
+              </div>
+            )}
+
+          </div>
+        </div>
+      </div>
+
+      <!-- FILA 2: formación + bio, ancho completo -->
+      {lineasFormacion.length > 0 && (
+        <div class="mb-4 p-4 rounded-4 border-start border-4"
+             style="border-color: var(--ufro-pink) !important; background: #fafbfd;">
+          <p class="ficha-label mb-2">Formación Académica</p>
+          {lineasFormacion.map((linea: string) => (
+            <p class="mb-1 text-dark small lh-sm">{linea}</p>
+          ))}
+        </div>
+      )}
+
+      {p.bio && (
+        <div class="profile-bio" set:html={p.bio} />
+      )}
+
+      <!-- Volver -->
+      <div class="mt-4 pt-2 border-top">
+        <a href={`/equipo/${categoria}`}
+           class="btn btn-outline-secondary btn-sm rounded-pill px-4">
+          <i class="bi bi-arrow-left me-1"></i>Volver a {meta.label}
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+</MainLayout>
+
+<style>
+  .ficha-label {
+    font-size: .68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: #9ca3af;
+    margin-bottom: 2px;
+  }
+  .ficha-value { font-size: .875rem; color: #1f2937; line-height: 1.4; }
+
+  .contact-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .82rem;
+    color: #6b7280;
+    text-decoration: none;
+    padding: 4px 0;
+  }
+  .contact-chip i { color: var(--ufro-blue); }
+  .contact-chip:hover { color: var(--ufro-blue); }
+
+  .link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-size: .78rem;
+    font-weight: 500;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    text-decoration: none;
+    transition: all .2s;
+    background: #fff;
+  }
+  .link-btn:hover { border-color: var(--ufro-blue); color: var(--ufro-blue); background: var(--ufro-blue-soft); }
+  .link-btn.linkedin { background: #0a66c2; color: #fff; border-color: #0a66c2; }
+  .link-btn.linkedin:hover { background: #0958a8; border-color: #0958a8; }
+  .link-btn.contactar { background: var(--ufro-blue); color: #fff; border-color: var(--ufro-blue); }
+  .link-btn.contactar:hover { background: #002a52; border-color: #002a52; color: #fff; }
+
+  .profile-bio { font-size: 1rem; line-height: 1.85; color: #4b5563; }
+  .profile-bio p { margin-bottom: 1.2rem; }
+  .profile-bio h2, .profile-bio h3 {
+    font-weight: 700;
+    color: var(--ufro-blue);
+    margin-top: 2rem;
+    margin-bottom: .75rem;
+  }
+</style>
