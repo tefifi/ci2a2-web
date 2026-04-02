@@ -192,15 +192,17 @@ export default function AdminColaboradores() {
                       </div>
                       <div className="col-md-6">
                         <label className="form-label small fw-bold text-secondary">Área de Investigación</label>
-                        <input type="text" className="form-control" name="area_investigacion"
-                          placeholder="Ej. Optimización y Equilibrio"
+                        <textarea className="form-control" name="area_investigacion" rows={3}
+                          placeholder={"Una área por línea:\nCriptografía\nMatemáticas Discretas\nSeguridad de la Información"}
                           value={crud.form.area_investigacion} onChange={crud.handleChange} />
+                        <div className="form-text">Una área por línea (Enter para separar)</div>
                       </div>
                       <div className="col-12">
                         <label className="form-label small fw-bold text-secondary">Grupos de Trabajo / Labs</label>
-                        <input type="text" className="form-control" name="grupos_trabajo"
-                          placeholder="Ej. CI²A² Digital Health • CI²A² Networks"
+                        <textarea className="form-control" name="grupos_trabajo" rows={3}
+                          placeholder={"Un grupo por línea:\nCI²A² Digital Health\nCI²A² Networks"}
                           value={crud.form.grupos_trabajo} onChange={crud.handleChange} />
+                        <div className="form-text">Un grupo por línea (Enter para separar)</div>
                       </div>
                     </div>
                   )}

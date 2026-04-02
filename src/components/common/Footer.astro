@@ -14,64 +14,17 @@ const currentYear = new Date().getFullYear();
 <footer class="bg-ufro text-white pt-5 pb-4 mt-auto position-relative">
   <div class="container">
     <div class="row g-5 justify-content-between overflow-hidden">
-      <div class="col-lg-4 col-md-6">
-        <img
-          src="/img/logo-ci2a2.png"
-          alt="Logo CI2A2 Blanco"
-          class="mb-4 img-fluid"
-          style="max-height: 70px;"
-        />
-        <p class="small opacity-75 pe-lg-4 lh-lg fw-light">
-          Articulando ciencia, tecnología y sociedad desde La Araucanía para el
-          mundo. Liderando la innovación en IA aplicada.
-        </p>
-      </div>
 
-      <div class="col-lg-2 col-md-6">
+      <!-- 1. INSTITUCIÓN -->
+      <div class="col-lg-3 col-md-6 text-lg-start">
         <h6 class="fw-bold text-uppercase mb-4 small ls-1 text-fica">
-          Explora
-        </h6>
-        <ul class="list-unstyled d-flex flex-column gap-3 small fw-light">
-          <li><a href="/" class="footer-link">Inicio</a></li>
-          <li><a href="/nosotros" class="footer-link">Nosotros</a></li>
-          <li><a href="/proyectos" class="footer-link">Proyectos</a></li>
-          <li><a href="/noticias" class="footer-link">Noticias</a></li>
-        </ul>
-      </div>
-
-      <div class="col-lg-3 col-md-6">
-        <h6 class="fw-bold text-uppercase mb-4 small ls-1 text-fica">
-          Contacto
-        </h6>
-        <ul
-          class="list-unstyled d-flex flex-column gap-3 small opacity-85 fw-light"
-        >
-          <li class="d-flex gap-3 align-items-start">
-            <i class="bi bi-geo-alt text-fica mt-1 fs-6"></i>
-            <span>Av. Francisco Salazar 01145,<br />Temuco, Chile.</span>
-          </li>
-          <li class="d-flex gap-3 align-items-center">
-            <i class="bi bi-envelope text-fica fs-6"></i>
-            <a
-              href="mailto:contacto.ci2a2@ufro.cl"
-              class="text-white text-decoration-none footer-link-simple"
-            >
-              contacto.ci2a2@ufro.cl
-            </a>
-          </li>
-        </ul>
-      </div>
-
-      <div class="col-lg-3 col-md-6 text-lg-end">
-        <h6 class="fw-bold text-uppercase mb-4 small ls-1 text-fica w-100">
           Institución
         </h6>
-
         <a
           href="https://www.ufro.cl/"
           target="_blank"
           rel="noopener noreferrer"
-          class="d-inline-block mb-4 ms-lg-auto logo-ufro-link"
+          class="d-inline-block mb-4 logo-ufro-link"
         >
           <img
             src="/img/02-logo-UFRO-blanco-horizontal.png"
@@ -80,19 +33,65 @@ const currentYear = new Date().getFullYear();
             style="max-width: 180px;"
           />
         </a>
-
-        <div class="d-flex justify-content-lg-end mb-2">
+        <div class="d-flex justify-content-start mb-2">
           <img
             src="/img/selloAcreditacion.webp"
             alt="Sello Acreditación"
             class="img-fluid rounded seal-image"
           />
         </div>
-
-        <p class="small opacity-50 fst-italic text-lg-end m-0">
+        <p class="small opacity-50 fst-italic m-0">
           Facultad de Ingeniería y Ciencias
         </p>
       </div>
+
+      <!-- 2. LOGO + LEMA -->
+      <div class="col-lg-3 col-md-6 text-center">
+        <img
+          src="/img/logo-ci2a2.png"
+          alt="Logo CI2A2 Blanco"
+          class="mb-4 img-fluid"
+          style="max-height: 70px;"
+        />
+        <p class="small opacity-75 lh-lg fw-light">
+          Articulando ciencia, tecnología y sociedad desde La Araucanía para el
+          mundo. Liderando la innovación en IA aplicada.
+        </p>
+      </div>
+
+      <!-- 3. EXPLORA -->
+      <div class="col-lg-2 col-md-6">
+        <h6 class="fw-bold text-uppercase mb-4 small ls-1 text-fica">
+          Explora
+        </h6>
+        <ul class="list-unstyled d-flex flex-column gap-3 small fw-light">
+          <li><a href="/" class="footer-link">Inicio</a></li>
+          <li><a href="/nosotros" class="footer-link">Nosotros</a></li>
+          <li><a href="/equipo" class="footer-link">Equipo</a></li>
+          <li><a href="/proyectos" class="footer-link">Proyectos</a></li>
+          <li><a href="/noticias" class="footer-link">Noticias</a></li>
+        </ul>
+      </div>
+
+      <!-- 4. CONTACTO -->
+      <div class="col-lg-3 col-md-6">
+        <h6 class="fw-bold text-uppercase mb-4 small ls-1 text-fica">
+          Contacto
+        </h6>
+        <ul class="list-unstyled d-flex flex-column gap-3 small opacity-85 fw-light">
+          <li class="d-flex gap-3 align-items-start">
+            <i class="bi bi-geo-alt text-fica mt-1 fs-6"></i>
+            <span>Av. Francisco Salazar 01145,<br />Temuco, Chile.</span>
+          </li>
+          <li class="d-flex gap-3 align-items-center">
+            <i class="bi bi-envelope text-fica fs-6"></i>
+            <a href="/contacto" class="text-white text-decoration-none footer-link-simple">
+              Envíanos un mensaje
+            </a>
+          </li>
+        </ul>
+      </div>
+
     </div>
 
     <hr class="border-light opacity-10 my-4" />
@@ -118,18 +117,10 @@ const currentYear = new Date().getFullYear();
     --fica-pink: #d63384;
   }
 
-  .bg-ufro {
-    background-color: var(--ufro-blue);
-  }
-  .text-fica {
-    color: var(--fica-pink) !important;
-  }
-  .ls-1 {
-    letter-spacing: 1px;
-  }
-  .fw-light {
-    font-weight: 300;
-  }
+  .bg-ufro { background-color: var(--ufro-blue); }
+  .text-fica { color: var(--fica-pink) !important; }
+  .ls-1 { letter-spacing: 1px; }
+  .fw-light { font-weight: 300; }
 
   .footer-illustration {
     position: relative;
@@ -137,7 +128,6 @@ const currentYear = new Date().getFullYear();
     margin-bottom: -1px;
   }
 
-  /* ENLACES */
   .footer-link {
     color: rgba(255, 255, 255, 0.65);
     text-decoration: none;
@@ -149,33 +139,20 @@ const currentYear = new Date().getFullYear();
     transform: translateX(4px);
   }
   .footer-link-simple:hover {
-    color: var(--fica-pink);
+    color: var(--fica-pink) !important;
     text-decoration: underline;
   }
 
-  /* Hover Logo UFRO */
-  .logo-ufro-link {
-    transition: opacity 0.3s ease;
-  }
-  .logo-ufro-link:hover {
-    opacity: 0.8;
-  }
+  .logo-ufro-link { transition: opacity 0.3s ease; }
+  .logo-ufro-link:hover { opacity: 0.8; }
 
-  /* --- ESTILO DEL SELLO --- */
   .seal-image {
-    /* Tamaño controlado */
     max-height: 65px;
     width: auto;
-
-    /* Borde fino blanco para separar el sello negro del fondo azul */
     border: 1px solid rgba(255, 255, 255, 0.3);
-
-    /* Sombra suave */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-
     transition: transform 0.3s ease;
   }
-
   .seal-image:hover {
     transform: scale(1.05);
     border-color: rgba(255, 255, 255, 0.8);
