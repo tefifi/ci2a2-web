@@ -151,7 +151,7 @@ export default function AdminAlianzas() {
                   ${crud.idEdicion === item.id ? 'bg-primary bg-opacity-10' : ''}`}
                 style={{
                   cursor: 'pointer',
-                  borderLeft: crud.idEdicion === item.id ? '4px solid #003767' : '4px solid transparent',
+                  borderLeft: crud.idEdicion === item.id ? '4px solid #0d6efd' : '4px solid transparent',
                 }}
                 onClick={() => crud.handleEdit(item)}
               >

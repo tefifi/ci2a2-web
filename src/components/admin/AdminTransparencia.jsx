@@ -49,7 +49,6 @@ export default function AdminTransparencia() {
     setMensajeLocal(null);
     try {
       const nombre = `doc_${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-      console.log('[AdminTransparencia] Subiendo:', nombre, 'al bucket:', BUCKET);
       const { error } = await supabase.storage.from(BUCKET).upload(nombre, file, {
         contentType: 'application/pdf',
         upsert: false,
@@ -283,14 +282,14 @@ export default function AdminTransparencia() {
                 className={`list-group-item p-3 border-bottom
                   ${crud.idEdicion === p.id ? 'bg-primary bg-opacity-10' : ''}`}
                 style={crud.idEdicion === p.id
-                  ? { borderLeft: '5px solid #003767' }
+                  ? { borderLeft: '5px solid #0d6efd' }
                   : { borderLeft: '5px solid transparent' }}
               >
                 <div className="d-flex justify-content-between align-items-center">
                   <div className="me-2 overflow-hidden">
                     <div className="d-flex align-items-center gap-1 mb-1">
                       <small className="fw-bold text-uppercase text-truncate"
-                        style={{ color: '#d63384', fontSize: '0.7rem' }}>
+                        style={{ color: 'var(--ufro-pink)', fontSize: '0.7rem' }}>
                         {p.concurso || 'Sin concurso'}
                       </small>
                       {p.link_resolucion && (

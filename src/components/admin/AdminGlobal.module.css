@@ -5,7 +5,7 @@
 }
 
 .titulo {
-    color: #003767;
+    color: var(--ufro-blue);
     font-weight: bold;
 }
 
