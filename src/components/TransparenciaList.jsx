@@ -118,18 +118,18 @@ export default function TransparenciaList({ iniciales }) {
                 /* Tarjetas */
                 .proyectos-container-list { display: flex; flex-direction: column; gap: 15px; }
                 .proyecto-card-v3 { background: #fff; border-radius: 16px; border: 1px solid #eef2f6; overflow: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-                .proyecto-card-v3:hover { border-color: #d63384; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-                .proyecto-card-v3.is-open { border-color: #003767; box-shadow: 0 15px 30px rgba(0,55,103,0.1); }
+                .proyecto-card-v3:hover { border-color: var(--ufro-pink); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+                .proyecto-card-v3.is-open { border-color: var(--ufro-blue); box-shadow: 0 15px 30px rgba(0,55,103,0.1); }
 
                 /* Header Interno */
                 .card-header-v3 { padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
                 .header-left { display: flex; align-items: center; gap: 20px; flex: 1; }
-                .badge-year { background: #f1f5f9; color: #003767; font-weight: 800; padding: 6px 12px; border-radius: 8px; font-size: 0.9rem; }
-                .text-concurso { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; color: #d63384; display: block; margin-bottom: 2px; }
+                .badge-year { background: #f1f5f9; color: var(--ufro-blue); font-weight: 800; padding: 6px 12px; border-radius: 8px; font-size: 0.9rem; }
+                .text-concurso { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; color: var(--ufro-pink); display: block; margin-bottom: 2px; }
                 .text-titulo { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin: 0; line-height: 1.4; }
                 
                 .icon-circle { width: 35px; height: 35px; border-radius: 50%; background: #f8fafc; display: flex; align-items: center; justify-content: center; transition: 0.3s; color: #64748b; }
-                .icon-circle.active { background: #003767; color: #fff; transform: rotate(180deg); }
+                .icon-circle.active { background: var(--ufro-blue); color: #fff; transform: rotate(180deg); }
 
                 /* Contenido Expandido */
                 .card-expand-content { transition: max-height 0.5s ease-in-out; background: #fafbfc; }
@@ -139,7 +139,7 @@ export default function TransparenciaList({ iniciales }) {
 
                 .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
                 .detail-item { display: flex; align-items: center; gap: 12px; }
-                .detail-item i { font-size: 1.2rem; color: #003767; }
+                .detail-item i { font-size: 1.2rem; color: var(--ufro-blue); }
                 .detail-item small { display: block; font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; }
                 .detail-item p { margin: 0; font-weight: 600; color: #1e293b; font-size: 0.9rem; }
                 .monto-highlight { color: #10b981 !important; }
@@ -148,8 +148,8 @@ export default function TransparenciaList({ iniciales }) {
                 .equipo-box small { display: block; margin-bottom: 5px; font-weight: 700; color: #64748b; font-size: 0.7rem; text-transform: uppercase; }
                 .equipo-box p { font-size: 0.85rem; margin: 0; color: #334155; }
 
-                .btn-download { display: inline-flex; align-items: center; padding: 10px 20px; background: #003767; color: #fff; text-decoration: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; transition: 0.2s; }
-                .btn-download:hover { background: #d63384; transform: translateY(-2px); color: #fff; }
+                .btn-download { display: inline-flex; align-items: center; padding: 10px 20px; background: var(--ufro-blue); color: #fff; text-decoration: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; transition: 0.2s; }
+                .btn-download:hover { background: var(--ufro-pink); transform: translateY(-2px); color: #fff; }
 
                 @media (max-width: 768px) {
                     .search-filter-grid { grid-template-columns: 1fr; }
