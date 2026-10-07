@@ -24,6 +24,13 @@ const config = (configData || []).reduce((acc, item) => {
     chart_areas: true 
 });
 
+// Si todos los interruptores de un grupo están apagados, ese grupo (o la
+// sección completa) no se dibuja, para no dejar el título solo en pantalla.
+// Del grupo de gráficos solo cuentan los que la plantilla realmente
+// dibuja: chart_carreras existe como interruptor, pero no tiene bloque abajo.
+const hayContadores = config.stat_colaboradores || config.stat_proyectos || config.stat_alianzas || config.stat_papers;
+const hayGraficos = config.chart_roles || config.chart_proyectos_anio || config.chart_areas;
+
 // --- 3. PROCESAMIENTO DE DATOS ---
 const colaboradores = equipo || [];
 const listProyectos = proyectos || [];
@@ -79,6 +86,7 @@ const proyAreaLabels = Object.keys(proyAreaMap);
 const proyAreaValues = Object.values(proyAreaMap);
 ---
 
+{(hayContadores || hayGraficos) && (
 <section class="py-5 bg-light position-relative" id="stats-section">
     <div class="container">
         
@@ -88,6 +96,7 @@ const proyAreaValues = Object.values(proyAreaMap);
         </div>
 
         {/* 1. CONTADORES */}
+        {hayContadores && (
         <div class="row g-4 text-center mb-5 justify-content-center">
             {config.stat_colaboradores && (
                 <div class="col-6 col-md-3">
@@ -122,8 +131,10 @@ const proyAreaValues = Object.values(proyAreaMap);
                 </div>
             )}
         </div>
+        )}
 
         {/* 2. GRÁFICOS */}
+        {hayGraficos && (
         <div class="row g-4 justify-content-center">
             
             {/* Roles */}
@@ -157,8 +168,10 @@ const proyAreaValues = Object.values(proyAreaMap);
             )}
 
         </div>
+        )}
     </div>
 </section>
+)}
 
 <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
