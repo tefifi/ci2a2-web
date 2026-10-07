@@ -13,6 +13,15 @@
 import { insertStaging, getColaboradoresConIdentificador } from './_supabaseStaging.js';
 import { pareceRelevante } from './_relevancia.js';
 
+const DRY_RUN = process.argv.includes('--dry-run');
+
+// Con --dry-run no se escribe nada en Supabase: el insert se simula como
+// "nuevo" para poder ver los conteos sin tocar la bandeja de revisión.
+async function guardar(item) {
+  if (DRY_RUN) return { inserted: true };
+  return insertStaging(item);
+}
+
 const ORCID_API = 'https://pub.orcid.org/v3.0';
 
 async function fetchWorksSummary(orcidId) {
@@ -110,7 +119,7 @@ async function main() {
 
         vistos++;
 
-        const { inserted, error } = await insertStaging({
+        const { inserted, error } = await guardar({
           tipo: 'publicacion',
           fuente: 'orcid',
           fuente_id: resumen.fuente_id,
@@ -145,7 +154,7 @@ async function main() {
       const perfil = await fetchPerfil(colaborador.orcid);
       if (perfil) {
         const mesActual = new Date().toISOString().slice(0, 7); // "2026-08"
-        const { inserted, error } = await insertStaging({
+        const { inserted, error } = await guardar({
           tipo: 'colaborador',
           fuente: 'orcid',
           fuente_id: `perfil-${colaborador.orcid.trim()}-${mesActual}`,
@@ -170,7 +179,15 @@ async function main() {
     }
   }
 
+  if (DRY_RUN) console.log('--dry-run: no se escribió nada en Supabase (los conteos son simulados).');
   console.log(`Listo. Vistos: ${vistos} | Nuevos en staging: ${nuevos} | Fallidos: ${fallidos}`);
+
+  // Si fallaron TODOS los colaboradores, algo sistémico está roto (API de
+  // ORCID caída, credenciales de Supabase inválidas, etc.) — no basta con
+  // loguearlo, hay que hacer fallar la corrida para que el cron avise.
+  if (colaboradores.length > 0 && fallidos >= colaboradores.length) {
+    throw new Error('Fallaron todos los colaboradores — revisa la API de ORCID o las credenciales.');
+  }
 }
 
 main().catch((err) => {
