@@ -33,11 +33,11 @@ if (!personas || personas.length === 0) return Astro.redirect('/equipo');
 <MainLayout title={meta.label}>
 
   <section class="py-5 text-white position-relative overflow-hidden shadow-sm"
-           style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);">
+           style="background: var(--gradient-main);">
     <div class="container position-relative z-2">
       <div class="col-lg-8">
-        <h6 class="fw-bold text-uppercase mb-2" style="color:#ff85c0; letter-spacing:2px;">
-          <a href="/equipo" class="text-decoration-none" style="color:#ff85c0;">Equipo</a>
+        <h6 class="fw-bold text-uppercase mb-2" style="color: var(--ufro-pink-light); letter-spacing:2px;">
+          <a href="/equipo" class="text-decoration-none" style="color: var(--ufro-pink-light);">Equipo</a>
         </h6>
         <h1 class="display-5 fw-bold mb-2">{meta.label}</h1>
         <p class="opacity-90 mb-0 lead small">{meta.desc}</p>

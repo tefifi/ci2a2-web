@@ -50,7 +50,7 @@ const getStatusStyle = (status: any) => {
   {/* --- ENCABEZADO --- */}
   <section
     class="py-5 text-white position-relative overflow-hidden shadow-sm"
-    style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);"
+    style="background: linear-gradient(135deg, var(--ufro-blue) 40%, var(--ufro-pink) 100%);"
   >
     <div class="container position-relative z-2">
       <div class="col-lg-8">
@@ -203,7 +203,7 @@ const getStatusStyle = (status: any) => {
                   <a
                     class={`page-link rounded-circle shadow-sm fw-bold d-flex align-items-center justify-content-center pagination-btn ${pag === paginaActual ? "active-page text-white border-0" : "bg-white text-dark"}`}
                     href={`?pagina=${pag}`}
-                    style={`width: 45px; height: 45px; ${pag === paginaActual ? "background-color: #003767 !important;" : ""}`}
+                    style={`width: 45px; height: 45px; ${pag === paginaActual ? "background-color: var(--ufro-blue) !important;" : ""}`}
                   >
                     {pag}
                   </a>
@@ -230,26 +230,8 @@ const getStatusStyle = (status: any) => {
   </section>
 </MainLayout>
 <style>
-  /* =========================================
-     1. VARIABLES Y UTILIDADES
-     ========================================= */
-  :root {
-    --ufro-blue: #003767;
-    --ufro-pink: #d63384;
-  }
-
-  .bg-fica { background-color: var(--ufro-pink); color: white; }
-  .text-pink-light { color: #ff85c0; }
-  .bg-ufro { background-color: var(--ufro-blue); color: white; }
-  .text-ufro { color: var(--ufro-blue); }
-  .ls-2 { letter-spacing: 2px; }
-
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
+  /* Tokens, .text-pink-light, .bg-ufro, .text-ufro, .ls-2 y .line-clamp-2
+     ya viven en global.css. (.bg-fica estaba definida pero sin uso, se quitó.) */
 
   /* Badge para estados desconocidos (Opacidad corregida) */
   .badge-ufro-soft {

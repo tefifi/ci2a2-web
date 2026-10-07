@@ -7,6 +7,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import DOMPurify from 'isomorphic-dompurify';
 
 export default function AgendaViewer() {
   const [eventos, setEventos] = useState([]);
@@ -199,7 +200,7 @@ function EventoCard({ evento, esFuturo }) {
         {evento.descripcion && (
           <div
             className="text-muted small line-clamp-3 mb-3 flex-grow-1"
-            dangerouslySetInnerHTML={{ __html: evento.descripcion }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(evento.descripcion) }}
           />
         )}
 

@@ -29,7 +29,7 @@ const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
   {/* --- ENCABEZADO --- */}
   <section
     class="py-5 text-white position-relative overflow-hidden shadow-sm"
-    style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);"
+    style="background: linear-gradient(135deg, var(--ufro-blue) 40%, var(--ufro-pink) 100%);"
   >
     <div class="container position-relative z-2">
       <div class="col-lg-8">
@@ -148,7 +148,7 @@ const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
                   <a
                     class={`page-link rounded-circle shadow-sm fw-bold d-flex align-items-center justify-content-center pagination-btn ${pag === paginaActual ? "active-page text-white border-0" : "bg-white text-dark"}`}
                     href={`?pagina=${pag}`}
-                    style={`width: 45px; height: 45px; ${pag === paginaActual ? "background-color: #003767 !important;" : ""}`}
+                    style={`width: 45px; height: 45px; ${pag === paginaActual ? "background-color: var(--ufro-blue) !important;" : ""}`}
                   >
                     {pag}
                   </a>
@@ -176,20 +176,7 @@ const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
 </MainLayout>
 
 <style>
-  /* --- COLORES --- */
-  :root {
-    --ufro-blue: #003767;
-    --ufro-pink: #d63384;
-  }
-  .text-pink-light {
-    color: #ff85c0;
-  }
-  .text-ufro {
-    color: var(--ufro-blue);
-  }
-  .ls-2 {
-    letter-spacing: 2px;
-  }
+  /* Tokens, .text-pink-light, .text-ufro y .ls-2 ya viven en global.css */
 
   /* --- TARJETAS --- */
   .modern-card {

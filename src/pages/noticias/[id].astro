@@ -1,6 +1,7 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
 import { supabase } from "../../lib/supabase";
+import DOMPurify from "isomorphic-dompurify";
 
 export const prerender = false;
 
@@ -25,7 +26,7 @@ if (error || !noticia) {
                 <div>
                     <span
                         class="badge mb-3 px-3 py-2 fw-bold"
-                        style="background-color: #d63384; color: white;"
+                        style="background-color: var(--ufro-pink); color: white;"
                     >
                         {noticia.categoria || "Novedad"}
                     </span>
@@ -85,7 +86,7 @@ if (error || !noticia) {
                     }
                     <div
                         class="lead fw-bold text-secondary mb-5 fst-italic border-start border-4 ps-4 text-break"
-                        style="border-color: #d63384 !important; white-space: pre-line;"
+                        style="border-color: var(--ufro-pink) !important; white-space: pre-line;"
                     >
                         {noticia.bajada}
                     </div>
@@ -93,7 +94,7 @@ if (error || !noticia) {
 
                     <div
                         class="content-body text-dark"
-                        set:html={noticia.cuerpo}
+                        set:html={DOMPurify.sanitize(noticia.cuerpo)}
                     />
 
                     <hr class="my-5 opacity-25" />
@@ -126,7 +127,7 @@ if (error || !noticia) {
                             <a
                                 href="/noticias"
                                 class="btn rounded-pill px-5 custom-btn-fica"
-                                style="border: 2px solid #d63384; color: #d63384; font-weight: bold;"
+                                style="border: 2px solid var(--ufro-pink); color: var(--ufro-pink); font-weight: bold;"
                             >
                                 Ver más noticias
                             </a>
@@ -145,7 +146,7 @@ if (error || !noticia) {
         font-weight: 500;
     }
     .back-link:hover {
-        color: #d63384;
+        color: var(--ufro-pink);
         transform: translateX(-5px);
     }
     .back-link i {
@@ -165,7 +166,7 @@ if (error || !noticia) {
     }
     .content-body :global(h2),
     .content-body :global(h3) {
-        color: #003767;
+        color: var(--ufro-blue);
         font-weight: bold;
         margin-top: 2.5rem;
         margin-bottom: 1rem;
@@ -177,7 +178,7 @@ if (error || !noticia) {
         transition: all 0.3s ease;
     }
     .custom-btn-fica:hover {
-        background-color: #d63384 !important;
+        background-color: var(--ufro-pink) !important;
         color: white !important;
         transform: translateY(-3px);
         box-shadow: 0 5px 15px rgba(214, 51, 132, 0.3);
