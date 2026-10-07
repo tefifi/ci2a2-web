@@ -13,6 +13,7 @@ import AdminGraficos       from "../components/admin/adminGraficos";
 import AdminTransparencia  from "../components/admin/AdminTransparencia";
 import AdminBiblioteca     from "../components/admin/AdminBiblioteca.jsx";
 import AdminManuales       from "../components/admin/AdminManuales.jsx";
+import AdminRevision       from "../components/admin/AdminRevision.jsx";
 import TiempoSesion        from "../components/admin/TiempoSesion";
 
 const accessToken  = Astro.cookies.get("sb-access-token")?.value;
@@ -110,6 +111,10 @@ if (error || !user) {
                 <!-- GRUPO: SISTEMA -->
                 <div class="nav-group">
                     <div class="nav-group-label">Sistema</div>
+                    <button class="nav-item" data-tab="revision">
+                        <i class="bi bi-inbox"></i>
+                        <span>Revisión (scraping)</span>
+                    </button>
                     <button class="nav-item" data-tab="manuales">
                         <i class="bi bi-file-earmark-text"></i>
                         <span>Manuales</span>
@@ -211,6 +216,14 @@ if (error || !user) {
                     <AdminTransparencia client:only="react" />
                 </div>
 
+                <div class="tab-pane" id="tab-revision">
+                    <div class="tab-header">
+                        <h3 class="tab-title"><i class="bi bi-inbox me-2"></i>Revisión de contenido scrapeado</h3>
+                        <p class="tab-subtitle">Aprueba o rechaza lo que trajeron los scrapers (ORCID, UFRO Noticias, Google Scholar) antes de que se publique.</p>
+                    </div>
+                    <AdminRevision client:only="react" />
+                </div>
+
                 <div class="tab-pane" id="tab-manuales">
                     <div class="tab-header">
                         <h3 class="tab-title"><i class="bi bi-file-earmark-text me-2"></i>Manuales de Usuario</h3>
@@ -284,7 +297,7 @@ if (error || !user) {
     .admin-sidebar {
         width: 240px;
         min-height: 100vh;
-        background: #003767;
+        background: var(--ufro-blue);
         display: flex;
         flex-direction: column;
         flex-shrink: 0;
@@ -411,14 +424,14 @@ if (error || !user) {
         background: none;
         border: none;
         cursor: pointer;
-        color: #003767;
+        color: var(--ufro-blue);
         padding: 0;
         display: flex;
     }
 
     .topbar-title {
         font-weight: 700;
-        color: #003767;
+        color: var(--ufro-blue);
         font-size: 1rem;
         flex: 1;
     }
@@ -458,7 +471,7 @@ if (error || !user) {
     .tab-title {
         font-size: 1.4rem;
         font-weight: 800;
-        color: #003767;
+        color: var(--ufro-blue);
         margin: 0;
     }
 

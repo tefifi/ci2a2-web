@@ -1,0 +1,33 @@
+name: Scrapers CI²A²
+
+on:
+  schedule:
+    # Todos los días a las 06:00 UTC (~03:00 Chile continental).
+    # OpenAlex y ORCID son APIs reales sin límites agresivos, así que no
+    # necesitan un cron aparte más espaciado (a diferencia de lo que hacía
+    # falta con Google Scholar, que se descartó por bloquear las requests
+    # automatizadas — ver notas en openAlex.js).
+    - cron: '0 6 * * *'
+  workflow_dispatch: {} # permite correrlo manualmente desde GitHub
+
+jobs:
+  scrape-diario:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run scrape:orcid
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - run: npm run scrape:noticias
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - run: npm run scrape:openalex
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
