@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { AdminSpinner } from './components/AdminUI';
 
 // --- COMPONENTE AUXILIAR (Tarjeta) ---
 const ToggleCard = ({ clave, titulo, descripcion, icono, countReal, config, onToggle, colorIcono = 'text-primary' }) => (
@@ -151,7 +152,7 @@ export default function AdminGraficos() {
         <div className="container-fluid p-0">
             {/* --- HEADER --- */}
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="fw-bold m-0" style={{ color: '#003767' }}>Gestión de Métricas y Gráficos</h2>
+                <h2 className="fw-bold m-0" style={{ color: 'var(--ufro-blue)' }}>Gestión de Métricas y Gráficos</h2>
                 <button className="btn btn-sm btn-outline-secondary" onClick={fetchData}>
                     <i className="bi bi-arrow-clockwise me-2"></i>Refrescar Datos
                 </button>
@@ -165,10 +166,7 @@ export default function AdminGraficos() {
             )}
 
             {loading ? (
-                <div className="text-center py-5">
-                    <div className="spinner-border text-primary" role="status"></div>
-                    <p className="mt-2 text-muted small">Cargando panel...</p>
-                </div>
+                <AdminSpinner texto="Cargando panel..." />
             ) : (
                 <div className="row g-4">
                     

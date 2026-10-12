@@ -2,6 +2,7 @@
 import MainLayout from "../../layouts/MainLayout.astro";
 import MigaDePan from "../../components/common/MigaDePan.astro";
 import { supabase } from "../../lib/supabase";
+import DOMPurify from "isomorphic-dompurify";
 
 export const prerender = false;
 
@@ -43,7 +44,7 @@ const getStatusStyle = (status: string) => {
     }
     <section
         class="text-white position-relative overflow-hidden"
-        style="background: linear-gradient(to right, #003767 0%, #3e2b69 50%, #d63384 100%); min-height: 280px;"
+        style="background: linear-gradient(to right, var(--ufro-blue) 0%, #3e2b69 50%, var(--ufro-pink) 100%); min-height: 280px;"
     >
         <div class="container position-relative z-2 pt-3 pb-4">
             <div class="row">
@@ -210,7 +211,7 @@ const getStatusStyle = (status: string) => {
 
                         <div
                             class="rich-text"
-                            set:html={proyecto?.description}
+                            set:html={DOMPurify.sanitize(proyecto?.description)}
                         />
 
                         {
@@ -398,26 +399,8 @@ const getStatusStyle = (status: string) => {
         text-decoration: underline !important;
     }
 
-    /* --- COLORES --- */
-    :root {
-        --ufro-blue: #003767;
-        --ufro-pink: #d63384;
-    }
-    .bg-ufro {
-        background-color: var(--ufro-blue);
-    }
-    .text-ufro {
-        color: var(--ufro-blue);
-    }
-    .bg-pink {
-        background-color: var(--ufro-pink) !important;
-    }
-    .text-pink {
-        color: var(--ufro-pink) !important;
-    }
-    .border-pink {
-        border-color: var(--ufro-pink) !important;
-    }
+    /* Tokens y utilitarios de color (bg-ufro, text-ufro, bg-pink, text-pink,
+       border-pink) ya viven en global.css */
     .link-pink {
         color: var(--ufro-pink);
         transition: 0.2s;

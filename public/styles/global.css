@@ -9,24 +9,39 @@
  *   2. Reset / base
  *   3. Utilitarios de color
  *   4. Utilitarios de texto
- *   5. Animaciones reutilizables
- *   6. Tarjetas y efectos hover
- *   7. Responsive helpers
+ *   5. Utilitarios de espaciado
+ *   6. Animaciones reutilizables
+ *   7. Botones (sistema único — reemplaza btn-pildora, btn-pink, btn-leermas,
+ *      custom-btn-fica, btn-arrow-pink, btn-volver, link-btn y variantes locales)
+ *   8. Tarjetas y efectos hover
+ *   9. Footer
+ *
+ * REGLA: si necesitas un botón/color/hover que no está acá, agrégalo AQUÍ,
+ * nunca en un <style> local de una página. Los <style> locales son solo
+ * para layout específico de esa página (grids, posicionamiento puntual).
  */
 
 /* ─── 1. VARIABLES ────────────────────────────────────────────────────────── */
 :root {
   --ufro-blue:       #003767;
+  --ufro-blue-dark:  #002a52;
   --ufro-pink:       #d63384;
+  --ufro-pink-dark:  #b02a6b;
   --ufro-pink-light: #ff85c0;
+  --ufro-pink-tint:  #fff0f5;
   --ufro-blue-soft:  rgba(0, 55, 103, 0.05);
 
   --gradient-main: linear-gradient(135deg, var(--ufro-blue) 40%, var(--ufro-pink) 100%);
+
+  /* Radios */
+  --radius-pill: 50rem;
+  --radius-card: 1rem;
+
+  /* Espaciado de secciones (reemplaza .py-6 duplicado en varias páginas) */
+  --space-section: 5rem;
 }
 
 /* ─── 2. BASE ──────────────────────────────────────────────────────────────── */
-
-
 html,
 body {
   overflow-x: hidden;
@@ -96,7 +111,11 @@ main {
   overflow: hidden;
 }
 
-/* ─── 5. ANIMACIONES ──────────────────────────────────────────────────────── */
+/* ─── 5. UTILITARIOS DE ESPACIADO ─────────────────────────────────────────── */
+/* Antes definido de forma duplicada en 3+ páginas — única fuente ahora */
+.py-6 { padding-top: var(--space-section); padding-bottom: var(--space-section); }
+
+/* ─── 6. ANIMACIONES ──────────────────────────────────────────────────────── */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0);    }
@@ -115,13 +134,125 @@ main {
 .animate-fade-in    { animation: fadeIn    0.5s ease-in;      }
 .animate-on-scroll  { animation: fadeInUp  0.6s ease-out forwards; }
 
-/* ─── 6. TARJETAS Y HOVER ─────────────────────────────────────────────────── */
+.transition-all { transition: all 0.3s ease; }
+
+/* ─── 7. BOTONES ──────────────────────────────────────────────────────────── */
+/*
+ * Sistema único de botones. Reemplaza: .btn-pildora, .btn-pildora-white,
+ * .btn-pink, .btn-leermas, .custom-btn-fica, .btn-arrow-pink, .btn-volver,
+ * .link-btn y cualquier variante local equivalente.
+ *
+ * Estructura: .btn-ci2a2 (base) + un modificador de estilo + opcionalmente
+ * un modificador de tamaño.
+ *
+ *   <a class="btn-ci2a2 btn-ci2a2--outline">Ver más</a>
+ *   <a class="btn-ci2a2 btn-ci2a2--solid">Contáctanos</a>
+ *   <a class="btn-ci2a2 btn-ci2a2--outline-white">Quiero participar</a>
+ *   <button class="btn-ci2a2 btn-ci2a2--icon"><i class="bi bi-x"></i></button>
+ *   <a class="btn-ci2a2 btn-ci2a2--outline btn-ci2a2--sm">Ver todas</a>
+ */
+
+.btn-ci2a2 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  padding: 0.65rem 2rem;
+  border: 2px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease,
+              border-color 0.25s ease, transform 0.25s cubic-bezier(0.34,1.56,0.64,1),
+              box-shadow 0.25s ease;
+}
+
+.btn-ci2a2--sm  { padding: 0.4rem 1.25rem; font-size: 0.85rem; }
+.btn-ci2a2--lg  { padding: 0.85rem 2.75rem; }
+
+/* Outline rosa → relleno rosa (uso general, el más común del sitio) */
+.btn-ci2a2--outline {
+  color: var(--ufro-pink);
+  border-color: var(--ufro-pink);
+  background: transparent;
+}
+.btn-ci2a2--outline:hover {
+  background-color: var(--ufro-pink);
+  color: #fff;
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(214, 51, 132, 0.35);
+}
+
+/* Relleno rosa sólido (CTA principal) */
+.btn-ci2a2--solid {
+  color: #fff;
+  background-color: var(--ufro-pink);
+  border-color: var(--ufro-pink);
+}
+.btn-ci2a2--solid:hover {
+  background-color: var(--ufro-pink-dark);
+  border-color: var(--ufro-pink-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(192, 40, 115, 0.4);
+}
+
+/* Outline blanco (sobre fondos de color / gradiente) */
+.btn-ci2a2--outline-white {
+  color: #fff;
+  border-color: #fff;
+  background: transparent;
+}
+.btn-ci2a2--outline-white:hover {
+  background-color: #fff;
+  color: var(--ufro-pink);
+  transform: scale(1.05);
+  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.35);
+}
+
+/* Circular, solo ícono (reemplaza pagination-btn, btn-close-modal, btn-arrow-pink, btn-volver) */
+.btn-ci2a2--icon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  color: var(--ufro-blue);
+  background-color: #fff;
+  border-color: #e9ecef;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.btn-ci2a2--icon:hover {
+  background-color: var(--ufro-pink);
+  border-color: var(--ufro-pink);
+  color: #fff;
+  transform: scale(1.08);
+}
+
+/* ─── 7b. ALIAS DE COMPATIBILIDAD (temporales) ──────────────────────────────
+ * El HTML de varias páginas todavía usa estos nombres viejos. Apuntan al
+ * mismo sistema de arriba para que nada se vea distinto mientras se
+ * renombra el markup de cada página a .btn-ci2a2. Borrar esta sección
+ * una vez que ya no queden usos de .btn-pildora / .btn-pildora-white /
+ * .btn-pink en el proyecto (buscar con grep antes de borrar).
+ */
+.btn-pildora        { color: var(--ufro-pink); border: 2px solid var(--ufro-pink); background: transparent; font-weight: 700; border-radius: var(--radius-pill); transition: background-color .25s ease, color .25s ease, transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease; }
+.btn-pildora:hover  { background-color: var(--ufro-pink); color: #fff; transform: scale(1.05); box-shadow: 0 6px 18px rgba(214,51,132,.35); }
+
+.btn-pildora-white       { color: #fff; border: 2px solid #fff; background: transparent; font-weight: 700; border-radius: var(--radius-pill); transition: background-color .25s ease, color .25s ease, transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease; }
+.btn-pildora-white:hover { background-color: #fff; color: var(--ufro-pink); transform: scale(1.05); box-shadow: 0 6px 24px rgba(255,255,255,.35); }
+
+.btn-pink        { background-color: var(--ufro-pink); border-color: var(--ufro-pink); color: #fff; transition: all .3s; }
+.btn-pink:hover  { background-color: var(--ufro-pink-dark); border-color: var(--ufro-pink-dark); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(192,40,115,.4); }
+
+/* ─── 8. TARJETAS Y HOVER ─────────────────────────────────────────────────── */
 
 /* Elevación suave al hover (usada en la mayoría de tarjetas) */
-.hover-up {
+.hover-up,
+.hover-lift {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.hover-up:hover {
+.hover-up:hover,
+.hover-lift:hover {
   transform: translateY(-6px);
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
 }
@@ -132,6 +263,12 @@ main {
   box-shadow: 0 15px 30px rgba(214, 51, 132, 0.2) !important;
 }
 
+/* Zoom leve al hover (botones/CTA puntuales) */
+.hover-scale {
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.hover-scale:hover { transform: scale(1.05); }
+
 /* Zoom de imagen al hover dentro de un contenedor overflow:hidden */
 .img-zoom {
   transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -140,8 +277,21 @@ main {
   transform: scale(1.1);
 }
 
-/* ─── 7. FOOTER ───────────────────────────────────────────────────────────── */
+/* Efecto "vidrio" sobre fondos de color (tarjetas translúcidas) */
+.hover-glass {
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+.hover-glass:hover {
+  background-color: rgba(255,255,255,0.2) !important;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+.backdrop-blur {
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+/* ─── 9. FOOTER ───────────────────────────────────────────────────────────── */
 .bg-ufro-footer {
   background-color: var(--ufro-blue);
 }
-

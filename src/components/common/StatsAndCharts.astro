@@ -24,6 +24,13 @@ const config = (configData || []).reduce((acc, item) => {
     chart_areas: true 
 });
 
+// Si todos los interruptores de un grupo están apagados, ese grupo (o la
+// sección completa) no se dibuja, para no dejar el título solo en pantalla.
+// Del grupo de gráficos solo cuentan los que la plantilla realmente
+// dibuja: chart_carreras existe como interruptor, pero no tiene bloque abajo.
+const hayContadores = config.stat_colaboradores || config.stat_proyectos || config.stat_alianzas || config.stat_papers;
+const hayGraficos = config.chart_roles || config.chart_proyectos_anio || config.chart_areas;
+
 // --- 3. PROCESAMIENTO DE DATOS ---
 const colaboradores = equipo || [];
 const listProyectos = proyectos || [];
@@ -79,15 +86,17 @@ const proyAreaLabels = Object.keys(proyAreaMap);
 const proyAreaValues = Object.values(proyAreaMap);
 ---
 
+{(hayContadores || hayGraficos) && (
 <section class="py-5 bg-light position-relative" id="stats-section">
     <div class="container">
         
         <div class="text-center mb-5">
             <h2 class="fw-bold text-dark">Radiografía del Centro</h2>
-            <div class="mx-auto mt-2 mb-3 bg-gradient opacity-75" style="width: 60px; height: 4px; background: linear-gradient(to right, #003767, #d63384);"></div>
+            <div class="mx-auto mt-2 mb-3 bg-gradient opacity-75" style="width: 60px; height: 4px; background: linear-gradient(to right, var(--ufro-blue), var(--ufro-pink));"></div>
         </div>
 
         {/* 1. CONTADORES */}
+        {hayContadores && (
         <div class="row g-4 text-center mb-5 justify-content-center">
             {config.stat_colaboradores && (
                 <div class="col-6 col-md-3">
@@ -122,8 +131,10 @@ const proyAreaValues = Object.values(proyAreaMap);
                 </div>
             )}
         </div>
+        )}
 
         {/* 2. GRÁFICOS */}
+        {hayGraficos && (
         <div class="row g-4 justify-content-center">
             
             {/* Roles */}
@@ -157,15 +168,18 @@ const proyAreaValues = Object.values(proyAreaMap);
             )}
 
         </div>
+        )}
     </div>
 </section>
+)}
 
 <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script is:inline define:vars={{ rolesLabels, rolesValues, carrerasLabels, carrerasValues, anioLabels, anioValues, proyAreaLabels, proyAreaValues }}>
     function initStatsAndCharts() {
-        console.log("--> Iniciando Charts <--");
-
+        // Colores en hex literal a propósito: Chart.js dibuja sobre <canvas>,
+        // que no puede resolver variables CSS (var(--ufro-blue)) — el canvas
+        // necesita el valor de color final, no una referencia.
         const ufroBlue = "#003767";
         const ufroPink = "#d63384";
         // Paleta extendida para carreras, ya que pueden ser muchas variadas
@@ -260,10 +274,7 @@ const proyAreaValues = Object.values(proyAreaMap);
 </script>
 
 <style>
-    :root { --ufro-blue: #003767; --ufro-pink: #d63384; }
-    .text-ufro { color: var(--ufro-blue); }
-    .text-pink { color: var(--ufro-pink); }
-    .ls-1 { letter-spacing: 1px; font-size: 0.85rem; }
+    /* Tokens, .text-ufro, .text-pink y .ls-1 ya viven en global.css */
     .border-bottom-blue { border-bottom: 4px solid var(--ufro-blue); }
     .border-bottom-pink { border-bottom: 4px solid var(--ufro-pink); }
     .chart-container { position: relative; height: 250px; width: 100%; min-height: 250px; }

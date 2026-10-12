@@ -6,7 +6,7 @@ import StatsAndCharts from '../components/common/StatsAndCharts.astro';
 <MainLayout title="Nosotros">
 
   <section class="py-5 text-white position-relative overflow-hidden shadow-sm"
-           style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);">
+           style="background: linear-gradient(135deg, var(--ufro-blue) 40%, var(--ufro-pink) 100%);">
     <div class="container position-relative z-2">
       <div class="col-lg-8">
         <h6 class="fw-bold text-uppercase mb-2" style="color:#ff85c0; letter-spacing:2px;">Sobre nosotros</h6>
@@ -63,14 +63,7 @@ import StatsAndCharts from '../components/common/StatsAndCharts.astro';
 </MainLayout>
 
 <style>
-  .ls-1 { letter-spacing: 1px; }
-  .text-ufro { color: var(--ufro-blue); }
-  .text-gradient {
-    background: var(--gradient-main);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
+  /* .ls-1, .text-ufro y .text-gradient ya viven en global.css */
   .btn-equipo {
     background: var(--ufro-blue);
     color: #fff;

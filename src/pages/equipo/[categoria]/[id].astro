@@ -1,6 +1,7 @@
 ---
 import MainLayout from '../../../layouts/MainLayout.astro';
 import { supabase } from '../../../lib/supabase';
+import DOMPurify from 'isomorphic-dompurify';
 
 export const prerender = false;
 
@@ -47,11 +48,11 @@ const lineasGrupos: string[] = p.grupos_trabajo
 
   <!-- Hero -->
   <section class="py-5 text-white position-relative overflow-hidden shadow-sm"
-           style="background: linear-gradient(135deg, #003767 40%, #d63384 100%);">
+           style="background: var(--gradient-main);">
     <div class="container position-relative z-2">
       <div class="col-lg-8">
-        <h6 class="fw-bold text-uppercase mb-2" style="color:#ff85c0; letter-spacing:2px;">
-          <a href={`/equipo/${categoria}`} class="text-decoration-none" style="color:#ff85c0;">{meta.label}</a>
+        <h6 class="fw-bold text-uppercase mb-2" style="color: var(--ufro-pink-light); letter-spacing:2px;">
+          <a href={`/equipo/${categoria}`} class="text-decoration-none" style="color: var(--ufro-pink-light);">{meta.label}</a>
         </h6>
         <h1 class="display-5 fw-bold mb-2">{p.nombre}</h1>
         {p.cargo && <p class="opacity-90 mb-0 lead small">{p.cargo}</p>}
@@ -192,7 +193,7 @@ const lineasGrupos: string[] = p.grupos_trabajo
 
       <!-- Bio -->
       {p.bio && (
-        <div class="profile-bio" set:html={p.bio} />
+        <div class="profile-bio" set:html={DOMPurify.sanitize(p.bio)} />
       )}
 
       <!-- Volver -->
@@ -289,8 +290,8 @@ const lineasGrupos: string[] = p.grupos_trabajo
     transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
   }
   .btn-volver:hover {
-    background: #b8296f;
-    border-color: #b8296f;
+    background: var(--ufro-pink-dark);
+    border-color: var(--ufro-pink-dark);
     color: #fff;
     box-shadow: 0 6px 18px rgba(214,51,132,.35);
     transform: translateY(-2px);

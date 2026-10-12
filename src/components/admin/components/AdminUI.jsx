@@ -170,7 +170,7 @@ export function AdminSpinner({ texto = 'Cargando...' }) {
 export function AdminPageHeader({ titulo, mensaje, onClose }) {
   return (
     <div className="mb-4">
-      <h2 className="fw-bold" style={{ color: '#003767' }}>{titulo}</h2>
+      <h2 className="fw-bold" style={{ color: 'var(--ufro-blue)' }}>{titulo}</h2>
       <AdminAlert mensaje={mensaje} onClose={onClose} />
     </div>
   );
@@ -193,7 +193,7 @@ export function FormHeader({
     <h5 className="card-title mb-4 fw-bold text-dark border-bottom pb-2">
       <i
         className={`bi ${idEdicion ? 'bi-pencil-square' : 'bi-plus-circle'} me-2`}
-        style={{ color: '#003767' }}
+        style={{ color: 'var(--ufro-blue)' }}
       ></i>
       {idEdicion ? labelEditar : labelNuevo}
     </h5>
@@ -220,7 +220,7 @@ export function FormActions({
       <button
         type="submit"
         className="btn btn-primary fw-bold px-4 flex-grow-1"
-        style={{ background: '#003767', border: 'none' }}
+        style={{ background: 'var(--ufro-blue)', border: 'none' }}
         disabled={loading}
       >
         {loading ? (

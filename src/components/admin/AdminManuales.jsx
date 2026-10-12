@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
+import { AdminSpinner } from './components/AdminUI';
 
 const BUCKET = 'manuales';
 
@@ -163,7 +164,7 @@ export default function AdminManuales() {
         <div className="col-lg-4">
           <div className="card border-0 shadow-sm h-100" style={{ borderRadius: '16px' }}>
             <div className="card-header bg-white border-bottom py-3 px-4" style={{ borderRadius: '16px 16px 0 0' }}>
-              <h5 className="mb-0 fw-bold" style={{ color: '#003767' }}>
+              <h5 className="mb-0 fw-bold" style={{ color: 'var(--ufro-blue)' }}>
                 <i className="bi bi-cloud-arrow-up me-2"></i>Subir Manual
               </h5>
             </div>
@@ -242,7 +243,7 @@ export default function AdminManuales() {
                 )}
 
                 <button type="submit" className="btn w-100 fw-bold text-white py-2"
-                  style={{ background: '#003767', borderRadius: '10px' }}
+                  style={{ background: 'var(--ufro-blue)', borderRadius: '10px' }}
                   disabled={subiendo || !archivo}>
                   {subiendo
                     ? <><span className="spinner-border spinner-border-sm me-2"></span>Subiendo...</>
@@ -258,7 +259,7 @@ export default function AdminManuales() {
         <div className="col-lg-8">
           <div className="card border-0 shadow-sm" style={{ borderRadius: '16px' }}>
             <div className="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center" style={{ borderRadius: '16px 16px 0 0' }}>
-              <h5 className="mb-0 fw-bold" style={{ color: '#003767' }}>
+              <h5 className="mb-0 fw-bold" style={{ color: 'var(--ufro-blue)' }}>
                 <i className="bi bi-folder2-open me-2"></i>
                 Manuales Disponibles
                 <span className="badge bg-light text-secondary border ms-2 fw-normal" style={{ fontSize: '0.8rem' }}>
@@ -272,10 +273,7 @@ export default function AdminManuales() {
 
             <div className="card-body p-0">
               {loading ? (
-                <div className="text-center py-5 text-muted">
-                  <div className="spinner-border spinner-border-sm mb-2"></div>
-                  <p className="small mb-0">Cargando manuales...</p>
-                </div>
+                <AdminSpinner texto="Cargando manuales..." />
               ) : manuales.length === 0 ? (
                 <div className="text-center py-5 text-muted">
                   <i className="bi bi-folder2 fs-1 d-block mb-2 opacity-25"></i>
@@ -289,7 +287,7 @@ export default function AdminManuales() {
                     return (
                       <div key={manual.name}
                         className={`list-group-item p-3 ${esActivo ? 'bg-primary bg-opacity-10' : ''}`}
-                        style={{ borderLeft: esActivo ? '4px solid #003767' : '4px solid transparent' }}>
+                        style={{ borderLeft: esActivo ? '4px solid var(--ufro-blue)' : '4px solid transparent' }}>
                         <div className="d-flex align-items-center gap-3">
 
                           {/* Icono PDF */}

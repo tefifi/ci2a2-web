@@ -37,7 +37,7 @@ export default function AuthForm() {
 
     return (
         <div className="card border-0 shadow-lg rounded-4 overflow-hidden" style={{ maxWidth: '400px', margin: '0 auto' }}>
-            <div className="p-4 text-center text-white" style={{ background: 'linear-gradient(135deg, #003767 0%, #d63384 100%)' }}>
+            <div className="p-4 text-center text-white" style={{ background: 'linear-gradient(135deg, var(--ufro-blue) 0%, var(--ufro-pink) 100%)' }}>
                 <h3 className="fw-bold mb-0">Intranet CI2A2</h3>
                 <p className="small opacity-75 mb-0">Acceso exclusivo funcionarios</p>
             </div>
@@ -83,7 +83,7 @@ export default function AuthForm() {
                     <button 
                         type="submit" 
                         className="btn text-white fw-bold py-2 mt-3 rounded-3" 
-                        style={{ background: '#003767' }} 
+                        style={{ background: 'var(--ufro-blue)' }} 
                         disabled={loading}
                     >
                         {loading ? 'Verificando...' : 'Acceder al Panel'}
@@ -93,7 +93,7 @@ export default function AuthForm() {
                 <div className="text-center mt-3">
                     <p className="small text-muted mb-0">
                         ¿No tienes acceso? <br/>
-                        Contacta a <a href="mailto:soporte@ci2a2.cl" className="text-decoration-none fw-bold" style={{color: '#d63384'}}>Administración</a>
+                        Contacta a <a href="mailto:soporte@ci2a2.cl" className="text-decoration-none fw-bold" style={{color: 'var(--ufro-pink)'}}>Administración</a>
                     </p>
                 </div>
             </div>

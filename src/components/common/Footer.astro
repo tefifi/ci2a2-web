@@ -112,14 +112,8 @@ const currentYear = new Date().getFullYear();
 </footer>
 
 <style>
-  :root {
-    --ufro-blue: #003767;
-    --fica-pink: #d63384;
-  }
-
-  .bg-ufro { background-color: var(--ufro-blue); }
-  .text-fica { color: var(--fica-pink) !important; }
-  .ls-1 { letter-spacing: 1px; }
+  /* Tokens (--ufro-blue, --ufro-pink), .bg-ufro y .ls-1 ya viven en global.css */
+  .text-fica { color: var(--ufro-pink) !important; }
   .fw-light { font-weight: 300; }
 
   .footer-illustration {
@@ -135,11 +129,11 @@ const currentYear = new Date().getFullYear();
     display: inline-block;
   }
   .footer-link:hover {
-    color: var(--fica-pink);
+    color: var(--ufro-pink);
     transform: translateX(4px);
   }
   .footer-link-simple:hover {
-    color: var(--fica-pink) !important;
+    color: var(--ufro-pink) !important;
     text-decoration: underline;
   }
 

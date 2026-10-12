@@ -1,7 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
-import { useConfirmar, ModalConfirmar } from './components/AdminUI';
+import {
+    ModalConfirmar, AdminPageHeader, FormHeader, FormActions,
+    SidebarCard, ListaAcciones, ListaVacia,
+} from './components/AdminUI';
+import { useAdminCRUD } from './hooks/useAdminCRUD';
 
+const FORM_INICIAL = {
+    titulo: '', descripcion: '', url: '', imagen_url: '',
+    tipo: 'link', autor: '', destacado: false,
+};
+
+// Zona de subida de imagen específica de Biblioteca: a diferencia de
+// ImageUploadZone (el componente compartido), acá hay que mostrar
+// automáticamente la miniatura de YouTube cuando el recurso es un video —
+// por eso sigue siendo un componente propio en vez del genérico.
 const UploadZoneUnified = ({ imageUploaded, youtubeUrl, resourceType, onUpload, onRemove, subiendo }) => {
     const [isDragging, setIsDragging] = useState(false);
     const getYoutubeThumb = () => {
@@ -56,6 +69,8 @@ const UploadZoneUnified = ({ imageUploaded, youtubeUrl, resourceType, onUpload, 
     );
 };
 
+// Igual que arriba: subir un PDF no es algo que ningún otro Admin necesite,
+// así que no hay un componente compartido equivalente — se mantiene propio.
 const PdfUploadZone = ({ pdfUrl, onUpload, onRemove, subiendo }) => {
     const [isDragging, setIsDragging] = useState(false);
     const inputRef = useRef(null);
@@ -99,51 +114,24 @@ const PdfUploadZone = ({ pdfUrl, onUpload, onRemove, subiendo }) => {
 };
 
 export default function AdminBiblioteca({ token }) {
-    const [lista, setLista]             = useState([]);
-    const [loading, setLoading]         = useState(false);
-    const [subiendo, setSubiendo]       = useState(false);
-    const [subiendoPdf, setSubiendoPdf] = useState(false);
-    const [mensaje, setMensaje]         = useState(null);
-    const [idEdicion, setIdEdicion]     = useState(null);
-    const [sessionReady, setSessionReady] = useState(false);
-    const { confirmar, modalProps }     = useConfirmar();
-    const [form, setForm] = useState({ titulo: '', descripcion: '', url: '', imagen_url: '', tipo: 'link', autor: '', destacado: false });
+    const crud = useAdminCRUD('biblioteca', FORM_INICIAL, {
+        mensajeCreado: 'Recurso creado con éxito.',
+        mensajeEditado: 'Recurso actualizado correctamente.',
+        mensajeEliminado: 'Recurso eliminado correctamente.',
+    });
+    const {
+        lista, form, idEdicion, loading, subiendo, setSubiendo,
+        mensaje, mostrarMensaje, limpiarMensaje,
+        setField, handleEdit, handleDelete, resetForm, modalProps,
+    } = crud;
 
+    const [subiendoPdf, setSubiendoPdf] = useState(false);
+
+    // El panel recibe el token de sesión desde admin.astro (igual que antes).
     useEffect(() => {
-        const init = async () => {
-            if (token) await supabase.auth.setSession({ access_token: token, refresh_token: token });
-            setSessionReady(true);
-        };
-        init();
+        if (token) supabase.auth.setSession({ access_token: token, refresh_token: token });
     }, [token]);
 
-    useEffect(() => { if (sessionReady) fetchRecursos(); }, [sessionReady]);
-
-    const fetchRecursos = async () => {
-        setLoading(true);
-        const { data, error } = await supabase.from('biblioteca').select('*').order('created_at', { ascending: false });
-        if (error && (error.code === 'PGRST301' || error.status === 401))
-            setMensaje({ tipo: 'warning', texto: 'Sesión inestable. Recarga la página.' });
-        else setLista(data || []);
-        setLoading(false);
-    };
-
-    const handleImageUpload = async (file) => {
-        setSubiendo(true);
-        try {
-            const ext = file.name.split('.').pop();
-            const { error } = await supabase.storage.from('biblioteca-img').upload(`biblio_${Date.now()}.${ext}`, file);
-            if (error) throw error;
-            const { data } = supabase.storage.from('biblioteca-img').getPublicUrl(`biblio_${Date.now()}.${ext}`);
-            // Recargar con URL correcta
-            const { data: d2 } = await supabase.storage.from('biblioteca-img').upload(`biblio_${Date.now()}.${ext}`, file);
-            const url = supabase.storage.from('biblioteca-img').getPublicUrl(`biblio_${Date.now()}.${ext}`).data.publicUrl;
-            setForm(prev => ({ ...prev, imagen_url: url }));
-        } catch (err) { alert('Error al subir imagen: ' + err.message); }
-        finally { setSubiendo(false); }
-    };
-
-    // Fix: upload imagen correctamente
     const handleImgUpload = async (file) => {
         if (!file) return;
         setSubiendo(true);
@@ -153,9 +141,12 @@ export default function AdminBiblioteca({ token }) {
             const { error } = await supabase.storage.from('biblioteca-img').upload(name, file);
             if (error) throw error;
             const { data } = supabase.storage.from('biblioteca-img').getPublicUrl(name);
-            setForm(prev => ({ ...prev, imagen_url: data.publicUrl }));
-        } catch (err) { alert('Error: ' + err.message); }
-        finally { setSubiendo(false); }
+            setField('imagen_url', data.publicUrl);
+        } catch (err) {
+            mostrarMensaje('danger', 'Error al subir imagen: ' + err.message);
+        } finally {
+            setSubiendo(false);
+        }
     };
 
     const handlePdfUpload = async (file) => {
@@ -166,45 +157,22 @@ export default function AdminBiblioteca({ token }) {
             const { error } = await supabase.storage.from('biblioteca-pdfs').upload(name, file, { contentType: 'application/pdf' });
             if (error) throw error;
             const { data } = supabase.storage.from('biblioteca-pdfs').getPublicUrl(name);
-            setForm(prev => ({ ...prev, url: data.publicUrl }));
-        } catch (err) { alert('Error al subir PDF: ' + err.message); }
-        finally { setSubiendoPdf(false); }
+            setField('url', data.publicUrl);
+        } catch (err) {
+            mostrarMensaje('danger', 'Error al subir PDF: ' + err.message);
+        } finally {
+            setSubiendoPdf(false);
+        }
     };
 
-    const handleSubmit = async (e) => {
+    const onSubmit = (e) => {
         e.preventDefault();
-        setMensaje(null);
-        if (!form.titulo) { setMensaje({ tipo: 'danger', texto: 'El título es obligatorio.' }); return; }
-        if (!form.url)    { setMensaje({ tipo: 'danger', texto: form.tipo === 'paper' ? 'Sube un PDF o ingresa una URL.' : 'La URL es obligatoria.' }); return; }
-        try {
-            if (idEdicion) {
-                const { error } = await supabase.from('biblioteca').update({ ...form }).eq('id', idEdicion);
-                if (error) throw error;
-                setMensaje({ tipo: 'success', texto: 'Recurso actualizado correctamente.' });
-            } else {
-                const { error } = await supabase.from('biblioteca').insert([{ ...form }]);
-                if (error) throw error;
-                setMensaje({ tipo: 'success', texto: 'Recurso creado con éxito.' });
-            }
-            resetForm(); fetchRecursos();
-            document.getElementById('top-anchor')?.scrollIntoView({ behavior: 'smooth' });
-        } catch (err) { setMensaje({ tipo: 'danger', texto: 'Error al guardar: ' + err.message }); }
-    };
-
-    const handleDelete = async (id) => {
-        const ok = await confirmar({
-            titulo: '¿Eliminar este recurso?',
-            descripcion: 'Se eliminará permanentemente de la biblioteca digital.',
-        });
-        if (!ok) return;
-        await supabase.from('biblioteca').delete().eq('id', id);
-        if (idEdicion === id) resetForm();
-        fetchRecursos();
-    };
-
-    const resetForm = () => {
-        setForm({ titulo: '', descripcion: '', url: '', imagen_url: '', tipo: 'link', autor: '', destacado: false });
-        setIdEdicion(null);
+        if (!form.titulo) { mostrarMensaje('danger', 'El título es obligatorio.'); return; }
+        if (!form.url) {
+            mostrarMensaje('danger', form.tipo === 'paper' ? 'Sube un PDF o ingresa una URL.' : 'La URL es obligatoria.');
+            return;
+        }
+        crud.handleSubmit(e);
     };
 
     const esPaper = form.tipo === 'paper';
@@ -212,38 +180,24 @@ export default function AdminBiblioteca({ token }) {
     return (
         <div className="container-fluid p-0 mb-5" id="top-anchor">
             <ModalConfirmar {...modalProps} />
-            <ModalConfirmar {...modalProps} />
-            <div className="mb-4"><h2 className="fw-bold mb-0" style={{ color: '#003767' }}>Gestión de Biblioteca</h2></div>
-
-            {mensaje && (
-                <div className={`alert alert-${mensaje.tipo} shadow-sm mb-4 border-0 d-flex align-items-center`}>
-                    <i className={`bi ${mensaje.tipo === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2 fs-5`}></i>
-                    <div className="flex-grow-1 fw-medium">{mensaje.texto}</div>
-                    <button type="button" className="btn-close" onClick={() => setMensaje(null)}></button>
-                </div>
-            )}
+            <AdminPageHeader titulo="Gestión de Biblioteca" mensaje={mensaje} onClose={limpiarMensaje} />
 
             <div className="row g-4">
                 <div className="col-lg-8">
                     <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
-                        <div className="card-header bg-white border-bottom py-3">
-                            <h5 className="mb-0 fw-bold" style={{ color: '#003767' }}>
-                                <i className={`bi ${idEdicion ? 'bi-pencil-square' : 'bi-plus-circle'} me-2`}></i>
-                                {idEdicion ? 'Editar Recurso' : 'Nuevo Recurso'}
-                            </h5>
-                        </div>
                         <div className="card-body p-4">
-                            <form onSubmit={handleSubmit}>
+                            <FormHeader idEdicion={idEdicion} labelNuevo="Nuevo Recurso" labelEditar="Editar Recurso" />
+                            <form onSubmit={onSubmit}>
                                 <div className="row g-3">
                                     <div className="col-12">
                                         <label className="form-label fw-bold small text-secondary">Título <span className="text-danger">*</span></label>
                                         <input type="text" className="form-control bg-light border-0" placeholder="Ej: Webinar sobre IA..."
-                                            value={form.titulo} onChange={e => setForm({ ...form, titulo: e.target.value })} required />
+                                            value={form.titulo} onChange={e => setField('titulo', e.target.value)} required />
                                     </div>
                                     <div className="col-md-6">
                                         <label className="form-label fw-bold small text-secondary">Tipo</label>
                                         <select className="form-select bg-light border-0" value={form.tipo}
-                                            onChange={e => setForm({ ...form, tipo: e.target.value, url: '' })}>
+                                            onChange={e => { setField('tipo', e.target.value); setField('url', ''); }}>
                                             <option value="link">Enlace Web</option>
                                             <option value="video">Video (YouTube)</option>
                                             <option value="centro">Centro Investigación</option>
@@ -253,19 +207,19 @@ export default function AdminBiblioteca({ token }) {
                                     <div className="col-md-6">
                                         <label className="form-label fw-bold small text-secondary">Autor / Fuente</label>
                                         <input type="text" className="form-control bg-light border-0" placeholder="Ej: CI2A2"
-                                            value={form.autor} onChange={e => setForm({ ...form, autor: e.target.value })} />
+                                            value={form.autor} onChange={e => setField('autor', e.target.value)} />
                                     </div>
                                     {esPaper ? (
                                         <div className="col-12">
                                             <PdfUploadZone pdfUrl={form.url} onUpload={handlePdfUpload}
-                                                onRemove={() => setForm({ ...form, url: '' })} subiendo={subiendoPdf} />
+                                                onRemove={() => setField('url', '')} subiendo={subiendoPdf} />
                                             <div className="mt-2">
                                                 <label className="form-label small text-secondary mb-1">O ingresa URL externa (DOI, repositorio, etc.)</label>
                                                 <div className="input-group">
                                                     <span className="input-group-text bg-light border-0 text-secondary"><i className="bi bi-link-45deg"></i></span>
                                                     <input type="url" className="form-control bg-light border-0" placeholder="https://doi.org/..."
                                                         value={form.url.startsWith('http') && !form.url.includes('supabase') ? form.url : ''}
-                                                        onChange={e => setForm({ ...form, url: e.target.value })} />
+                                                        onChange={e => setField('url', e.target.value)} />
                                                 </div>
                                                 <div className="form-text" style={{ fontSize: '0.7rem' }}>Si subes un PDF, este campo se completa automáticamente.</div>
                                             </div>
@@ -276,97 +230,79 @@ export default function AdminBiblioteca({ token }) {
                                             <div className="input-group">
                                                 <span className="input-group-text bg-light border-0 text-secondary"><i className="bi bi-link-45deg"></i></span>
                                                 <input type="url" className="form-control bg-light border-0" placeholder="https://..."
-                                                    value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} required />
+                                                    value={form.url} onChange={e => setField('url', e.target.value)} required />
                                             </div>
                                         </div>
                                     )}
                                     <div className="col-md-7 d-flex flex-column">
                                         <label className="form-label fw-bold small text-secondary">Descripción</label>
                                         <textarea className="form-control bg-light border-0 flex-grow-1" placeholder="Resumen del recurso..."
-                                            value={form.descripcion} onChange={e => setForm({ ...form, descripcion: e.target.value })}
+                                            value={form.descripcion} onChange={e => setField('descripcion', e.target.value)}
                                             style={{ minHeight: '160px' }}></textarea>
                                     </div>
                                     <div className="col-md-5 d-flex flex-column justify-content-between">
                                         <UploadZoneUnified imageUploaded={form.imagen_url} youtubeUrl={form.url} resourceType={form.tipo}
-                                            onUpload={handleImgUpload} onRemove={() => setForm({ ...form, imagen_url: '' })} subiendo={subiendo} />
+                                            onUpload={handleImgUpload} onRemove={() => setField('imagen_url', '')} subiendo={subiendo} />
                                         <div className="form-text small mt-1 text-muted text-end" style={{ fontSize: '0.7rem' }}>Formato 16:9 recomendado</div>
                                     </div>
                                     <div className="col-12">
                                         <div className="form-check form-switch">
                                             <input className="form-check-input" type="checkbox" id="destacado"
-                                                checked={form.destacado} onChange={e => setForm({ ...form, destacado: e.target.checked })} />
+                                                checked={form.destacado} onChange={e => setField('destacado', e.target.checked)} />
                                             <label className="form-check-label small fw-bold text-secondary" htmlFor="destacado">Marcar como destacado</label>
                                         </div>
                                     </div>
-                                    <div className="col-12 pt-4 border-top mt-2">
-                                        {idEdicion ? (
-                                            <div className="d-flex gap-2 justify-content-end">
-                                              <button type="submit" className="btn text-white fw-bold shadow-sm" style={{ backgroundColor: '#003767', width: '75%' }}
-                                                    disabled={loading || subiendo || subiendoPdf}>
-                                                    {(subiendo || subiendoPdf) ? <><span className="spinner-border spinner-border-sm me-2"></span>Subiendo...</> : 'Guardar Cambios'}
-                                                </button>
-                                                <button type="button" className="btn btn-secondary fw-bold" style={{ width: '25%' }}
-                                                    onClick={() => { resetForm(); setMensaje(null); }}>Cancelar</button>
-                                                
-                                            </div>
-                                        ) : (
-                                            <button type="submit" className="btn w-100 text-white fw-bold shadow-sm py-2" style={{ backgroundColor: '#003767' }}
-                                                disabled={loading || subiendo || subiendoPdf}>
-                                                {(subiendo || subiendoPdf) ? <><span className="spinner-border spinner-border-sm me-2"></span>Subiendo...</> : 'Crear Recurso'}
-                                            </button>
-                                        )}
-                                    </div>
                                 </div>
+
+                                <FormActions
+                                    idEdicion={idEdicion}
+                                    loading={loading || subiendo || subiendoPdf}
+                                    onCancel={resetForm}
+                                    labelGuardar="Crear Recurso"
+                                    labelEditar="Guardar Cambios"
+                                />
                             </form>
                         </div>
                     </div>
                 </div>
 
                 <div className="col-lg-4">
-                    <div className="card border-0 shadow-sm rounded-4 h-100 bg-white">
-                        <div className="card-header bg-light border-bottom py-3">
-                            <h6 className="fw-bold text-secondary mb-0">Publicados ({lista.length})</h6>
-                        </div>
-                        <div className="card-body p-3 overflow-auto" style={{ maxHeight: '800px' }}>
-                            <div className="d-flex flex-column gap-3">
-                                {lista.map((item) => {
-                                    const ytMatch = item.tipo === 'video' && item.url ? item.url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/) : null;
-                                    const thumb = item.imagen_url || (ytMatch && ytMatch[2].length === 11 ? `https://img.youtube.com/vi/${ytMatch[2]}/default.jpg` : null);
-                                    return (
-                                        <div key={item.id}
-                                            className={`d-flex align-items-center border rounded p-2 shadow-sm ${idEdicion === item.id ? 'bg-primary-subtle' : 'bg-white'}`}
-                                            style={idEdicion === item.id ? { borderLeft: '4px solid #003767' } : {}}>
-                                            <div style={{ width: '80px', height: '50px' }} className="rounded overflow-hidden bg-light flex-shrink-0 d-flex align-items-center justify-content-center border">
-                                                {item.tipo === 'paper' && !thumb ? <i className="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
-                                                    : thumb ? <img src={thumb} className="w-100 h-100 object-fit-cover" alt="" />
-                                                    : <i className="bi bi-link-45deg text-muted opacity-50"></i>}
-                                            </div>
-                                            <div className="flex-grow-1 px-3 overflow-hidden">
-                                                <h6 className={`mb-0 fw-bold text-truncate ${idEdicion === item.id ? 'text-primary' : 'text-dark'}`} style={{ fontSize: '0.9rem' }}>{item.titulo}</h6>
-                                                <div className="d-flex align-items-center gap-2">
-                                                    <span className="badge bg-light text-secondary border fw-normal" style={{ fontSize: '0.65rem' }}>
-                                                        {item.tipo === 'paper' ? '📄 PDF' : item.tipo.toUpperCase()}
-                                                    </span>
-                                                    {item.autor && <small className="text-muted text-truncate" style={{ fontSize: '0.75rem' }}>{item.autor}</small>}
-                                                </div>
-                                            </div>
-                                            <div className="d-flex gap-1">
-                                                <button onClick={() => { setForm(item); setIdEdicion(item.id); setMensaje(null); document.getElementById('top-anchor')?.scrollIntoView({ behavior: 'smooth' }); }}
-                                                    className="btn btn-sm btn-light text-primary border-0" title="Editar"><i className="bi bi-pencil"></i></button>
-                                                <button onClick={() => handleDelete(item.id)}
-                                                    className="btn btn-sm btn-light text-danger border-0" title="Eliminar"><i className="bi bi-trash"></i></button>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                                {lista.length === 0 && !loading && (
-                                    <div className="text-center py-5 text-muted small opacity-50">
-                                        <i className="bi bi-inbox fs-2 d-block mb-2"></i>No hay recursos publicados.
+                    <SidebarCard titulo="Publicados" count={lista.length} maxHeight="800px">
+                        {lista.map((item) => {
+                            const ytMatch = item.tipo === 'video' && item.url ? item.url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/) : null;
+                            const thumb = item.imagen_url || (ytMatch && ytMatch[2].length === 11 ? `https://img.youtube.com/vi/${ytMatch[2]}/default.jpg` : null);
+                            return (
+                                <div key={item.id}
+                                    className={`list-group-item d-flex gap-3 align-items-center p-3 transition-all
+                                      ${idEdicion === item.id ? 'bg-primary bg-opacity-10' : ''}`}
+                                    style={idEdicion === item.id ? { borderLeft: '4px solid #0d6efd' } : {}}
+                                >
+                                    <div style={{ width: 80, height: 50 }}
+                                        className="rounded overflow-hidden bg-light flex-shrink-0 d-flex align-items-center justify-content-center border">
+                                        {item.tipo === 'paper' && !thumb ? <i className="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
+                                            : thumb ? <img src={thumb} className="w-100 h-100 object-fit-cover" alt="" />
+                                            : <i className="bi bi-link-45deg text-muted opacity-50"></i>}
                                     </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
+                                    <div className="flex-grow-1 overflow-hidden">
+                                        <h6 className={`mb-0 fw-bold text-truncate small ${idEdicion === item.id ? 'text-primary' : ''}`}>
+                                            {item.titulo}
+                                        </h6>
+                                        <div className="d-flex align-items-center gap-2">
+                                            <span className="badge bg-light text-secondary border fw-normal" style={{ fontSize: '0.65rem' }}>
+                                                {item.tipo === 'paper' ? '📄 PDF' : item.tipo.toUpperCase()}
+                                            </span>
+                                            {item.autor && <small className="text-muted text-truncate">{item.autor}</small>}
+                                        </div>
+                                    </div>
+                                    <ListaAcciones
+                                        onEdit={() => { handleEdit(item); document.getElementById('top-anchor')?.scrollIntoView({ behavior: 'smooth' }); }}
+                                        onDelete={() => handleDelete(item.id, '¿Eliminar este recurso?')}
+                                    />
+                                </div>
+                            );
+                        })}
+                        {lista.length === 0 && !loading && <ListaVacia texto="No hay recursos publicados." />}
+                    </SidebarCard>
                 </div>
             </div>
         </div>

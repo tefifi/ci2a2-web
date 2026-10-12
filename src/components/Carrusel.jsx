@@ -11,6 +11,9 @@ const breakpoints = {
 
 const FALLBACK_IMG = "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?q=80&w=800&auto=format&fit=crop";
 
+/**
+ * @param {{ datos?: any[], banners?: any[], tipo?: string }} props
+ */
 export default function Carrusel({ datos = [], banners = [], tipo = "generico" }) {
     const items = datos.length > 0 ? datos : banners;
     if (!items || items.length === 0) return null;
@@ -40,8 +43,8 @@ export default function Carrusel({ datos = [], banners = [], tipo = "generico" }
 function CardSelector({ item, tipo }) {
     const [isHovered, setIsHovered] = useState(false);
 
-    const UFRO_BLUE = "#003767";
-    const UFRO_PINK = "#d63384";
+    const UFRO_BLUE = "var(--ufro-blue)";
+    const UFRO_PINK = "var(--ufro-pink)";
     const UFRO_PINK_LIGHT = "#fff0f5";
 
     // --- DISEÑO PROYECTOS ---
@@ -64,7 +67,7 @@ function CardSelector({ item, tipo }) {
                     <div className="position-absolute top-0 end-0 m-3">
                         <span style={{
                             backgroundColor: '#fff0f5', // El rosa sutil que te gustó
-                            color: '#d63384',           // El rosa fuerte institucional
+                            color: 'var(--ufro-pink)',           // El rosa fuerte institucional
                             fontSize: '0.65rem',        // Texto bien pequeño y fino
                             fontWeight: '700',
                             padding: '3px 10px',        // Menos relleno para que sea delgado

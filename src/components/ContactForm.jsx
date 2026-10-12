@@ -49,7 +49,7 @@ export default function ContactForm({ titulo, descripcion, destinatario = null, 
 
     return (
         <div className="bg-white p-4 rounded-4 shadow-sm border border-light">
-            <h3 className="fw-bold mb-2" style={{color: '#003767'}}>{titulo}</h3>
+            <h3 className="fw-bold mb-2" style={{color: 'var(--ufro-blue)'}}>{titulo}</h3>
             <p className="text-secondary mb-4 small">{descripcion}</p>
             
             {destinatario && (
@@ -101,7 +101,7 @@ export default function ContactForm({ titulo, descripcion, destinatario = null, 
                     <textarea className="form-control bg-light border-0" rows="4" required value={formData.mensaje} onChange={(e) => setFormData({...formData, mensaje: e.target.value})}></textarea>
                 </div>
 
-                <button type="submit" className="btn fw-bold w-100 py-2 mt-2 text-white" style={{backgroundColor: '#003767'}} disabled={status === 'sending'}>
+                <button type="submit" className="btn fw-bold w-100 py-2 mt-2 text-white" style={{backgroundColor: 'var(--ufro-blue)'}} disabled={status === 'sending'}>
                     {status === 'sending' ? 'Enviando...' : 'Enviar Mensaje'}
                 </button>
 

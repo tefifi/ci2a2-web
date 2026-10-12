@@ -35,7 +35,7 @@ const isUfro = color === 'ufro';
 const textColorClass   = isUfro ? "text-ufro"         : "text-white";
 const activeColorClass = isUfro ? "text-ufro fw-bold" : "text-white fw-bold";
 const opacityClass     = isUfro ? ""                  : "opacity-75";
-const separatorColor   = isUfro ? "#003767"           : "rgba(255, 255, 255, 0.7)";
+const separatorColor   = isUfro ? "var(--ufro-blue)"           : "rgba(255, 255, 255, 0.7)";
 ---
 
 {paths.length > 0 && (
@@ -76,7 +76,7 @@ const separatorColor   = isUfro ? "#003767"           : "rgba(255, 255, 255, 0.7
 )}
 
 <style define:vars={{ separatorColor }}>
-  .text-ufro { color: #003767 !important; }
+  .text-ufro { color: var(--ufro-blue) !important; }
 
   .breadcrumb-item + .breadcrumb-item::before {
     color: var(--separatorColor);

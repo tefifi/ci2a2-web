@@ -243,7 +243,7 @@ export default function PublicacionesList() {
             .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
             /* Animaciones del Modal */
             .modal-backdrop-custom { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 55, 103, 0.6); z-index: 1050; backdrop-filter: blur(4px); animation: fadeIn 0.2s ease; }
-            .modal-content-custom { width: 95%; max-width: 750px; border-top: 5px solid #d63384; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+            .modal-content-custom { width: 95%; max-width: 750px; border-top: 5px solid var(--ufro-pink); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
             @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         `}</style>

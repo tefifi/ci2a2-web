@@ -1,154 +1,145 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
-import { syncZoteroToSupabase } from '../../lib/zotero';
-import styles from './AdminGlobal.module.css';
+import { useAdminCRUD } from './hooks/useAdminCRUD';
+import {
+  ModalConfirmar, AdminPageHeader, FormHeader, FormActions,
+  SidebarCard, ListaAcciones, ListaVacia,
+} from './components/AdminUI';
+
+const FORM_INICIAL = {
+  title: '', year: '', autores: '', url: '', type: '', area: '', is_visible: true,
+};
 
 export default function AdminPublicaciones() {
-  const [papers, setPapers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [syncing, setSyncing] = useState(false);
-
-  // Cargar papers desde Supabase
-  const fetchPapers = async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from('publicaciones')
-      .select('*')
-      .order('year', { ascending: false })
-      .order('title', { ascending: true });
-    setPapers(data || []);
-    setLoading(false);
-  };
-
-  // Función de Sincronización
-  const handleSync = async (silent = false) => {
-    if (syncing) return;
-    setSyncing(true);
-    await syncZoteroToSupabase();
-    await fetchPapers();
-    setSyncing(false);
-  };
-
-  useEffect(() => {
-    fetchPapers();
-    handleSync(true);
-  }, []);
-
-  const updateField = async (id, field, value) => {
-    setPapers(papers.map(p => p.id === id ? { ...p, [field]: value } : p));
-    await supabase.from('publicaciones').update({ [field]: value }).eq('id', id);
-  };
-
-  const toggleVisibility = async (id, currentStatus) => {
-    setPapers(papers.map(p => p.id === id ? { ...p, is_visible: !currentStatus } : p));
-    await supabase.from('publicaciones').update({ is_visible: !currentStatus }).eq('id', id);
-  };
+  // Antes esta pantalla solo listaba lo que traía Zotero (y luego el
+  // scraping de ORCID/OpenAlex) — no existía forma de agregar una
+  // publicación a mano. Con useAdminCRUD (igual que el resto de los
+  // paneles) ahora sí se puede: crear, editar y eliminar directamente,
+  // además de lo que sigue llegando vía la bandeja de Revisión.
+  const crud = useAdminCRUD('publicaciones', FORM_INICIAL, {
+    ordenarPor: 'year',
+    ordenAscendente: false,
+    mensajeCreado: 'Publicación creada correctamente.',
+    mensajeEditado: 'Publicación actualizada correctamente.',
+    mensajeEliminado: 'Publicación eliminada correctamente.',
+  });
+  const {
+    lista, form, idEdicion, loading,
+    mensaje, limpiarMensaje,
+    handleChange, setField, handleSubmit, handleEdit, handleDelete, resetForm, modalProps,
+  } = crud;
 
   return (
-    <div className="bg-white p-4 rounded shadow-sm border">
+    <div className="container-fluid p-0 mb-5">
+      <ModalConfirmar {...modalProps} />
+      <AdminPageHeader titulo="Gestión de Publicaciones" mensaje={mensaje} onClose={limpiarMensaje} />
 
-      {/* --- BARRA SUPERIOR UNIFICADA --- */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h2 className={`mb-1 ${styles.titulo}`}>Gestión de Publicaciones</h2>
-          <small className="text-muted">Total: {papers.length} documentos</small>        \
+      <div className="row g-4">
+        <div className="col-lg-8">
+          <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+            <div className="card-body p-4">
+              <FormHeader idEdicion={idEdicion} labelNuevo="Nueva Publicación" labelEditar="Editar Publicación" />
+              <form onSubmit={handleSubmit}>
+                <div className="row g-3">
+                  <div className="col-12">
+                    <label className="form-label fw-bold small text-secondary">Título <span className="text-danger">*</span></label>
+                    <input type="text" name="title" className="form-control bg-light border-0"
+                      placeholder="Título de la publicación" value={form.title} onChange={handleChange} required />
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label fw-bold small text-secondary">Año</label>
+                    <input type="number" name="year" className="form-control bg-light border-0"
+                      placeholder="2026" value={form.year} onChange={handleChange} />
+                  </div>
+                  <div className="col-md-9">
+                    <label className="form-label fw-bold small text-secondary">Autores</label>
+                    <input type="text" name="autores" className="form-control bg-light border-0"
+                      placeholder="Apellido, N.; Apellido, N." value={form.autores} onChange={handleChange} />
+                  </div>
+                  <div className="col-12">
+                    <label className="form-label fw-bold small text-secondary">Enlace (DOI, repositorio, etc.)</label>
+                    <input type="url" name="url" className="form-control bg-light border-0"
+                      placeholder="https://doi.org/..." value={form.url} onChange={handleChange} />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold small text-secondary">Tipo</label>
+                    <input list="datalist-categorias" name="type" className="form-control bg-light border-0"
+                      placeholder="Elegir..." value={form.type} onChange={handleChange} />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-bold small text-secondary">Área Temática</label>
+                    <input list="datalist-areas" name="area" className="form-control bg-light border-0"
+                      placeholder="Elegir..." value={form.area} onChange={handleChange} />
+                  </div>
+                  <div className="col-12">
+                    <div className="form-check form-switch">
+                      <input className="form-check-input" type="checkbox" id="is_visible"
+                        checked={form.is_visible} onChange={(e) => setField('is_visible', e.target.checked)} />
+                      <label className="form-check-label small fw-bold text-secondary" htmlFor="is_visible">Visible en el sitio</label>
+                    </div>
+                  </div>
+                </div>
+
+                <FormActions
+                  idEdicion={idEdicion}
+                  loading={loading}
+                  onCancel={resetForm}
+                  labelGuardar="Crear Publicación"
+                  labelEditar="Guardar Cambios"
+                />
+              </form>
+
+              {/* Listas invisibles para autocompletado */}
+              <datalist id="datalist-categorias">
+                <option value="Revista (Journal)" />
+                <option value="Congreso (Conference)" />
+                <option value="Libro" />
+                <option value="Capítulo de Libro" />
+                <option value="Tesis" />
+              </datalist>
+              <datalist id="datalist-areas">
+                <option value="Inteligencia Artificial" />
+                <option value="Educación" />
+                <option value="Salud Digital" />
+                <option value="Ciencia de Datos" />
+                <option value="Industria 4.0" />
+              </datalist>
+            </div>
           </div>
+        </div>
 
-        <button
-          onClick={() => handleSync(false)}
-          disabled={syncing}
-          className="btn btn-primary btn-sm d-flex align-items-center gap-2"
-        >
-          {syncing ? (
-            <>
-              <span className="spinner-border spinner-border-sm"></span>
-              Sincronizando...
-            </>
-          ) : (
-            <>
-              <i className="bi bi-arrow-repeat"></i>
-              Sincronizar con Zotero
-            </>
-          )}
-        </button>
+        <div className="col-lg-4">
+          <SidebarCard titulo="Publicaciones" count={lista.length} maxHeight="800px">
+            {lista.map((paper) => (
+              <div key={paper.id}
+                className={`list-group-item d-flex gap-3 align-items-center p-3 transition-all
+                  ${idEdicion === paper.id ? 'bg-primary bg-opacity-10' : ''}`}
+                style={idEdicion === paper.id ? { borderLeft: '4px solid #0d6efd' } : {}}
+              >
+                <div className="flex-grow-1 overflow-hidden">
+                  <h6 className={`mb-0 fw-bold text-truncate small ${idEdicion === paper.id ? 'text-primary' : ''}`}>
+                    {paper.title}
+                  </h6>
+                  <small className="text-muted d-block text-truncate">{paper.autores}</small>
+                  <div className="d-flex align-items-center gap-2 mt-1">
+                    <span className="badge bg-light text-secondary border fw-normal" style={{ fontSize: '0.65rem' }}>
+                      {paper.year || 's/f'}
+                    </span>
+                    {!paper.is_visible && (
+                      <span className="badge bg-secondary-subtle text-secondary fw-normal" style={{ fontSize: '0.65rem' }}>
+                        <i className="bi bi-eye-slash me-1"></i>Oculta
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <ListaAcciones
+                  onEdit={() => handleEdit(paper)}
+                  onDelete={() => handleDelete(paper.id, '¿Eliminar esta publicación?')}
+                />
+              </div>
+            ))}
+            {lista.length === 0 && <ListaVacia texto="No hay publicaciones registradas." />}
+          </SidebarCard>
+        </div>
       </div>
-
-      {loading ? (
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status"></div>
-          <p className="mt-2 text-muted small">Cargando biblioteca...</p>
-        </div>
-      ) : (
-        <div className="table-responsive">
-          <table className="table table-hover align-middle">
-            <thead className="bg-light text-secondary small text-uppercase">
-              <tr>
-                <th style={{ width: '60px' }}>Año</th>
-                <th>Título / Autores</th>
-                <th style={{ width: '150px' }}>Tipo</th>
-                <th style={{ width: '180px' }}>Área Temática</th>
-                <th style={{ width: '80px' }} className="text-center">Visible</th>
-              </tr>
-            </thead>
-            <tbody>
-              {papers.map(paper => (
-                <tr key={paper.id}>
-                  <td className="fw-bold text-secondary">{paper.year}</td>
-                  <td>
-                    <div className="fw-bold text-dark mb-1" style={{ fontSize: '0.95rem' }}>{paper.title}</div>
-                    <div className="small text-muted text-truncate" style={{ maxWidth: '400px' }}>{paper.autores}</div>
-                  </td>
-                  <td>
-                    <input
-                      list="datalist-categorias"
-                      className="form-control form-control-sm border-0 bg-light"
-                      placeholder="Elegir..."
-                      value={paper.type || ''}
-                      onChange={(e) => updateField(paper.id, 'type', e.target.value)}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      list="datalist-areas"
-                      className="form-control form-control-sm border-0 bg-light"
-                      placeholder="Elegir..."
-                      value={paper.area || ''}
-                      onChange={(e) => updateField(paper.id, 'area', e.target.value)}
-                    />
-                  </td>
-
-                  <td className="text-center">
-                    <button
-                      onClick={() => toggleVisibility(paper.id, paper.is_visible)}
-                      className={`btn btn-sm border-0 ${paper.is_visible ? 'text-success' : 'text-secondary'}`}
-                      title={paper.is_visible ? "Visible" : "Oculto"}
-                    >
-                      <i className={`bi ${paper.is_visible ? 'bi-eye-fill' : 'bi-eye-slash-fill'}`} style={{ fontSize: '1.2rem' }}></i>
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Listas invisibles para autocompletado */}
-      <datalist id="datalist-categorias">
-        <option value="Revista (Journal)" />
-        <option value="Congreso (Conference)" />
-        <option value="Libro" />
-        <option value="Capítulo de Libro" />
-        <option value="Tesis" />
-      </datalist>
-
-      <datalist id="datalist-areas">
-        <option value="Inteligencia Artificial" />
-        <option value="Educación" />
-        <option value="Salud Digital" />
-        <option value="Ciencia de Datos" />
-        <option value="Industria 4.0" />
-      </datalist>
     </div>
   );
 }
