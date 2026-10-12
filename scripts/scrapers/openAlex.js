@@ -22,7 +22,7 @@ const OPENALEX_API = 'https://api.openalex.org/works';
 // OpenAlex pide (opcionalmente pero recomendado) un email de contacto en
 // la query para entrar al "polite pool" — respuestas más rápidas y
 // confiables. Cambia esto por un correo real del centro si tienes uno.
-const CONTACTO = 'contacto@ci2a2.ufro.cl';
+const CONTACTO = 'contacto.ci2a2@ufrontera.cl';
 
 function extraerIdOrcid(valorGuardado) {
   // Igual que en orcid.js: acepta el ID solo o la URL completa de ORCID.
@@ -184,6 +184,13 @@ async function main() {
     console.log(`--dry-run: no se escribió en Supabase. Trabajos vistos: ${vistos}`);
   } else {
     console.log(`Listo. Vistos: ${vistos} | Nuevos en staging: ${nuevos} | Fallidos: ${fallidos}`);
+
+    // Igual que en orcid.js: si fallaron todos los colaboradores, es un
+    // problema sistémico (API de OpenAlex caída, credenciales inválidas),
+    // no algo para solo dejar en el log.
+    if (colaboradores.length > 0 && fallidos >= colaboradores.length) {
+      throw new Error('Fallaron todos los colaboradores — revisa la API de OpenAlex o las credenciales.');
+    }
   }
 }
 
