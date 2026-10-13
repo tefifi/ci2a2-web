@@ -2,7 +2,7 @@
 import MainLayout from "../../layouts/MainLayout.astro";
 import MigaDePan from "../../components/common/MigaDePan.astro";
 import { supabase } from "../../lib/supabase";
-import DOMPurify from "isomorphic-dompurify";
+import { sanitize } from "../../lib/sanitizeHtml";
 
 export const prerender = false;
 
@@ -211,7 +211,7 @@ const getStatusStyle = (status: string) => {
 
                         <div
                             class="rich-text"
-                            set:html={DOMPurify.sanitize(proyecto?.description)}
+                            set:html={sanitize(proyecto?.description)}
                         />
 
                         {

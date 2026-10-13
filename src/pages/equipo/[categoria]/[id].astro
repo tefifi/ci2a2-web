@@ -1,7 +1,7 @@
 ---
 import MainLayout from '../../../layouts/MainLayout.astro';
 import { supabase } from '../../../lib/supabase';
-import DOMPurify from 'isomorphic-dompurify';
+import { sanitize } from "../../../lib/sanitizeHtml";
 
 export const prerender = false;
 
@@ -193,7 +193,7 @@ const lineasGrupos: string[] = p.grupos_trabajo
 
       <!-- Bio -->
       {p.bio && (
-        <div class="profile-bio" set:html={DOMPurify.sanitize(p.bio)} />
+        <div class="profile-bio" set:html={sanitize(p.bio)} />
       )}
 
       <!-- Volver -->
