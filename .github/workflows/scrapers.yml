@@ -1,5 +1,11 @@
 name: Scrapers CI²A²
 
+# Corre los tres scrapers cada día a las 06:00 UTC (03:00 en Chile) y se
+# puede lanzar a mano desde la pestaña Actions ("Run workflow").
+#
+# Cada scraper es un job independiente: si uno falla (por ejemplo, el sitio
+# de la UFRO no responde desde los servidores de GitHub), los otros igual
+# se ejecutan. El job que falla sigue marcándose en rojo y GitHub avisa.
 on:
   schedule:
     # Todos los días a las 06:00 UTC (~03:00 Chile continental).
@@ -10,9 +16,13 @@ on:
     - cron: '0 6 * * *'
   workflow_dispatch: {} # permite correrlo manualmente desde GitHub
 
+permissions:
+  contents: read
+
 jobs:
-  scrape-diario:
+  orcid:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,11 +33,31 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      - run: npm run scrape:noticias
+
+  openalex:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run scrape:openalex
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      - run: npm run scrape:openalex
+
+  noticias:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run scrape:noticias
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
