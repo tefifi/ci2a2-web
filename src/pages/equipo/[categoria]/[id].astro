@@ -299,9 +299,12 @@ const lineasGrupos: string[] = p.grupos_trabajo
   .volver-arrow { transition: transform 0.25s cubic-bezier(.34,1.56,.64,1); }
   .btn-volver:hover .volver-arrow { transform: translateX(-4px); }
 
+  /* La bio entra con set:html, así que Astro no le pone su atributo de alcance.
+     Por eso los selectores internos van con :global(). */
   .profile-bio { font-size: 1rem; line-height: 1.85; color: #4b5563; }
-  .profile-bio p { margin-bottom: 1.2rem; }
-  .profile-bio h2, .profile-bio h3 {
+  .profile-bio :global(p) { margin-bottom: 1.2rem; }
+  .profile-bio :global(h2),
+  .profile-bio :global(h3) {
     font-weight: 700;
     color: var(--ufro-blue);
     margin-top: 2rem;
