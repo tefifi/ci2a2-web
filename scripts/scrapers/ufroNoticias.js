@@ -45,6 +45,30 @@ function extraerTexto($el) {
   return $el.first().text().replace(/\s+/g, ' ').trim();
 }
 
+/**
+ * fetch con reintentos. Desde los servidores de GitHub Actions (EE. UU.),
+ * fica.ufro.cl a veces no responde a tiempo ("Connect Timeout Error"):
+ * en las pruebas del 12-10-2026 falló 2 de 3 corridas, y desde Chile
+ * funciona siempre. Se reintenta con espera creciente antes de rendirse;
+ * si todos los intentos fallan, el error se propaga y el job falla.
+ */
+async function fetchConReintentos(url, opciones, intentos = 4) {
+  let ultimoError;
+  for (let i = 1; i <= intentos; i++) {
+    try {
+      return await fetch(url, opciones);
+    } catch (err) {
+      ultimoError = err;
+      if (i < intentos) {
+        const espera = 5000 * i; // 5 s, 10 s, 15 s
+        console.warn(`Intento ${i}/${intentos} falló (${err.cause?.code || err.message}). Reintentando en ${espera / 1000} s...`);
+        await new Promise((r) => setTimeout(r, espera));
+      }
+    }
+  }
+  throw ultimoError;
+}
+
 // Tags de bloque que se conservan del cuerpo. Todo lo demás (menús, botones,
 // scripts, iframes) se descarta; el sitio vuelve a sanear el HTML al mostrarlo.
 const TAGS_CUERPO = 'p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote';
@@ -104,7 +128,7 @@ function escaparHtml(s) {
  * el admin al revisar).
  */
 async function obtenerDetalle(url) {
-  const res = await fetch(url, {
+  const res = await fetchConReintentos(url, {
     headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CI2A2Bot/1.0)' },
   });
   if (!res.ok) return { fecha: null, cuerpo: '' };
@@ -138,7 +162,7 @@ async function obtenerDetalle(url) {
 }
 
 async function scrapearListado() {
-  const res = await fetch(URL_LISTADO, {
+  const res = await fetchConReintentos(URL_LISTADO, {
     headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CI2A2Bot/1.0)' },
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} al obtener ${URL_LISTADO}`);
