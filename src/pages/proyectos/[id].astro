@@ -509,32 +509,35 @@ const getStatusStyle = (status: string) => {
     }
 
     /* --- ESTILOS TEXTO --- */
+    /* El HTML de la descripción entra con set:html, así que Astro no le pone su
+       atributo de alcance. Por eso los selectores internos van con :global(). */
     .rich-text {
         color: #444;
         line-height: 1.8;
     }
-    .rich-text h2,
-    .rich-text h3 {
+    .rich-text :global(h2),
+    .rich-text :global(h3),
+    .rich-text :global(h4) {
         color: var(--ufro-blue);
         font-weight: 700;
         margin-top: 2rem;
         margin-bottom: 1rem;
     }
-    .rich-text p {
+    .rich-text :global(p) {
         margin-bottom: 1.5rem;
     }
-    .rich-text ul,
-    .rich-text ol {
+    .rich-text :global(ul),
+    .rich-text :global(ol) {
         margin-bottom: 1.5rem;
         padding-left: 1.5rem;
     }
-    .rich-text img {
+    .rich-text :global(img) {
         max-width: 100%;
         height: auto;
         border-radius: 8px;
         margin: 1rem 0;
     }
-    .rich-text blockquote {
+    .rich-text :global(blockquote) {
         border-left: 4px solid var(--ufro-pink);
         padding-left: 1rem;
         font-style: italic;
