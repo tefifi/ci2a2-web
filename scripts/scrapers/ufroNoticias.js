@@ -45,6 +45,53 @@ function extraerTexto($el) {
   return $el.first().text().replace(/\s+/g, ' ').trim();
 }
 
+// Tags de bloque que se conservan del cuerpo. Todo lo demás (menús, botones,
+// scripts, iframes) se descarta; el sitio vuelve a sanear el HTML al mostrarlo.
+const TAGS_CUERPO = 'p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote';
+
+/**
+ * Devuelve el cuerpo de la noticia como HTML con sus párrafos.
+ *
+ * fica.ufro.cl usa Elementor: el texto vive en un <div class=
+ * "elementor-widget-container"> genérico, así que no hay una clase propia
+ * del cuerpo que sirva de selector fijo. En vez de eso se elige el
+ * contenedor cuyos párrafos directos suman más texto (verificado con
+ * scripts de diagnóstico contra una noticia real). Si no hay ninguno con
+ * 2+ párrafos, se cae a SELECTOR_CUERPO y, en último caso, a ''.
+ */
+function extraerCuerpoHtml($) {
+  let mejor = null;
+  let mejorLargo = 0;
+
+  $('div, section, article, main').each((_, el) => {
+    const $el = $(el);
+    const parrafos = $el.children('p');
+    if (parrafos.length < 2) return;
+    const largo = parrafos.text().trim().length;
+    if (largo > mejorLargo) {
+      mejor = $el;
+      mejorLargo = largo;
+    }
+  });
+
+  if (!mejor) {
+    const texto = extraerTexto($(SELECTOR_CUERPO).first());
+    return texto ? `<p>${escaparHtml(texto)}</p>` : '';
+  }
+
+  const bloques = [];
+  mejor.children(TAGS_CUERPO).each((_, el) => {
+    const $el = $(el);
+    if (!$el.text().replace(/\s+/g, ' ').trim()) return; // párrafos vacíos / &nbsp;
+    bloques.push($.html($el));
+  });
+  return bloques.join('\n');
+}
+
+function escaparHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 /**
  * Entra a la noticia individual a buscar la fecha real de publicación y el
  * cuerpo completo (el listado de /category/noticias/ no trae ninguno de
@@ -85,7 +132,7 @@ async function obtenerDetalle(url) {
     });
   }
 
-  const cuerpo = extraerTexto($(SELECTOR_CUERPO).first());
+  const cuerpo = extraerCuerpoHtml($);
 
   return { fecha, cuerpo };
 }
@@ -128,10 +175,14 @@ async function main() {
   console.log(`Encontrados: ${items.length} items con los selectores actuales.`);
 
   if (items.length === 0) {
-    console.log(
-      'No se encontró nada: revisa SELECTORES en este archivo contra el HTML real de la página.'
+    // Antes esto solo avisaba y terminaba "bien" (código de salida 0) — un
+    // rediseño del sitio de UFRO podía romper los selectores sin que nadie
+    // se enterara nunca. Ahora falla de verdad: en el cron de GitHub
+    // Actions, un fallo dispara el correo automático de "workflow failed"
+    // a quien tenga notificaciones activadas en el repo.
+    throw new Error(
+      'No se encontró ninguna noticia — revisa SELECTORES en este archivo contra el HTML real de la página (puede que fica.ufro.cl haya cambiado de estructura).'
     );
-    return;
   }
 
   console.log('Entrando a cada noticia individual por fecha y cuerpo completo...');
