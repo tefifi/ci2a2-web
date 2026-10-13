@@ -1,7 +1,7 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
 import { supabase } from "../../lib/supabase";
-import DOMPurify from "isomorphic-dompurify";
+import { sanitize } from "../../lib/sanitizeHtml";
 
 export const prerender = false;
 
@@ -94,7 +94,7 @@ if (error || !noticia) {
 
                     <div
                         class="content-body text-dark"
-                        set:html={DOMPurify.sanitize(noticia.cuerpo)}
+                        set:html={sanitize(noticia.cuerpo)}
                     />
 
                     <hr class="my-5 opacity-25" />
