@@ -1,0 +1,13 @@
+services:
+  web:
+    build:
+      context: .
+      args:
+        PUBLIC_SUPABASE_URL: ${PUBLIC_SUPABASE_URL}
+        PUBLIC_SUPABASE_ANON_KEY: ${PUBLIC_SUPABASE_ANON_KEY}
+        PUBLIC_EMAILJS_SERVICE_ID: ${PUBLIC_EMAILJS_SERVICE_ID}
+        PUBLIC_EMAILJS_TEMPLATE_ID: ${PUBLIC_EMAILJS_TEMPLATE_ID}
+        PUBLIC_EMAILJS_PUBLIC_KEY: ${PUBLIC_EMAILJS_PUBLIC_KEY}
+    ports:
+      - "4321:4321"
+    restart: unless-stopped
