@@ -6,6 +6,11 @@ name: Scrapers CI²A²
 # Cada scraper es un job independiente: si uno falla (por ejemplo, el sitio
 # de la UFRO no responde desde los servidores de GitHub), los otros igual
 # se ejecutan. El job que falla sigue marcándose en rojo y GitHub avisa.
+#
+# Los jobs usan una versión fija de Ubuntu (ubuntu-24.04) en vez de
+# ubuntu-latest, para que un cambio de versión de GitHub no altere el entorno
+# de los scrapers sin que nos demos cuenta. Al subir de versión, se cambia
+# aquí a propósito y se prueba con "Run workflow".
 on:
   schedule:
     # Todos los días a las 06:00 UTC (~03:00 Chile continental).
@@ -21,7 +26,7 @@ permissions:
 
 jobs:
   orcid:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +40,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
   openalex:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +54,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
   noticias:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
