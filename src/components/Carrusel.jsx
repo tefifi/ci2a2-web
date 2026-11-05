@@ -11,6 +11,16 @@ const breakpoints = {
 
 const FALLBACK_IMG = "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?q=80&w=800&auto=format&fit=crop";
 
+// Color del estado del proyecto sobre fondo blanco (tarjeta del carrusel).
+// Mismas categorías que getStatusStyle en src/pages/proyectos/[id].astro.
+const getStatusColor = (status) => {
+    const s = (status || '').toLowerCase();
+    if (s.includes('curso') || s.includes('activo') || s.includes('desarrollo')) return '#198754'; // verde: En curso
+    if (s.includes('finalizado') || s.includes('terminado')) return '#6c757d'; // gris: Finalizado
+    if (s.includes('plan') || s.includes('diseño')) return '#b58100'; // amarillo oscuro: En planificación (legible sobre blanco)
+    return '#6c757d';
+};
+
 /**
  * @param {{ datos?: any[], banners?: any[], tipo?: string }} props
  */
@@ -93,7 +103,7 @@ function CardSelector({ item, tipo }) {
                     <p className="text-muted small line-clamp-3 mb-4">{item.resumen}</p>
 
                     <div className="mt-auto border-top pt-3 d-flex justify-content-between align-items-center">
-                        <small className="text-success fw-bold">
+                        <small className="fw-bold" style={{ color: getStatusColor(item.status) }}>
                             <i className="bi bi-circle-fill small me-1"></i> {item.status}
                         </small>
 
