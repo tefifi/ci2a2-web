@@ -14,14 +14,14 @@
     "types:generate": "npx supabase gen types typescript --project-id rspelkakwtivrnmboyhh --schema public > src/lib/database.types.ts"
   },
   "dependencies": {
-    "@astrojs/node": "^9.5.2",
-    "@astrojs/react": "^4.4.2",
-    "@astrojs/vercel": "^9.0.4",
+    "@astrojs/node": "^11.1.9",
+    "@astrojs/react": "^7.1.2",
+    "@astrojs/vercel": "^11.0.18",
     "@emailjs/browser": "^4.4.1",
     "@supabase/supabase-js": "^2.89.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "astro": "^5.16.6",
+    "astro": "^7.4.5",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "cheerio": "^1.0.0",
