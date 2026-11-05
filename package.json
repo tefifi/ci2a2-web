@@ -29,7 +29,6 @@
     "isomorphic-dompurify": "^2.19.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-router-dom": "^6.30.3",
     "react-simple-wysiwyg": "^3.4.1",
     "swiper": "^12.1.0",
     "xss": "^1.0.15"
