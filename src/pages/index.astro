@@ -18,9 +18,15 @@ const { data: noticiasRecientes } = await supabase
 const noticiasSeguras: NoticiaRow[] = (noticiasDestacadas && noticiasDestacadas.length > 0)
     ? noticiasDestacadas : (noticiasRecientes || []);
 
-const { data: proyectosData } = await supabase
-    .from("proyectos").select("*").eq("status", "En curso").order("created_at", { ascending: false }).limit(6);
-const proyectos: ProyectoRow[] = proyectosData || [];
+// Proyectos: se muestran todos, con los "En curso" primero.
+// Dentro de cada grupo se mantiene el orden por fecha de creación (más recientes primero).
+const { data: proyectosData, error: errorProyectos } = await supabase
+    .from("proyectos").select("*").order("created_at", { ascending: false });
+if (errorProyectos) console.error("Error cargando proyectos:", errorProyectos);
+const esEnCurso = (p: ProyectoRow): boolean => (p.status || "").trim().toLowerCase() === "en curso";
+const proyectos: ProyectoRow[] = [...(proyectosData || [])].sort(
+    (a, b) => Number(esEnCurso(b)) - Number(esEnCurso(a))
+);
 
 const { data: publicacionesData } = await supabase
     .from("publicaciones").select("*").eq("is_visible", true).order("year", { ascending: false }).limit(3);
