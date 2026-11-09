@@ -9,12 +9,12 @@ const { categoria, id } = Astro.params;
 
 const CATEGORIAS: Record<string, { label: string }> = {
   'investigadores':            { label: 'Investigadores' },
-  'investigadores-asociados':  { label: 'Investigadores Asociados' },
+  'investigadores-asociados':  { label: 'Investigadores asociados' },
   'cientificos':               { label: 'Científicos' },
-  'profesionales':             { label: 'Ingenieros y Profesionales' },
+  'profesionales':             { label: 'Ingenieros y profesionales' },
   'postdocs':                  { label: 'Postdoctorados' },
-  'profesores-distinguidos':   { label: 'Profesores Distinguidos' },
-  'investigadores-visitantes': { label: 'Investigadores Visitantes' },
+  'profesores-distinguidos':   { label: 'Profesores distinguidos' },
+  'investigadores-visitantes': { label: 'Investigadores visitantes' },
   'staff':                     { label: 'Staff' },
 };
 
@@ -27,7 +27,7 @@ const { data: p, error } = await supabase
   .eq('id', id)
   .single();
 
-if (error || !p) return Astro.redirect(`/equipo/${categoria}`);
+if (error || !p) return Astro.redirect(`/equipo#${categoria}`);
 
 const fotoSrc = p.foto_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nombre)}&background=003767&color=fff&size=400`;
 
@@ -52,7 +52,7 @@ const lineasGrupos: string[] = p.grupos_trabajo
     <div class="container position-relative z-2">
       <div class="col-lg-8">
         <h6 class="fw-bold text-uppercase mb-2" style="color: var(--ufro-pink-light); letter-spacing:2px;">
-          <a href={`/equipo/${categoria}`} class="text-decoration-none" style="color: var(--ufro-pink-light);">{meta.label}</a>
+          <a href={`/equipo#${categoria}`} class="text-decoration-none" style="color: var(--ufro-pink-light);">{meta.label}</a>
         </h6>
         <h1 class="display-5 fw-bold mb-2">{p.nombre}</h1>
         {p.cargo && <p class="opacity-90 mb-0 lead small">{p.cargo}</p>}
@@ -198,7 +198,7 @@ const lineasGrupos: string[] = p.grupos_trabajo
 
       <!-- Volver -->
       <div class="mt-4 pt-2 border-top">
-        <a href={`/equipo/${categoria}`} class="btn-volver">
+        <a href={`/equipo#${categoria}`} class="btn-volver">
           <i class="bi bi-arrow-left volver-arrow"></i>
           Volver a {meta.label}
         </a>
