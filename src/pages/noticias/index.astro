@@ -38,9 +38,9 @@ const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
         >
           Actualidad
         </h6>
-        <h1 class="display-5 fw-bold mb-2">Noticias y Eventos</h1>
+        <h1 class="display-5 fw-bold mb-2">Noticias y eventos</h1>
         <p class="opacity-90 mb-0 lead small">
-          Novedades e investigaciones del CI²A²
+          Novedades e investigaciones del CI²A².
         </p>
       </div>
     </div>
@@ -79,7 +79,7 @@ const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
                         class="text-muted small fw-bold text-uppercase d-flex align-items-center gap-2 mb-2"
                         style="font-size: 0.7rem;"
                       >
-                        <i class="bi bi-calendar3 text-ufro opacity-75" />
+                        <i class="bi bi-calendar3 text-pink" />
                         {item.fecha
                           ? new Date(item.fecha).toLocaleDateString("es-CL", {
                               timeZone: "UTC",
@@ -104,11 +104,17 @@ const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
                         {item.bajada}
                       </p>
 
-                      {/* Botón "Leer completa" (ROSADO) */}
-                      <div class="mt-auto">
-                        <span class="btn btn-sm btn-leermas rounded-pill fw-bold px-4 py-2">
-                          Leer completa
+                      {/* Pie: etiqueta + flecha circular (igual que en la portada) */}
+                      <div class="mt-auto pt-2 border-top border-light w-100 d-flex justify-content-end align-items-center gap-2">
+                        <span
+                          class="text-muted fw-bold transition-text"
+                          style="font-size: 0.75rem;"
+                        >
+                          Leer noticia
                         </span>
+                        <div class="btn-arrow-pink rounded-circle d-flex align-items-center justify-content-center">
+                          <i class="bi bi-arrow-right transition-icon" />
+                        </div>
                       </div>
                     </div>
                   </article>
@@ -207,20 +213,31 @@ const paginasArray = Array.from({ length: totalPaginas }, (_, i) => i + 1);
     text-decoration: underline;
   }
 
-  /* --- BOTÓN LEER MÁS (ROSADO) --- */
-  .btn-leermas {
-    color: var(--ufro-pink); /* Texto Rosado */
-    border: 1px solid var(--ufro-pink); /* Borde Rosado */
+  /* --- PIE: ETIQUETA + FLECHA CIRCULAR --- */
+  .transition-text { transition: color 0.3s ease; }
+  .card-link-wrapper:hover .transition-text { color: var(--ufro-pink) !important; }
+
+  .btn-arrow-pink {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    color: var(--ufro-pink);
+    border: 1.5px solid var(--ufro-pink);
     background: transparent;
     transition: all 0.3s ease;
   }
-
-  /* Al pasar el mouse por la tarjeta, el botón se llena de ROSADO */
-  .card-link-wrapper:hover .btn-leermas {
+  .card-link-wrapper:hover .btn-arrow-pink {
     background-color: var(--ufro-pink);
     color: white;
-    box-shadow: 0 4px 10px rgba(214, 51, 132, 0.3); /* Sombra rosada */
+    box-shadow: 0 4px 10px rgba(214, 51, 132, 0.3);
   }
+
+  .transition-icon {
+    font-size: 1rem;
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .card-link-wrapper:hover .transition-icon { transform: translateX(5px); }
 
   /* --- PAGINACIÓN --- */
   .pagination-btn {

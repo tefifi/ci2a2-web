@@ -11,14 +11,31 @@ const breakpoints = {
 
 const FALLBACK_IMG = "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?q=80&w=800&auto=format&fit=crop";
 
-// Color del estado del proyecto sobre fondo blanco (tarjeta del carrusel).
-// Mismas categorías que getStatusStyle en src/pages/proyectos/[id].astro.
-const getStatusColor = (status) => {
-    const s = (status || '').toLowerCase();
-    if (s.includes('curso') || s.includes('activo') || s.includes('desarrollo')) return '#198754'; // verde: En curso
-    if (s.includes('finalizado') || s.includes('terminado')) return '#6c757d'; // gris: Finalizado
-    if (s.includes('plan') || s.includes('diseño')) return '#b58100'; // amarillo oscuro: En planificación (legible sobre blanco)
-    return '#6c757d';
+// Texto que acompaña a la flecha en el pie de cada tarjeta.
+// Para cambiarlo, edita solo estas dos líneas.
+const ETIQUETA_PROYECTO = 'Ver ficha';
+const ETIQUETA_NOTICIA = 'Leer noticia';
+
+// Píldora de estado del proyecto: mismas clases que la tarjeta de la vista
+// /proyectos (getStatusStyle en src/pages/proyectos/index.astro), para que se
+// vea igual en la portada.
+const getEstadoPildora = (status) => {
+    if (!status) return { className: 'bg-light text-secondary border-secondary' };
+    const s = status.toLowerCase();
+    if (s.includes('curso') || s.includes('activo') || s.includes('desarrollo'))
+        return { className: 'bg-success bg-opacity-10 text-success border-success' };
+    if (s.includes('finalizado') || s.includes('terminado'))
+        return { className: 'bg-secondary bg-opacity-10 text-secondary border-secondary' };
+    if (s.includes('plan') || s.includes('diseño'))
+        return { className: 'bg-warning bg-opacity-10 text-dark border-warning' };
+    return {
+        className: '',
+        style: {
+            backgroundColor: 'rgba(0, 55, 103, 0.1)',
+            color: 'var(--ufro-blue)',
+            border: '1px solid var(--ufro-blue)',
+        },
+    };
 };
 
 /**
@@ -50,137 +67,131 @@ export default function Carrusel({ datos = [], banners = [], tipo = "generico" }
     );
 }
 
+// Pie de la tarjeta: etiqueta + flecha circular (igual que la vista /proyectos).
+function PieTarjeta({ etiqueta, isHovered }) {
+    return (
+        <div className="mt-auto pt-2 border-top border-light w-100 d-flex justify-content-end align-items-center gap-2">
+            <span
+                className="fw-bold"
+                style={{
+                    fontSize: '0.75rem',
+                    color: isHovered ? 'var(--ufro-pink)' : '#6c757d',
+                    transition: 'color 0.3s ease',
+                }}
+            >
+                {etiqueta}
+            </span>
+            <span
+                className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                style={{
+                    width: '32px',
+                    height: '32px',
+                    border: '1.5px solid var(--ufro-pink)',
+                    color: isHovered ? '#fff' : 'var(--ufro-pink)',
+                    backgroundColor: isHovered ? 'var(--ufro-pink)' : 'transparent',
+                    boxShadow: isHovered ? '0 4px 10px rgba(214, 51, 132, 0.3)' : 'none',
+                    transition: 'all 0.3s ease',
+                }}
+            >
+                <i
+                    className="bi bi-arrow-right"
+                    style={{
+                        fontSize: '1rem',
+                        display: 'inline-block',
+                        transform: isHovered ? 'translateX(3px)' : 'translateX(0)',
+                        transition: 'transform 0.3s ease',
+                    }}
+                ></i>
+            </span>
+        </div>
+    );
+}
+
 function CardSelector({ item, tipo }) {
     const [isHovered, setIsHovered] = useState(false);
 
-    const UFRO_BLUE = "var(--ufro-blue)";
-    const UFRO_PINK = "var(--ufro-pink)";
-    const UFRO_PINK_LIGHT = "#fff0f5";
+    if (tipo !== 'proyectos' && tipo !== 'noticias') return null;
 
-    // --- DISEÑO PROYECTOS ---
-    if (tipo === 'proyectos') {
-        return (
-            <article
-                className="card h-100 border-0 shadow-sm w-100 overflow-hidden hover-lift"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-            >
-                <div className="position-relative" style={{ height: '220px' }}>
-                    <img
-                        src={item.image_url || FALLBACK_IMG}
-                        className="w-100 h-100 object-fit-cover transition-all"
-                        style={{ transform: isHovered ? 'scale(1.05)' : 'scale(1)', transition: '0.6s ease-in-out' }}
-                        alt={item.title}
-                        onError={(e) => { e.target.src = FALLBACK_IMG }}
-                    />
-                    {/* ÁREA EN PROYECTOS: Estilo "Píldora" Minimalista */}
-                    <div className="position-absolute top-0 end-0 m-3">
-                        <span style={{
-                            backgroundColor: '#fff0f5', // El rosa sutil que te gustó
-                            color: 'var(--ufro-pink)',           // El rosa fuerte institucional
-                            fontSize: '0.65rem',        // Texto bien pequeño y fino
-                            fontWeight: '700',
-                            padding: '3px 10px',        // Menos relleno para que sea delgado
-                            borderRadius: '20px',       // Forma de píldora
-                            letterSpacing: '0.5px',
-                            display: 'inline-block',
-                            boxShadow: '0 2px 5px rgba(0,0,0,0.08)', // Sombra casi imperceptible
-                            border: '1px solid rgba(214, 51, 132, 0.1)' // Borde muy suave
-                        }}>
+    const esProyecto = tipo === 'proyectos';
+    const href = esProyecto ? `/proyectos/${item.id}` : `/noticias/${item.id}`;
+    const estado = esProyecto ? getEstadoPildora(item.status) : null;
+
+    return (
+        <article
+            className="card h-100 border-0 shadow-sm w-100 bg-white rounded-4 overflow-hidden hover-lift"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            {/* IMAGEN 16:9 — en proyectos, la píldora de área va sobre la imagen */}
+            <div className="position-relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
+                <img
+                    src={item.image_url || FALLBACK_IMG}
+                    className="w-100 h-100 object-fit-cover"
+                    style={{
+                        objectPosition: esProyecto ? `50% ${item.image_position ?? 50}%` : undefined,
+                        transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+                        transition: '0.6s ease-in-out',
+                    }}
+                    alt={item.title}
+                    onError={(e) => { e.target.src = FALLBACK_IMG }}
+                />
+                {esProyecto && item.area && (
+                    <div className="position-absolute top-0 end-0 m-2">
+                        {/* Misma píldora que la tarjeta de la vista /proyectos */}
+                        <span
+                            className="badge bg-white text-dark shadow-sm fw-bold px-2 py-1 rounded-2 small"
+                            style={{ fontSize: '0.65rem', opacity: 0.95 }}
+                        >
                             {item.area}
                         </span>
-                    </div>                </div>
-                <div className="card-body p-4 d-flex flex-column">
-                    <h5 className="fw-bold fs-5 line-clamp-3 mb-1" // mb-1 para pegar el resumen
-                        style={{
-                            minHeight: '2rem', // Bajamos de 4.5 a 3.8 (suficiente para 3 líneas compactas)
-                            color: isHovered ? UFRO_BLUE : '#212529',
-                            transition: '0.3s',
-                            lineHeight: '1.2' // Interlineado más apretado
-                        }}>
-                        {item.title}
-                    </h5>
-                    <p className="text-muted small line-clamp-3 mb-4">{item.resumen}</p>
-
-                    <div className="mt-auto border-top pt-3 d-flex justify-content-between align-items-center">
-                        <small className="fw-bold" style={{ color: getStatusColor(item.status) }}>
-                            <i className="bi bi-circle-fill small me-1"></i> {item.status}
-                        </small>
-
-                        {/* ENLACE INTERACTIVO: VER FICHA */}
-                        <a href={`/proyectos/${item.id}`}
-                            className="text-pink text-decoration-none fw-bold small stretched-link d-flex align-items-center"
-                            style={{ transition: 'all 0.3s ease' }}>
-                            <span style={{ transform: isHovered ? 'translateX(-3px)' : 'translateX(0)', transition: '0.3s' }}>
-                                Ver ficha
-                            </span>
-                            <i className="bi bi-arrow-right ms-2"
-                                style={{
-                                    transform: isHovered ? 'translateX(3px)' : 'translateX(0)',
-                                    transition: '0.3s'
-                                }}></i>
-                        </a>
                     </div>
-                </div>
-
-            </article>
-        );
-    }
-
-    // --- DISEÑO NOTICIAS ---
-    if (tipo === 'noticias') {
-        return (
-            <div
-                className="card border-0 shadow-sm h-100 w-100 bg-white overflow-hidden hover-lift"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-            >
-                <div style={{ height: '220px', overflow: 'hidden' }}>
-                    <img
-                        src={item.image_url || FALLBACK_IMG}
-                        className="w-100 h-100 object-fit-cover transition-all"
-                        style={{ transform: isHovered ? 'scale(1.05)' : 'scale(1)', transition: '0.6s ease-in-out' }}
-                        alt={item.title}
-                        onError={(e) => { e.target.src = FALLBACK_IMG }}
-                    />
-                </div>
-                <div className="card-body p-4 d-flex flex-column">
-                    <div className="mb-2">
-                        <small className="text-muted d-flex align-items-center" style={{ fontSize: '0.8rem' }}>
-                            <i className="bi bi-calendar3 me-2 text-pink"></i>
-                            {item.fecha}
-                        </small>
-                    </div>
-
-                    <h5 className="fw-bold mb-3 line-clamp-3"
-                        style={{ minHeight: '4.5rem', color: isHovered ? UFRO_BLUE : '#212529', transition: '0.3s', lineHeight: '1.4' }}>
-                        <a href={`/noticias/${item.id}`} className="text-decoration-none stretched-link" style={{ color: 'inherit' }}>
-                            {item.title}
-                        </a>
-                    </h5>
-
-                    <p className="text-muted small line-clamp-3 mb-4 flex-grow-1">
-                        {item.resumen}
-                    </p>
-
-                    <div className="mt-auto">
-                        {/* ENLACE INTERACTIVO: LEER NOTICIA */}
-                        <span className="text-pink fw-bold d-inline-flex align-items-center"
-                            style={{ fontSize: '0.9rem', transition: '0.3s' }}>
-                            <span style={{ transform: isHovered ? 'translateX(-3px)' : 'translateX(0)', transition: '0.3s' }}>
-                                Leer noticia
-                            </span>
-                            <i className="bi bi-arrow-right ms-2"
-                                style={{
-                                    transform: isHovered ? 'translateX(3px)' : 'translateX(0)',
-                                    transition: '0.3s'
-                                }}></i>
-                        </span>
-                    </div>
-                </div>
+                )}
             </div>
-        );
-    }
 
-    return null;
+            <div className="card-body p-3 d-flex flex-column">
+                {/* FILA: fecha (solo si existe) a la izquierda, estado a la derecha */}
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                    {item.fecha && (
+                        <div
+                            className="text-muted small fw-bold text-uppercase d-flex align-items-center gap-2"
+                            style={{ fontSize: '0.7rem' }}
+                        >
+                            <i className="bi bi-calendar3 text-pink"></i>
+                            {item.fecha}
+                        </div>
+                    )}
+                    {esProyecto && (
+                        <span
+                            className={`badge ms-auto border border-opacity-25 rounded-pill fw-bold ${estado.className}`}
+                            style={{ fontSize: '0.6rem', letterSpacing: '0.5px', ...estado.style }}
+                        >
+                            {item.status || 'Proyecto'}
+                        </span>
+                    )}
+                </div>
+
+                <h5
+                    className="fw-bold mb-2 lh-sm line-clamp-3"
+                    style={{
+                        fontSize: '1.1rem',
+                        color: isHovered ? 'var(--ufro-blue)' : '#212529',
+                        transition: 'color 0.3s ease',
+                    }}
+                >
+                    <a href={href} className="text-decoration-none stretched-link" style={{ color: 'inherit' }}>
+                        {item.title}
+                    </a>
+                </h5>
+
+                <p
+                    className="text-secondary small line-clamp-3 mb-3 flex-grow-1"
+                    style={{ lineHeight: '1.5', fontSize: '0.85rem' }}
+                >
+                    {item.resumen}
+                </p>
+
+                <PieTarjeta etiqueta={esProyecto ? ETIQUETA_PROYECTO : ETIQUETA_NOTICIA} isHovered={isHovered} />
+            </div>
+        </article>
+    );
 }

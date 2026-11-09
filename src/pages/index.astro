@@ -65,11 +65,11 @@ const categoriasAmostrar = [
 ];
 
 const lineasInvestigacion = [
-    { titulo: "IA e Interculturalidad", desc: "Desarrollo de IA con enfoque intercultural: preservación de lenguas originarias, saberes ancestrales y gobernanza de datos indígenas.", icon: "bi-cpu" },
+    { titulo: "IA e interculturalidad", desc: "Desarrollo de IA con enfoque intercultural: preservación de lenguas originarias, saberes ancestrales y gobernanza de datos indígenas.", icon: "bi-cpu" },
     { titulo: "Smart Agro", desc: "IA para la gestión hídrica y optimización de cultivos.", icon: "bi-flower1" },
-    { titulo: "Salud y Bienestar", desc: "Diagnóstico asistido y telemedicina inteligente.", icon: "bi-heart-pulse" },
+    { titulo: "Salud y bienestar", desc: "Diagnóstico asistido y telemedicina inteligente.", icon: "bi-heart-pulse" },
     { titulo: "Industria 4.0", desc: "Automatización y optimización de procesos productivos.", icon: "bi-gear-wide-connected" },
-    { titulo: "Gobernanza de Datos", desc: "Políticas públicas basadas en evidencia y ética de datos.", icon: "bi-bank" },
+    { titulo: "Gobernanza de datos", desc: "Políticas públicas basadas en evidencia y ética de datos.", icon: "bi-bank" },
 ];
 
 const { count: totalEquipo } = await supabase.from("colaboradores").select("*", { count: "exact", head: true });
@@ -91,7 +91,7 @@ const config: Record<string, boolean> = (configData as ConfigGraficoRow[] || [])
 const mostrarSeccionImpacto = config.stat_colaboradores || config.stat_proyectos || config.stat_alianzas || config.stat_papers;
 
 function formatAuthorsHome(autoresStr: string | null | undefined): string {
-    if (!autoresStr) return "Autoría CI2A2";
+    if (!autoresStr) return "Autoría CI²A²";
     const autores = autoresStr.split(";");
     return autores.length > 2 ? `${autores[0].trim()} et al.` : autoresStr;
 }
@@ -195,7 +195,7 @@ function formatAuthorsHome(autoresStr: string | null | undefined): string {
                     <div class="d-flex gap-4 border-top pt-4">
                         <div>
                             <h3 class="fw-bold text-ufro mb-0">4+</h3>
-                            <small class="text-muted" style="font-size: 0.85rem;">Áreas Estratégicas</small>
+                            <small class="text-muted" style="font-size: 0.85rem;">Áreas estratégicas</small>
                         </div>
                         <div class="vr opacity-25"></div>
                         <div>
@@ -222,7 +222,7 @@ function formatAuthorsHome(autoresStr: string | null | undefined): string {
             <div class="container position-relative z-2">
                 <div class="text-center mb-5">
                     <h6 class="text-pink fw-bold text-uppercase ls-2 mb-2">Nuestra Gestión</h6>
-                    <h3 class="fw-bold text-white display-6">Impacto en Cifras</h3>
+                    <h3 class="fw-bold text-white display-6">Impacto en cifras</h3>
                 </div>
                 <div class="row g-4 text-center justify-content-center">
                     {config.stat_colaboradores && (
@@ -271,7 +271,7 @@ function formatAuthorsHome(autoresStr: string | null | undefined): string {
         <div class="container">
             <div class="text-center mb-5">
                 <h6 class="text-pink fw-bold text-uppercase ls-2">Enfoque Estratégico</h6>
-                <h2 class="fw-bold text-dark">Líneas de Investigación</h2>
+                <h2 class="fw-bold text-dark">Líneas de investigación</h2>
                 <div class="mx-auto mt-3 bg-pink rounded-pill" style="width: 50px; height: 3px;"></div>
             </div>
             <div class="row g-4 justify-content-center">
@@ -296,12 +296,12 @@ function formatAuthorsHome(autoresStr: string | null | undefined): string {
     <section id="proyectos" class="py-6 bg-white border-top">
         <div class="container">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-end mb-5 gap-3">
-                <div class="text-center text-md-start w-100">
+                <div class="w-100">
                     <h6 class="text-pink fw-bold text-uppercase ls-2">Innovación Aplicada</h6>
-                    <h2 class="fw-bold text-dark">Proyectos Destacados</h2>
+                    <h2 class="fw-bold text-dark">Proyectos destacados</h2>
                 </div>
-                <a href="/proyectos" class="btn btn-outline-pink rounded-pill px-4 py-2 fw-bold shadow-sm btn-pildora text-nowrap align-self-center align-self-md-end">
-                    Ver Portafolio
+                <a href="/proyectos" class="btn btn-outline-pink rounded-pill px-4 py-2 fw-bold shadow-sm btn-pildora text-nowrap align-self-start align-self-md-end">
+                    Ver portafolio
                 </a>
             </div>
             {proyectos && proyectos.length > 0 ? (
@@ -313,6 +313,10 @@ function formatAuthorsHome(autoresStr: string | null | undefined): string {
                         resumen: p.descripcion || p.resumen || "Sin descripción disponible.",
                         area: p.area || p.categoria || "I+D",
                         status: p.status || p.estado || "En curso",
+                        fecha: p.fecha_inicio
+                            ? new Date(p.fecha_inicio).toLocaleDateString("es-CL", { timeZone: "UTC", year: "numeric", month: "short" })
+                            : null,
+                        image_position: p.image_position ?? 50,
                     }))}
                 />
             ) : (
@@ -328,27 +332,27 @@ function formatAuthorsHome(autoresStr: string | null | undefined): string {
             <div class="row align-items-center g-5">
                 <div class="col-lg-5">
                     <h6 class="text-pink fw-bold text-uppercase ls-2 mb-2">Talento Joven</h6>
-                    <h2 class="fw-bold mb-4 display-5 text-white">Formación y Docencia</h2>
+                    <h2 class="fw-bold mb-4 display-5 text-white">Formación y docencia</h2>
                     <p class="lead opacity-90 mb-5">Vinculamos a estudiantes con proyectos de frontera.
                         Ofrecemos oportunidades reales para tu desarrollo profesional en un entorno de alto nivel.</p>
-                    <a href="/contacto" class="btn rounded-pill px-5 py-3 fw-bold shadow-lg btn-pildora-white">¡Quiero participar!</a>
+                    <a href="/contacto?tab=estudiantes" class="btn rounded-pill px-5 py-3 fw-bold shadow-lg btn-pildora-white">¡Quiero participar!</a>
                 </div>
                 <div class="col-lg-6 offset-lg-1">
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <a href="/contacto" class="text-decoration-none text-white h-100 d-block">
+                            <a href="/contacto?tab=estudiantes" class="text-decoration-none text-white h-100 d-block">
                                 <div class="p-4 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-25 h-100 hover-glass text-center text-md-start transition-all cursor-pointer">
                                     <div class="mb-3 d-inline-block p-3 rounded-circle bg-white bg-opacity-10">
                                         <i class="bi bi-mortarboard fs-3 text-white"></i>
                                     </div>
-                                    <h5 class="fw-bold text-white">Tesis y Articulación</h5>
+                                    <h5 class="fw-bold text-white">Tesis y articulación</h5>
                                     <p class="small opacity-75 mb-0">Desarrolla tu memoria de título con posibilidad de
                                         <strong>articulación directa con el Magíster</strong>.</p>
                                 </div>
                             </a>
                         </div>
                         <div class="col-md-6">
-                            <a href="/contacto" class="text-decoration-none text-white h-100 d-block">
+                            <a href="/contacto?tab=estudiantes" class="text-decoration-none text-white h-100 d-block">
                                 <div class="p-4 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-25 h-100 hover-glass text-center text-md-start transition-all cursor-pointer">
                                     <div class="mb-3 d-inline-block p-3 rounded-circle bg-white bg-opacity-10">
                                         <i class="bi bi-briefcase fs-3 text-white"></i>
@@ -368,9 +372,14 @@ function formatAuthorsHome(autoresStr: string | null | undefined): string {
     <!-- NOTICIAS -->
     <section class="py-6 bg-light overflow-hidden">
         <div class="container">
-            <div class="text-center mb-5">
-                <h6 class="text-pink fw-bold text-uppercase ls-2">Actualidad</h6>
-                <h2 class="fw-bold text-dark">Noticias y Eventos</h2>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-end mb-5 gap-3">
+                <div class="w-100">
+                    <h6 class="text-pink fw-bold text-uppercase ls-2">Actualidad</h6>
+                    <h2 class="fw-bold text-dark">Noticias y eventos</h2>
+                </div>
+                <a href="/noticias" class="btn btn-outline-pink rounded-pill px-4 py-2 fw-bold shadow-sm btn-pildora text-nowrap align-self-start align-self-md-end">
+                    Ver todas las noticias
+                </a>
             </div>
             {noticiasSeguras && noticiasSeguras.length > 0 ? (
                 <Carrusel client:load tipo="noticias" banners={[]}
@@ -383,9 +392,6 @@ function formatAuthorsHome(autoresStr: string | null | undefined): string {
             ) : (
                 <div class="text-center py-5"><p class="text-muted">Cargando noticias...</p></div>
             )}
-            <div class="text-center mt-5">
-                <a href="/noticias" class="btn btn-outline-pink rounded-pill px-5 py-2 fw-bold shadow-sm btn-pildora">Ver todas las noticias</a>
-            </div>
         </div>
     </section>
 
@@ -395,7 +401,7 @@ function formatAuthorsHome(autoresStr: string | null | undefined): string {
             <div class="row align-items-center">
                 <div class="col-lg-4 mb-4 mb-lg-0">
                     <h6 class="text-pink fw-bold text-uppercase ls-2">Ciencia Abierta</h6>
-                    <h2 class="fw-bold text-dark mb-3">Producción Científica</h2>
+                    <h2 class="fw-bold text-dark mb-3">Producción científica</h2>
                     <p class="text-muted mb-4">Difundimos el conocimiento a través de revistas indexadas y
                         conferencias de alto impacto.</p>
                     <a href="/publicaciones" class="btn btn-outline-pink rounded-pill px-4 py-2 fw-bold shadow-sm btn-pildora">Ver repositorio</a>
@@ -444,7 +450,7 @@ function formatAuthorsHome(autoresStr: string | null | undefined): string {
                             de I+D conjuntos.</p>
                         <div class="text-center text-md-start">
                             <a href="/contacto" class="btn btn-pink text-white rounded-pill px-5 py-3 fw-bold shadow hover-scale">
-                                Contáctanos Ahora
+                                Contáctanos ahora
                             </a>
                         </div>
                     </div>
