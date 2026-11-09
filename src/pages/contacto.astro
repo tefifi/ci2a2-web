@@ -4,6 +4,7 @@ import PageHeader  from '../components/common/PageHeader.astro';
 import ContactForm from '../components/ContactForm.jsx';
 
 const colaborador = Astro.url.searchParams.get('para');
+const abrirEstudiantes = Astro.url.searchParams.get('tab') === 'estudiantes';
 ---
 
 <MainLayout title="Contacto">
@@ -49,23 +50,25 @@ const colaborador = Astro.url.searchParams.get('para');
           <ul class="nav nav-pills nav-fill mb-4 bg-white p-2 rounded-4 shadow-sm border border-light"
               id="contactTab" role="tablist">
             <li class="nav-item" role="presentation">
-              <button class="nav-link active fw-bold py-3 rounded-3 tab-blue"
+              <button class={`nav-link fw-bold py-3 rounded-3 tab-blue ${abrirEstudiantes ? '' : 'active'}`}
                       id="colaborar-tab" data-bs-toggle="pill"
-                      data-bs-target="#colaborar" type="button" role="tab">
+                      data-bs-target="#colaborar" type="button" role="tab"
+                      aria-controls="colaborar" aria-selected={abrirEstudiantes ? 'false' : 'true'}>
                 <i class="bi bi-briefcase-fill me-2"></i>General
               </button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link fw-bold py-3 rounded-3 tab-pink"
+              <button class={`nav-link fw-bold py-3 rounded-3 tab-pink ${abrirEstudiantes ? 'active' : ''}`}
                       id="estudiantes-tab" data-bs-toggle="pill"
-                      data-bs-target="#estudiantes" type="button" role="tab">
+                      data-bs-target="#estudiantes" type="button" role="tab"
+                      aria-controls="estudiantes" aria-selected={abrirEstudiantes ? 'true' : 'false'}>
                 <i class="bi bi-mortarboard-fill me-2"></i>Prácticas y Tesis
               </button>
             </li>
           </ul>
 
           <div class="tab-content" id="contactTabContent">
-            <div class="tab-pane fade show active" id="colaborar" role="tabpanel">
+            <div class={`tab-pane fade ${abrirEstudiantes ? '' : 'show active'}`} id="colaborar" role="tabpanel">
               <ContactForm
                 client:only="react"
                 titulo="Alianzas y Colaboración"
@@ -74,7 +77,7 @@ const colaborador = Astro.url.searchParams.get('para');
                 mostrarCarrera={false}
               />
             </div>
-            <div class="tab-pane fade" id="estudiantes" role="tabpanel">
+            <div class={`tab-pane fade ${abrirEstudiantes ? 'show active' : ''}`} id="estudiantes" role="tabpanel">
               <ContactForm
                 client:only="react"
                 titulo="Postulación Prácticas y Tesis"

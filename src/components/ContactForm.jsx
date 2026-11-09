@@ -121,11 +121,11 @@ export default function ContactForm({ titulo, descripcion, destinatario = null, 
                 </div>
 
                 <div>
-                    <label className="form-label small fw-bold text-secondary">Tu Nombre</label>
+                    <label className="form-label small fw-bold text-secondary">Tu nombre</label>
                     <input type="text" className="form-control bg-light border-0" required maxLength={100} value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} />
                 </div>
                 <div>
-                    <label className="form-label small fw-bold text-secondary">Tu Correo</label>
+                    <label className="form-label small fw-bold text-secondary">Tu correo</label>
                     <input type="email" className="form-control bg-light border-0" required maxLength={254} value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
                 </div>
 
@@ -162,7 +162,7 @@ export default function ContactForm({ titulo, descripcion, destinatario = null, 
                 </div>
 
                 <button type="submit" className="btn fw-bold w-100 py-2 mt-2 text-white" style={{backgroundColor: 'var(--ufro-blue)'}} disabled={status === 'sending'}>
-                    {status === 'sending' ? 'Enviando...' : 'Enviar Mensaje'}
+                    {status === 'sending' ? 'Enviando...' : 'Enviar mensaje'}
                 </button>
 
                 {status === 'success' && <div className="alert alert-success small text-center mt-2 fw-bold">¡Mensaje enviado con éxito!</div>}
