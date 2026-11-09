@@ -9,6 +9,11 @@
 // nombre, lo que evita el problema de confundir personas con nombres
 // parecidos.
 //
+// Además del título, año y enlace, cada publicación se guarda en staging con
+// la lista completa de autores, el tipo, el área y el resumen (cuando
+// OpenAlex los tiene), para que lleguen al sitio y no salgan como
+// "No especificado" / "No hay resumen disponible".
+//
 // Uso:
 //   node scripts/scrapers/openAlex.js --dry-run
 //   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... node scripts/scrapers/openAlex.js
@@ -23,6 +28,49 @@ const OPENALEX_API = 'https://api.openalex.org/works';
 // la query para entrar al "polite pool" — respuestas más rápidas y
 // confiables. Cambia esto por un correo real del centro si tienes uno.
 const CONTACTO = 'contacto.ci2a2@ufrontera.cl';
+
+// Máximo de autores que se guardan por publicación (hay trabajos con cientos).
+const MAX_AUTORES = 20;
+
+// Áreas de OpenAlex ("fields") en inglés -> español, para que el filtro
+// "Área temática" del sitio no mezcle idiomas. Si llega una que no está acá,
+// no se guarda área y se puede completar a mano desde el admin.
+const AREAS_ES = {
+  'Agricultural and Biological Sciences': 'Ciencias Agrícolas y Biológicas',
+  'Arts and Humanities': 'Artes y Humanidades',
+  'Biochemistry, Genetics and Molecular Biology': 'Bioquímica, Genética y Biología Molecular',
+  'Business, Management and Accounting': 'Negocios, Gestión y Contabilidad',
+  'Chemical Engineering': 'Ingeniería Química',
+  'Chemistry': 'Química',
+  'Computer Science': 'Ciencias de la Computación',
+  'Decision Sciences': 'Ciencias de la Decisión',
+  'Dentistry': 'Odontología',
+  'Earth and Planetary Sciences': 'Ciencias de la Tierra y Planetarias',
+  'Economics, Econometrics and Finance': 'Economía, Econometría y Finanzas',
+  'Energy': 'Energía',
+  'Engineering': 'Ingeniería',
+  'Environmental Science': 'Ciencias Ambientales',
+  'Health Professions': 'Profesiones de la Salud',
+  'Immunology and Microbiology': 'Inmunología y Microbiología',
+  'Materials Science': 'Ciencia de los Materiales',
+  'Mathematics': 'Matemáticas',
+  'Medicine': 'Medicina',
+  'Multidisciplinary': 'Multidisciplinario',
+  'Neuroscience': 'Neurociencia',
+  'Nursing': 'Enfermería',
+  'Pharmacology, Toxicology and Pharmaceutics': 'Farmacología, Toxicología y Farmacéutica',
+  'Physics and Astronomy': 'Física y Astronomía',
+  'Psychology': 'Psicología',
+  'Social Sciences': 'Ciencias Sociales',
+  'Veterinary': 'Veterinaria',
+};
+
+// Subáreas que corresponden a una línea del centro: se prefieren sobre el
+// área general ("Computer Science") porque son más específicas.
+const SUBAREAS_ES = {
+  'Artificial Intelligence': 'Inteligencia Artificial',
+  'Computer Vision and Pattern Recognition': 'Inteligencia Artificial',
+};
 
 function extraerIdOrcid(valorGuardado) {
   // Igual que en orcid.js: acepta el ID solo o la URL completa de ORCID.
@@ -63,7 +111,50 @@ async function fetchAreaInvestigacion(orcidId) {
   return top.length > 0 ? top.join(', ') : null;
 }
 
-function extraerResumen(work) {
+/**
+ * OpenAlex entrega el resumen como un "índice invertido" (palabra -> posiciones)
+ * por temas de licencia. Se reconstruye el texto poniendo cada palabra en su
+ * posición. Devuelve null si el trabajo no tiene resumen.
+ */
+function reconstruirResumen(indiceInvertido) {
+  if (!indiceInvertido) return null;
+  const palabras = [];
+  for (const [palabra, posiciones] of Object.entries(indiceInvertido)) {
+    for (const pos of posiciones) palabras[pos] = palabra;
+  }
+  const texto = palabras.filter(Boolean).join(' ').trim();
+  return texto || null;
+}
+
+/** Lista completa de autores, separados por ";" (mismo formato que usa el sitio). */
+function extraerAutores(work) {
+  const nombres = (work.authorships ?? [])
+    .map((a) => a.author?.display_name)
+    .filter(Boolean);
+  if (nombres.length === 0) return null;
+  const visibles = nombres.slice(0, MAX_AUTORES);
+  if (nombres.length > MAX_AUTORES) visibles.push('et al.');
+  return visibles.join('; ');
+}
+
+function extraerArea(work) {
+  const subarea = work.primary_topic?.subfield?.display_name;
+  if (subarea && SUBAREAS_ES[subarea]) return SUBAREAS_ES[subarea];
+  const campo = work.primary_topic?.field?.display_name;
+  return (campo && AREAS_ES[campo]) || null;
+}
+
+/**
+ * Tipo en el vocabulario de OpenAlex/ORCID; el admin de Revisión lo traduce
+ * a los nombres que usa el sitio ("Revista (Journal)", "Libro"...).
+ * Si la fuente es un congreso, se marca como tal aunque el tipo sea "article".
+ */
+function extraerTipo(work) {
+  if (work.primary_location?.source?.type === 'conference') return 'conference-paper';
+  return work.type ?? null;
+}
+
+function extraerDatos(work) {
   return {
     fuente_id: work.id, // URL tipo https://openalex.org/W... — única por trabajo
     titulo: work.title || work.display_name || '(sin título)',
@@ -72,6 +163,10 @@ function extraerResumen(work) {
       work.primary_location?.landing_page_url ||
       (work.doi ? `https://doi.org/${work.doi.replace('https://doi.org/', '')}` : null) ||
       work.id,
+    autores: extraerAutores(work),
+    tipo: extraerTipo(work),
+    area: extraerArea(work),
+    resumen: reconstruirResumen(work.abstract_inverted_index),
     // OpenAlex indica si hay una versión de acceso abierto y su URL directa
     // (a veces el PDF, a veces la página del repositorio) — se usa para
     // alimentar la Biblioteca, aparte de la Publicación.
@@ -94,7 +189,7 @@ async function main() {
       console.log(`${colaborador.nombre}: ${works.length} trabajos en OpenAlex.`);
 
       for (const work of works) {
-        const resumen = extraerResumen(work);
+        const datos = extraerDatos(work);
         vistos++;
 
         if (DRY_RUN) continue;
@@ -102,19 +197,23 @@ async function main() {
         const { inserted, error } = await insertStaging({
           tipo: 'publicacion',
           fuente: 'openalex',
-          fuente_id: resumen.fuente_id,
+          fuente_id: datos.fuente_id,
           colaborador_id: colaborador.id,
           payload: {
-            titulo: resumen.titulo,
-            year: resumen.year,
-            autores: colaborador.nombre,
-            url: resumen.url,
-            relevante_ia: pareceRelevante(resumen.titulo),
+            titulo: datos.titulo,
+            year: datos.year,
+            // Lista completa de autores; si OpenAlex no la trae, al menos el colaborador.
+            autores: datos.autores || colaborador.nombre,
+            url: datos.url,
+            tipo_publicacion: datos.tipo,
+            area: datos.area,
+            resumen: datos.resumen,
+            relevante_ia: pareceRelevante(datos.titulo, datos.resumen),
           },
         });
 
         if (error) {
-          console.error(`  Error insertando ${resumen.fuente_id}:`, error.message);
+          console.error(`  Error insertando ${datos.fuente_id}:`, error.message);
           fallidos++;
         } else if (inserted) {
           nuevos++;
@@ -122,22 +221,22 @@ async function main() {
 
         // Si hay versión de acceso abierto, además se ofrece como item de
         // Biblioteca (documento descargable), aparte de la Publicación.
-        if (resumen.urlAccesoAbierto) {
+        if (datos.urlAccesoAbierto) {
           const { inserted: insertedBib, error: errorBib } = await insertStaging({
             tipo: 'biblioteca',
             fuente: 'openalex',
-            fuente_id: `${resumen.fuente_id}-oa`,
+            fuente_id: `${datos.fuente_id}-oa`,
             colaborador_id: colaborador.id,
             payload: {
-              titulo: resumen.titulo,
-              url: resumen.urlAccesoAbierto,
+              titulo: datos.titulo,
+              url: datos.urlAccesoAbierto,
               tipo: 'pdf',
               autor: colaborador.nombre,
-              relevante_ia: pareceRelevante(resumen.titulo),
+              relevante_ia: pareceRelevante(datos.titulo),
             },
           });
           if (errorBib) {
-            console.error(`  Error insertando biblioteca ${resumen.fuente_id}:`, errorBib.message);
+            console.error(`  Error insertando biblioteca ${datos.fuente_id}:`, errorBib.message);
             fallidos++;
           } else if (insertedBib) {
             nuevos++;

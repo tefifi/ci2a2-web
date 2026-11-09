@@ -2,6 +2,26 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useMensaje } from './hooks/useMensaje';
 
+// Tipos de publicación que traen ORCID y OpenAlex (en inglés) -> los nombres
+// que usa el sitio, para que el filtro "Tipo" no mezcle idiomas.
+// Si llega un tipo que no está acá, queda vacío y se puede completar a mano
+// desde "Gestión de publicaciones".
+const TIPOS_PUBLICACION = {
+  'journal-article': 'Revista (Journal)',
+  'article': 'Revista (Journal)',
+  'review': 'Revista (Journal)',
+  'conference-paper': 'Congreso (Conference)',
+  'proceedings-article': 'Congreso (Conference)',
+  'book': 'Libro',
+  'book-chapter': 'Capítulo de Libro',
+  'dissertation-thesis': 'Tesis',
+  'dissertation': 'Tesis',
+  'preprint': 'Preprint',
+};
+
+const normalizarTipoPublicacion = (tipo) =>
+  tipo ? TIPOS_PUBLICACION[String(tipo).toLowerCase()] || null : null;
+
 // Mapea el tipo de staging a la tabla pública destino y cómo traducir
 // el payload guardado en staging al shape que esa tabla espera.
 const DESTINOS = {
@@ -23,6 +43,12 @@ const DESTINOS = {
       year: p.year,
       autores: p.autores,
       url: p.url,
+      // Tipo, área y resumen: antes no se pasaban a la tabla, por eso en el
+      // sitio salían como "No especificado" / "No hay resumen disponible".
+      // Solo vienen si el scraper los trajo (OpenAlex sí; ORCID solo el tipo).
+      type: normalizarTipoPublicacion(p.tipo_publicacion),
+      area: p.area || null,
+      resumen: p.resumen || null,
       is_visible: true,
     }),
   },
@@ -72,11 +98,20 @@ const CAMPOS_PREVIEW = [
   { key: 'year', label: 'Año' },
   { key: 'autores', label: 'Autores' },
   { key: 'autor', label: 'Autor' },
+  { key: 'tipo_publicacion', label: 'Tipo' },
+  { key: 'area', label: 'Área' },
   { key: 'descripcion', label: 'Descripción' },
+  { key: 'resumen', label: 'Resumen' },
 ];
 
 function renderDetalles(payload) {
   return CAMPOS_PREVIEW.filter(({ key }) => payload[key]);
+}
+
+// Los resúmenes pueden ser largos: en la bandeja se muestra solo el comienzo.
+function textoCorto(valor) {
+  const texto = String(valor);
+  return texto.length > 300 ? texto.slice(0, 300) + '…' : texto;
 }
 
 // Campos de colaborador que se muestran como comparación "Actual → Propuesto"
@@ -238,7 +273,7 @@ export default function AdminRevision() {
                   <div className="mt-2 small">
                     {renderDetalles(item.payload).map(({ key, label }) => (
                       <div key={key}>
-                        <strong>{label}:</strong> {item.payload[key]}
+                        <strong>{label}:</strong> {textoCorto(item.payload[key])}
                       </div>
                     ))}
                   </div>
