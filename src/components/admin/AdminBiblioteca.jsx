@@ -180,13 +180,13 @@ export default function AdminBiblioteca({ token }) {
     return (
         <div className="container-fluid p-0 mb-5" id="top-anchor">
             <ModalConfirmar {...modalProps} />
-            <AdminPageHeader titulo="Gestión de Biblioteca" mensaje={mensaje} onClose={limpiarMensaje} />
+            <AdminPageHeader titulo="Gestión de biblioteca" mensaje={mensaje} onClose={limpiarMensaje} />
 
             <div className="row g-4">
                 <div className="col-lg-8">
                     <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
                         <div className="card-body p-4">
-                            <FormHeader idEdicion={idEdicion} labelNuevo="Nuevo Recurso" labelEditar="Editar Recurso" />
+                            <FormHeader idEdicion={idEdicion} labelNuevo="Nuevo recurso" labelEditar="Editar recurso" />
                             <form onSubmit={onSubmit}>
                                 <div className="row g-3">
                                     <div className="col-12">
@@ -198,15 +198,15 @@ export default function AdminBiblioteca({ token }) {
                                         <label className="form-label fw-bold small text-secondary">Tipo</label>
                                         <select className="form-select bg-light border-0" value={form.tipo}
                                             onChange={e => { setField('tipo', e.target.value); setField('url', ''); }}>
-                                            <option value="link">Enlace Web</option>
+                                            <option value="link">Enlace web</option>
                                             <option value="video">Video (YouTube)</option>
-                                            <option value="centro">Centro Investigación</option>
+                                            <option value="centro">Centro de investigación</option>
                                             <option value="paper">Paper / PDF</option>
                                         </select>
                                     </div>
                                     <div className="col-md-6">
                                         <label className="form-label fw-bold small text-secondary">Autor / Fuente</label>
-                                        <input type="text" className="form-control bg-light border-0" placeholder="Ej: CI2A2"
+                                        <input type="text" className="form-control bg-light border-0" placeholder="Ej: CI²A²"
                                             value={form.autor} onChange={e => setField('autor', e.target.value)} />
                                     </div>
                                     {esPaper ? (
@@ -258,8 +258,8 @@ export default function AdminBiblioteca({ token }) {
                                     idEdicion={idEdicion}
                                     loading={loading || subiendo || subiendoPdf}
                                     onCancel={resetForm}
-                                    labelGuardar="Crear Recurso"
-                                    labelEditar="Guardar Cambios"
+                                    labelGuardar="Crear recurso"
+                                    labelEditar="Guardar cambios"
                                 />
                             </form>
                         </div>
