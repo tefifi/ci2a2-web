@@ -5,7 +5,7 @@ import {
 } from './components/AdminUI';
 
 const FORM_INICIAL = {
-  title: '', year: '', autores: '', url: '', type: '', area: '', is_visible: true,
+  title: '', year: '', autores: '', url: '', type: '', area: '', resumen: '', is_visible: true,
 };
 
 export default function AdminPublicaciones() {
@@ -30,13 +30,13 @@ export default function AdminPublicaciones() {
   return (
     <div className="container-fluid p-0 mb-5">
       <ModalConfirmar {...modalProps} />
-      <AdminPageHeader titulo="Gestión de Publicaciones" mensaje={mensaje} onClose={limpiarMensaje} />
+      <AdminPageHeader titulo="Gestión de publicaciones" mensaje={mensaje} onClose={limpiarMensaje} />
 
       <div className="row g-4">
         <div className="col-lg-8">
           <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
             <div className="card-body p-4">
-              <FormHeader idEdicion={idEdicion} labelNuevo="Nueva Publicación" labelEditar="Editar Publicación" />
+              <FormHeader idEdicion={idEdicion} labelNuevo="Nueva publicación" labelEditar="Editar publicación" />
               <form onSubmit={handleSubmit}>
                 <div className="row g-3">
                   <div className="col-12">
@@ -52,7 +52,8 @@ export default function AdminPublicaciones() {
                   <div className="col-md-9">
                     <label className="form-label fw-bold small text-secondary">Autores</label>
                     <input type="text" name="autores" className="form-control bg-light border-0"
-                      placeholder="Apellido, N.; Apellido, N." value={form.autores} onChange={handleChange} />
+                      placeholder="Nombre Apellido; Nombre Apellido" value={form.autores} onChange={handleChange} />
+                    <div className="form-text" style={{ fontSize: '0.7rem' }}>Sepáralos con punto y coma (;).</div>
                   </div>
                   <div className="col-12">
                     <label className="form-label fw-bold small text-secondary">Enlace (DOI, repositorio, etc.)</label>
@@ -65,9 +66,14 @@ export default function AdminPublicaciones() {
                       placeholder="Elegir..." value={form.type} onChange={handleChange} />
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label fw-bold small text-secondary">Área Temática</label>
+                    <label className="form-label fw-bold small text-secondary">Área temática</label>
                     <input list="datalist-areas" name="area" className="form-control bg-light border-0"
                       placeholder="Elegir..." value={form.area} onChange={handleChange} />
+                  </div>
+                  <div className="col-12">
+                    <label className="form-label fw-bold small text-secondary">Resumen</label>
+                    <textarea name="resumen" className="form-control bg-light border-0" rows="5"
+                      placeholder="Resumen o abstract de la publicación..." value={form.resumen} onChange={handleChange}></textarea>
                   </div>
                   <div className="col-12">
                     <div className="form-check form-switch">
@@ -82,8 +88,8 @@ export default function AdminPublicaciones() {
                   idEdicion={idEdicion}
                   loading={loading}
                   onCancel={resetForm}
-                  labelGuardar="Crear Publicación"
-                  labelEditar="Guardar Cambios"
+                  labelGuardar="Crear publicación"
+                  labelEditar="Guardar cambios"
                 />
               </form>
 
