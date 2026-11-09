@@ -32,7 +32,7 @@ export default function TransparenciaList({ iniciales }) {
                     </div>
                 </div>
                 <div className="filter-wrapper">
-                    <select className="select-modern" onChange={(e) => setYearFilter(e.target.value)}>
+                    <select className="select-modern" value={yearFilter} onChange={(e) => setYearFilter(e.target.value)}>
                         <option value="Todos">Todos los años</option>
                         {[...new Set(iniciales.map(p => p.anio))].sort((a,b)=>b-a).map(y => (
                             <option key={y} value={y}>{y}</option>
@@ -90,14 +90,14 @@ export default function TransparenciaList({ iniciales }) {
 
                                 {p.participantes && (
                                     <div className="equipo-box">
-                                        <small>Equipo Participante</small>
+                                        <small>Equipo participante</small>
                                         <p>{p.participantes}</p>
                                     </div>
                                 )}
 
                                 {p.link_resolucion && (
                                     <a href={p.link_resolucion} target="_blank" className="btn-download">
-                                        Documentación Oficial <i className="bi bi-box-arrow-up-right ms-2"></i>
+                                        Documentación oficial <i className="bi bi-box-arrow-up-right ms-2"></i>
                                     </a>
                                 )}
                             </div>
@@ -113,7 +113,25 @@ export default function TransparenciaList({ iniciales }) {
                 .search-filter-grid { display: grid; grid-template-columns: 1fr 250px; gap: 20px; }
                 .search-box-modern { display: flex; align-items: center; background: #fff; padding: 12px 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
                 .search-box-modern input { border: none; width: 100%; outline: none; margin-left: 10px; font-size: 0.95rem; }
-                .select-modern { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; cursor: pointer; }
+
+                /* Desplegable de años: flecha propia con espacio a la derecha
+                   (la flecha nativa del navegador queda pegada al borde) */
+                .select-modern {
+                    width: 100%;
+                    padding: 12px 44px 12px 16px;
+                    border-radius: 12px;
+                    border: 1px solid #e2e8f0;
+                    background-color: #fff;
+                    cursor: pointer;
+                    appearance: none;
+                    -webkit-appearance: none;
+                    -moz-appearance: none;
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+                    background-repeat: no-repeat;
+                    background-position: right 18px center;
+                    background-size: 12px;
+                }
+                .select-modern:focus { outline: none; border-color: var(--ufro-pink); }
 
                 /* Tarjetas */
                 .proyectos-container-list { display: flex; flex-direction: column; gap: 15px; }

@@ -2,28 +2,39 @@
 import MainLayout from '../../layouts/MainLayout.astro';
 import { supabase } from '../../lib/supabase';
 
-const { data: todos } = await supabase
-  .from('colaboradores')
-  .select('tipo_rol');
-
-const conteo: Record<string, number> = {};
-(todos || []).forEach((c: any) => {
-  const k = c.tipo_rol || 'Staff';
-  conteo[k] = (conteo[k] || 0) + 1;
-});
-
+// Secciones de la página, en el orden en que se muestran.
+// `label` es el título visible y `slug` el ancla de la sección.
+// `tipo_rol` es el valor que está guardado en la base de datos: no se cambia.
 const CATEGORIAS = [
-  { slug: 'investigadores',            label: 'Investigadores',             desc: 'Investigadores principales del centro.',                      icon: 'bi-mortarboard-fill',     tipo_rol: 'Investigador'           },
-  { slug: 'investigadores-asociados',  label: 'Investigadores Asociados',   desc: 'Investigadores asociados desde otras instituciones.',          icon: 'bi-journal-bookmark-fill', tipo_rol: 'Investigador Asociado'  },
-  { slug: 'cientificos',               label: 'Científicos',                desc: 'Científicos e investigadores postdoctorales permanentes.',     icon: 'bi-beaker',               tipo_rol: 'Científico'             },
-  { slug: 'profesionales',             label: 'Ingenieros y Profesionales', desc: 'Profesionales de apoyo a la investigación.',                  icon: 'bi-briefcase-fill',       tipo_rol: 'Profesional'            },
-  { slug: 'postdocs',                  label: 'Postdoctorados',             desc: 'Investigadores en etapa postdoctoral.',                       icon: 'bi-award-fill',           tipo_rol: 'Postdoc'                },
-  { slug: 'profesores-distinguidos',   label: 'Profesores Distinguidos',    desc: 'Profesores internacionales vinculados al centro.',             icon: 'bi-star-fill',            tipo_rol: 'Profesor Distinguido'   },
-  { slug: 'investigadores-visitantes', label: 'Investigadores Visitantes',  desc: 'Investigadores externos en colaboración temporal.',           icon: 'bi-airplane-fill',        tipo_rol: 'Investigador Visitante' },
-  { slug: 'staff',                     label: 'Staff',                      desc: 'Personal de administración y apoyo al centro.',               icon: 'bi-people-fill',          tipo_rol: 'Staff'                  },
+  { slug: 'investigadores',            label: 'Investigadores',             tipo_rol: 'Investigador'           },
+  { slug: 'investigadores-asociados',  label: 'Investigadores asociados',   tipo_rol: 'Investigador Asociado'  },
+  { slug: 'cientificos',               label: 'Científicos',                tipo_rol: 'Científico'             },
+  { slug: 'profesionales',             label: 'Ingenieros y profesionales', tipo_rol: 'Profesional'            },
+  { slug: 'postdocs',                  label: 'Postdoctorados',             tipo_rol: 'Postdoc'                },
+  { slug: 'profesores-distinguidos',   label: 'Profesores distinguidos',    tipo_rol: 'Profesor Distinguido'   },
+  { slug: 'investigadores-visitantes', label: 'Investigadores visitantes',  tipo_rol: 'Investigador Visitante' },
+  { slug: 'staff',                     label: 'Staff',                      tipo_rol: 'Staff'                  },
 ];
 
-const categoriasVisibles = CATEGORIAS.filter(cat => (conteo[cat.tipo_rol] || 0) > 0);
+const { data: personas } = await supabase
+  .from('colaboradores')
+  .select('id, nombre, cargo, foto_url, facultad, institucion, tipo_rol, orden')
+  .order('orden', { ascending: true })
+  .order('nombre', { ascending: true });
+
+// Quien tiene cargo de Director/Directora va primero dentro de su sección.
+const esDirector = (cargo: string | null) => /^director(a)?\b/i.test((cargo || '').trim());
+
+const secciones = CATEGORIAS
+  .map((cat) => {
+    const lista = (personas || []).filter((p: any) => (p.tipo_rol || 'Staff') === cat.tipo_rol);
+    const ordenada = [
+      ...lista.filter((p: any) => esDirector(p.cargo)),
+      ...lista.filter((p: any) => !esDirector(p.cargo)),
+    ];
+    return { ...cat, personas: ordenada };
+  })
+  .filter((s) => s.personas.length > 0);
 ---
 
 <MainLayout title="Equipo — CI²A²">
@@ -33,79 +44,87 @@ const categoriasVisibles = CATEGORIAS.filter(cat => (conteo[cat.tipo_rol] || 0) 
     <div class="container position-relative z-2">
       <div class="col-lg-8">
         <h6 class="fw-bold text-uppercase mb-2" style="color: var(--ufro-pink-light); letter-spacing:2px;">Equipo</h6>
-        <h1 class="display-5 fw-bold mb-2">Nuestro Equipo</h1>
-        <p class="opacity-90 mb-0 lead small">Investigadores y profesionales que forman parte del CI²A²</p>
+        <h1 class="display-5 fw-bold mb-2">Nuestro equipo</h1>
+        <p class="opacity-90 mb-0 lead small">Investigadores y profesionales que forman parte del CI²A².</p>
       </div>
     </div>
   </section>
 
   <section class="py-5 bg-light">
-    <div class="container py-3">
-      <div class="row g-4">
-        {categoriasVisibles.map((cat) => {
-          const n = conteo[cat.tipo_rol];
-          return (
-            <div class="col-sm-6 col-lg-3">
-              <a href={`/equipo/${cat.slug}`} class="text-decoration-none cat-link">
-                <div class="cat-card h-100 bg-white rounded-4 p-4 d-flex flex-column gap-3">
+    <div class="container py-4">
 
-                  <div class="icon-box d-flex align-items-center justify-content-center rounded-3 flex-shrink-0"
-                       style="width:44px;height:44px;background:var(--ufro-blue-soft);">
-                    <i class={`bi ${cat.icon} fs-5`} style="color:var(--ufro-blue);"></i>
+      {secciones.map((sec) => (
+        <div id={sec.slug} class="seccion-equipo mb-5 animate-on-scroll">
+
+          <!-- Título de sección (igual que en Alianzas) -->
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <h3 class="fw-bold text-ufro mb-0">{sec.label}</h3>
+            <div class="divider-pink"></div>
+          </div>
+
+          <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+            {sec.personas.map((p: any) => (
+              <div class="col">
+                <a href={`/equipo/${sec.slug}/${p.id}`} class="text-decoration-none person-link">
+                  <div class="person-card h-100 bg-white rounded-4 shadow-sm overflow-hidden d-flex flex-column">
+
+                    <!-- Foto con aspect ratio fijo -->
+                    <div class="position-relative overflow-hidden" style="height:220px; background:#e8eef5;">
+                      <img
+                        src={p.foto_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nombre)}&background=003767&color=fff&size=400`}
+                        class="w-100 h-100 object-fit-cover photo-img"
+                        alt={p.nombre}
+                      />
+                    </div>
+
+                    <!-- Info -->
+                    <div class="p-3 d-flex flex-column gap-1 flex-grow-1">
+                      <h6 class="fw-bold text-dark mb-0 lh-sm person-name">{p.nombre}</h6>
+                      {p.cargo && (
+                        <span class="small fw-semibold" style="color: var(--ufro-blue);">{p.cargo}</span>
+                      )}
+                      {(p.facultad || p.institucion) && (
+                        <span class="small text-muted fst-italic lh-sm">
+                          {p.facultad || p.institucion}
+                        </span>
+                      )}
+                    </div>
+
                   </div>
+                </a>
+              </div>
+            ))}
+          </div>
 
-                  <div class="flex-grow-1">
-                    <p class="fw-bold text-dark mb-1 lh-sm">{cat.label}</p>
-                    <p class="text-muted small mb-0 lh-sm">{cat.desc}</p>
-                  </div>
+        </div>
+      ))}
 
-                  <div class="d-flex align-items-center justify-content-between mt-auto pt-2 border-top">
-                    <span class="small fw-semibold cat-count" style="color:var(--ufro-blue);">
-                      {n} {n === 1 ? 'persona' : 'personas'}
-                    </span>
-                    <i class="bi bi-arrow-right cat-arrow text-muted small"></i>
-                  </div>
-
-                </div>
-              </a>
-            </div>
-          );
-        })}
-      </div>
     </div>
   </section>
 
 </MainLayout>
 
 <style>
-  .cat-card {
-    border: 1.5px solid #e9ecef;
-    transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+  /* Al llegar con #ancla desde otra página, deja espacio bajo el navbar */
+  .seccion-equipo { scroll-margin-top: 110px; }
+
+  /* Mismo hover que las tarjetas de proyectos y noticias */
+  .person-card {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
   }
-  .cat-link:hover .cat-card {
-    border-color: var(--ufro-pink);
-    box-shadow: 0 12px 32px rgba(214,51,132,.13);
-    transform: translateY(-4px);
+  .person-link:hover .person-card {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 30px rgba(214, 51, 132, 0.15) !important;
   }
 
-  /* Ícono: solo cambia a fondo rosa sólido */
-  .icon-box {
-    transition: background 0.25s;
-  }
-  .cat-link:hover .icon-box {
-    background: var(--ufro-pink) !important;
-  }
-  .icon-box i { transition: color 0.25s; }
-  .cat-link:hover .icon-box i { color: #fff !important; }
+  /* Zoom de la foto */
+  .photo-img { transition: transform 0.6s ease; }
+  .person-link:hover .photo-img { transform: scale(1.08); }
 
-  /* Flecha se mueve a la derecha */
-  .cat-arrow { transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), color 0.2s; }
-  .cat-link:hover .cat-arrow {
-    transform: translateX(6px);
-    color: var(--ufro-pink) !important;
+  /* Nombre azul y subrayado al hover */
+  .person-name { transition: color 0.3s ease; }
+  .person-link:hover .person-name {
+    color: var(--ufro-blue) !important;
+    text-decoration: underline;
   }
-
-  /* Conteo de personas se pone rosa */
-  .cat-count { transition: color 0.2s; }
-  .cat-link:hover .cat-count { color: var(--ufro-pink) !important; }
 </style>
